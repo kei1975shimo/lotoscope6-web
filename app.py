@@ -23,7 +23,7 @@ from pools import build_pools  # noqa: E402
 from result_checker import check_ticket_rows, draw_numbers_from_row, load_draw_by_no, load_latest_draw  # noqa: E402
 from utils import load_json, read_csv_dicts  # noqa: E402
 
-APP_VERSION = "v1.1.0-public"
+APP_VERSION = "v1.3.0-public"
 MODE_CHOICES = [
     (
         "all",

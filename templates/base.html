@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#05070f">
+  <meta name="theme-color" content="#050813">
+  <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="ロト6の数字選びと、生成した買い目の結果照合を補助するWebツールです。">
@@ -15,14 +16,14 @@
   <main id="main-content" class="wrap app-shell">
     <header class="app-bar">
       <a class="app-brand" href="{{ url_for('index') }}" aria-label="LOTOSCOPE 6 ホーム">
-        <span class="app-brand-mark" aria-hidden="true">6</span>
+        <span class="app-brand-mark" aria-hidden="true"><i>☾</i><b>6</b></span>
         <span class="app-brand-copy">
           <strong>LOTOSCOPE 6</strong>
-          <small>ロト6数字選びサポート</small>
+          <small>数字の星図をひらく</small>
         </span>
       </a>
       <div class="app-bar-actions">
-        <span class="status-chip app-status">公開版</span>
+        <span class="status-chip app-status">公開中</span>
       </div>
     </header>
 
@@ -40,10 +41,10 @@
           <span class="loader-ball b1">06</span>
           <span class="loader-ball b2">24</span>
           <span class="loader-ball b3">37</span>
-          <span class="loader-core">PICK</span>
+          <span class="loader-core"><i>☾</i><b>6</b><small>ORACLE</small></span>
         </div>
-        <div class="loader-title">買い目を作成しています</div>
-        <div class="loader-text">入力条件と過去データを組み合わせています</div>
+        <div class="loader-title">数字の星図を描いています</div>
+        <div class="loader-text">入力条件と過去データを、ひとつの星図へ重ねています</div>
         <div class="loader-dots" aria-hidden="true"><i></i><i></i><i></i></div>
       </div>
     </div>

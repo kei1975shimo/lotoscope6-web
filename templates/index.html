@@ -3,27 +3,50 @@
 {% block content %}
 {% set current_mode = values.get('mode', 'all') %}
 {% set current_count = values.get('count', default_ticket_count|string) %}
-<section class="hero app-hero">
+<section class="hero app-hero home-hero mystic-hero">
+  <svg class="hero-constellation constellation-left" viewBox="0 0 180 130" aria-hidden="true">
+    <path d="M18 96 L52 62 L83 76 L118 34 L154 52" />
+    <circle cx="18" cy="96" r="2.4"/><circle cx="52" cy="62" r="3.1"/><circle cx="83" cy="76" r="2.2"/><circle cx="118" cy="34" r="3"/><circle cx="154" cy="52" r="2.2"/>
+  </svg>
+  <svg class="hero-constellation constellation-right" viewBox="0 0 170 120" aria-hidden="true">
+    <path d="M20 30 L48 54 L78 38 L104 74 L146 88" />
+    <circle cx="20" cy="30" r="2.2"/><circle cx="48" cy="54" r="2.8"/><circle cx="78" cy="38" r="2.1"/><circle cx="104" cy="74" r="3.2"/><circle cx="146" cy="88" r="2.4"/>
+  </svg>
+  <div class="moon-phase-row" aria-hidden="true"><span>●</span><span>◐</span><span>○</span><span>◑</span><span>●</span></div>
   <div class="hero-grid">
     <div class="hero-copy">
-      <div class="hero-kicker">NUMBER PICK</div>
-      <h1>LOTOSCOPE 6<small>ロト6の買い目候補を作成</small></h1>
-      <p>好きな数字、避けたい数字、過去データの傾向、数字の構成条件を組み合わせて、買い目候補を作ります。</p>
+      <div class="hero-kicker">CELESTIAL NUMBER ORACLE</div>
+      <h1>LOTOSCOPE 6<small>数字の星図から、買い目候補をひらく</small></h1>
+      <p>好きな数字と避けたい数字、過去データの傾向を重ね、あなたの条件に合う数字の組み合わせを星図のように描きます。</p>
       <div class="hero-points">
-        <span>好きな数字は任意</span>
-        <span>5種類の生成方法</span>
-        <span>結果照合つき</span>
+        <span>☾ 入力はすべて任意</span>
+        <span>✦ 5種類を比較</span>
+        <span>☉ 結果照合つき</span>
       </div>
     </div>
-    <div class="hero-visual" aria-hidden="true">
-      <div class="orbital"></div>
-      <div class="center-core"><span>✦</span><strong>NUMBER</strong><small>PICK</small></div>
-      <div class="planet p1">06</div>
-      <div class="planet p2">24</div>
-      <div class="planet p3">37</div>
-      <div class="planet-tag t1">INPUT</div>
-      <div class="planet-tag t2">BUILD</div>
-      <div class="planet-tag t3">CHECK</div>
+    <div class="hero-visual mystic-hero-visual" aria-hidden="true">
+      <div class="scope-aura"></div>
+      <div class="cosmic-scope">
+        <div class="scope-ring scope-ring-outer"></div>
+        <div class="scope-zodiac">
+          <span style="--i:0">♈</span><span style="--i:1">♉</span><span style="--i:2">♊</span><span style="--i:3">♋</span>
+          <span style="--i:4">♌</span><span style="--i:5">♍</span><span style="--i:6">♎</span><span style="--i:7">♏</span>
+          <span style="--i:8">♐</span><span style="--i:9">♑</span><span style="--i:10">♒</span><span style="--i:11">♓</span>
+        </div>
+        <div class="scope-ring scope-ring-middle"></div>
+        <div class="scope-ring scope-ring-inner"></div>
+        <div class="scope-axis scope-axis-x"></div>
+        <div class="scope-axis scope-axis-y"></div>
+        <div class="scope-orbit scope-orbit-a"><span class="scope-number num-band-1">06</span></div>
+        <div class="scope-orbit scope-orbit-b"><span class="scope-number num-band-3">24</span></div>
+        <div class="scope-orbit scope-orbit-c"><span class="scope-number num-band-4">37</span></div>
+        <div class="scope-core">
+          <small>LOTOSCOPE</small>
+          <strong>6</strong>
+          <em>NUMBER ORACLE</em>
+        </div>
+      </div>
+      <div class="scope-caption"><span>☾</span> HOROSCOPE NUMBER MAP <span>☉</span></div>
     </div>
   </div>
 </section>
