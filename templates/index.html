@@ -1,46 +1,48 @@
 {% extends "base.html" %}
-{% block title %}LOTOSCOPE 6 | 入力画面{% endblock %}
+{% block title %}LOTOSCOPE 6 | 買い目作成{% endblock %}
 {% block content %}
+{% set current_mode = values.get('mode', 'all') %}
+{% set current_count = values.get('count', default_ticket_count|string) %}
 <section class="hero app-hero">
   <div class="hero-grid">
     <div class="hero-copy">
-      <div class="hero-kicker">Mobile Number Scope</div>
-      <h1>LOTOSCOPE 6<small>スマホでサッと数字選び</small></h1>
-      <p>入力・確認・照合までを片手で使いやすい流れに整理しました。気になる数字を入れて、すぐ候補を見比べられます。</p>
+      <div class="hero-kicker">NUMBER PICK</div>
+      <h1>LOTOSCOPE 6<small>ロト6の買い目候補を作成</small></h1>
+      <p>好きな数字、避けたい数字、過去データの傾向、数字の構成条件を組み合わせて、買い目候補を作ります。</p>
       <div class="hero-points">
-        <span>大きい入力欄</span>
-        <span>タップしやすい操作</span>
+        <span>好きな数字は任意</span>
+        <span>5種類の生成方法</span>
         <span>結果照合つき</span>
       </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
       <div class="orbital"></div>
-      <div class="center-core"><span>✦</span><strong>MOBILE</strong><small>SCOPE</small></div>
+      <div class="center-core"><span>✦</span><strong>NUMBER</strong><small>PICK</small></div>
       <div class="planet p1">06</div>
       <div class="planet p2">24</div>
       <div class="planet p3">37</div>
-      <div class="planet-tag t1">tap</div>
-      <div class="planet-tag t2">pick</div>
-      <div class="planet-tag t3">check</div>
+      <div class="planet-tag t1">INPUT</div>
+      <div class="planet-tag t2">BUILD</div>
+      <div class="planet-tag t3">CHECK</div>
     </div>
   </div>
 </section>
 
-{% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+{% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
 
-<nav class="mobile-section-nav">
-  <a href="#number-form">入力</a>
-  <a href="#mode-panel">モード</a>
+<nav class="mobile-section-nav" aria-label="ページ内メニュー">
+  <a href="#number-form">数字入力</a>
+  <a href="#mode-panel">生成方法</a>
   <a href="#guide-panel">使い方</a>
 </nav>
 
-<section class="app-summary-strip">
-  <div class="summary-pill"><strong>1〜43</strong><span>数字範囲</span></div>
-  <div class="summary-pill"><strong>最大10</strong><span>生成口数</span></div>
-  <div class="summary-pill"><strong>全モード</strong><span>比較表示</span></div>
+<section class="app-summary-strip" aria-label="ツール概要">
+  <div class="summary-pill"><strong>1〜43</strong><span>数字の範囲</span></div>
+  <div class="summary-pill"><strong>各1〜{{ max_ticket_count }}口</strong><span>モードごとの口数</span></div>
+  <div class="summary-pill"><strong id="planned-total">—</strong><span>合計予定口数</span></div>
 </section>
 
-<form id="number-form" class="panel app-form-panel" method="post" action="{{ url_for('generate') }}" data-generate-form>
+<form id="number-form" class="panel app-form-panel" method="post" action="{{ url_for('generate') }}" data-generate-form data-mode-count="{{ generation_mode_count }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <div class="panel-head app-panel-head">
@@ -48,33 +50,32 @@
       <span>Step 1</span>
       <h2>数字を入力する</h2>
     </div>
-    <p>空欄のままでもOKです。</p>
+    <p>好きな数字と避けたい数字は、どちらも任意です。</p>
   </div>
 
   <div class="field">
-    <div class="label-row"><label>好きな数字</label><span>最大5個 / 任意</span></div>
-    <div class="number-grid app-number-grid">
+    <div class="label-row"><label for="favorite_1">好きな数字</label><span>最大5個・任意</span></div>
+    <div class="number-grid app-number-grid" data-number-group>
       {% for i in range(1, 6) %}
-      <input class="num-box" name="favorite_{{ i }}" type="number" inputmode="numeric" min="1" max="43" value="{{ values.get('favorite_' ~ i, '') }}" aria-label="好きな数字 {{ i }}">
+      <input class="num-box" id="favorite_{{ i }}" name="favorite_{{ i }}" type="number" inputmode="numeric" min="1" max="43" autocomplete="off" value="{{ values.get('favorite_' ~ i, '') }}" aria-label="好きな数字 {{ i }}個目">
       {% endfor %}
     </div>
-    <div class="hint">よく選ぶ数字、気になる数字、思い入れのある数字だけ入れてください。</div>
+    <div class="hint">よく選ぶ数字や、思い入れのある数字だけ入力してください。同じ数字は重複して入力できません。</div>
   </div>
 
   <div class="field">
-    <div class="label-row"><label>避けたい数字</label><span>最大5個 / 任意</span></div>
-    <div class="number-grid app-number-grid">
+    <div class="label-row"><label for="avoid_1">避けたい数字</label><span>最大5個・任意</span></div>
+    <div class="number-grid app-number-grid" data-number-group>
       {% for i in range(1, 6) %}
-      <input class="num-box" name="avoid_{{ i }}" type="number" inputmode="numeric" min="1" max="43" value="{{ values.get('avoid_' ~ i, '') }}" aria-label="避けたい数字 {{ i }}">
+      <input class="num-box" id="avoid_{{ i }}" name="avoid_{{ i }}" type="number" inputmode="numeric" min="1" max="43" autocomplete="off" value="{{ values.get('avoid_' ~ i, '') }}" aria-label="避けたい数字 {{ i }}個目">
       {% endfor %}
     </div>
-    <div class="hint">今回は入れたくない数字がある場合だけ入力してください。</div>
+    <div class="hint">今回は含めたくない数字がある場合だけ入力してください。好きな数字と同じ数字は指定できません。</div>
   </div>
 
   <div id="mode-panel" class="field">
-    <div class="label-row"><label>生成モード</label><span>迷ったら全モード</span></div>
+    <div class="label-row"><span class="field-label">生成方法</span><span>迷ったら全モード比較</span></div>
     <div class="mode-grid app-mode-grid">
-      {% set current_mode = values.get('mode', 'all') %}
       {% for mode_id, title, badge, desc in mode_choices %}
       <label class="mode-card mode-{{ mode_id }}">
         <input type="radio" name="mode" value="{{ mode_id }}" {% if current_mode == mode_id %}checked{% endif %}>
@@ -88,27 +89,34 @@
 
   <div class="row app-compact-row">
     <div class="field">
-      <label for="count">口数</label>
-      <input id="count" name="count" type="number" inputmode="numeric" min="1" max="10" value="{{ values.get('count', '5') }}">
-      <div class="hint">1〜10口まで選べます。</div>
+      <label for="count">各モードの生成口数</label>
+      <input id="count" name="count" type="number" inputmode="numeric" min="1" max="{{ max_ticket_count }}" value="{{ current_count }}">
+      <div id="count-help" class="hint">全モード比較では、指定口数を5種類それぞれに生成します。</div>
     </div>
     <div class="field">
-      <label>&nbsp;</label>
-      <div class="tip app-tip-card"><strong>おすすめ</strong><span class="tiny">迷うときは「全モード」+「5口」から始めると見やすいです。</span></div>
+      <span class="field-label">合計予定</span>
+      <div class="tip app-tip-card">
+        <strong id="planned-total-detail">計算中</strong>
+        <span class="tiny">初めて使う場合は「全モード比較・各2口（合計10口）」が見やすい設定です。</span>
+      </div>
     </div>
   </div>
 
   <details class="advanced app-advanced">
-    <summary>詳細設定を開く</summary>
-    <div class="field" style="margin-top:12px;">
-      <label for="seed">固定シード</label>
-      <input id="seed" name="seed" value="{{ values.get('seed', '') }}">
-      <div class="hint">同じ組み合わせを再表示したいときだけ入力します。通常は空欄でOKです。</div>
+    <summary><span data-toggle-label data-open-label="閉じる" data-closed-label="再現用設定を開く">再現用設定を開く</span></summary>
+    <div class="field advanced-inner">
+      <label for="seed">再現用キーワード（任意）</label>
+      <input id="seed" name="seed" maxlength="80" autocomplete="off" value="{{ values.get('seed', '') }}">
+      <div class="hint">同じ入力条件と同じキーワードを使うと、同じ買い目を再現できます。通常は空欄で構いません。氏名や連絡先などの個人情報は入力しないでください。</div>
     </div>
   </details>
 
+  <div class="form-disclaimer">
+    総合スコアは、このツール内で候補を比較するための独自評価です。当せん確率を示すものではありません。
+  </div>
+
   <div class="sticky-submit">
-    <button type="submit">運命の数字を生成する</button>
+    <button type="submit">買い目候補を作成する</button>
   </div>
 </form>
 
@@ -118,19 +126,19 @@
       <span>Step 2</span>
       <h2>使い方</h2>
     </div>
-    <p>迷わないように流れを整理しています。</p>
+    <p>入力から照合まで、4つの手順です。</p>
   </div>
   <div class="quick-grid app-quick-grid">
-    <div class="quick-card"><strong>好きな数字</strong><span>1つだけでも、空欄でも大丈夫です。</span></div>
-    <div class="quick-card"><strong>避けたい数字</strong><span>なければ空欄のままで進めます。</span></div>
-    <div class="quick-card"><strong>全モード</strong><span>まずは全体をまとめて比較できます。</span></div>
-    <div class="quick-card"><strong>結果照合</strong><span>生成後、そのまま照合画面へ進めます。</span></div>
+    <div class="quick-card"><strong>好きな数字</strong><span>1個だけでも、空欄でも利用できます。</span></div>
+    <div class="quick-card"><strong>避けたい数字</strong><span>指定した数字は買い目から除外します。</span></div>
+    <div class="quick-card"><strong>全モード比較</strong><span>5種類を同じ口数ずつ作り、違いを比較します。</span></div>
+    <div class="quick-card"><strong>結果照合</strong><span>抽せん回の指定、または数字の手入力で照合できます。</span></div>
   </div>
   <ol class="steps">
-    <li><b>1</b><div><strong>数字を入れる</strong><div class="tiny">好きな数字・避けたい数字はどちらも任意です。</div></div></li>
-    <li><b>2</b><div><strong>モードを選ぶ</strong><div class="tiny">迷ったら全モードで見比べられます。</div></div></li>
-    <li><b>3</b><div><strong>候補を見る</strong><div class="tiny">見やすい順に買い目を確認できます。</div></div></li>
-    <li><b>4</b><div><strong>照合する</strong><div class="tiny">抽せん結果とそのまま照らし合わせられます。</div></div></li>
+    <li><b>1</b><div><strong>数字を入力する</strong><div class="tiny">好きな数字・避けたい数字はどちらも任意です。</div></div></li>
+    <li><b>2</b><div><strong>生成方法と口数を選ぶ</strong><div class="tiny">全モード比較の口数は「各モードあたり」です。</div></div></li>
+    <li><b>3</b><div><strong>候補を比較する</strong><div class="tiny">総合スコアや数字構成を見ながら候補を確認します。</div></div></li>
+    <li><b>4</b><div><strong>抽せん結果と照合する</strong><div class="tiny">同梱データにない最新回は、手入力で照合できます。</div></div></li>
   </ol>
 </section>
 {% endblock %}

@@ -3,50 +3,54 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f2f2f7">
+  <meta name="theme-color" content="#05070f">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="ロト6の数字選びと、生成した買い目の結果照合を補助するWebツールです。">
   <title>{% block title %}LOTOSCOPE 6{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="{% block body_class %}app-mobile app-ios{% endblock %}">
-  <main class="wrap app-shell">
+<body class="{% block body_class %}app-mobile{% endblock %}">
+  <a class="skip-link" href="#main-content">本文へ移動</a>
+  <main id="main-content" class="wrap app-shell">
     <header class="app-bar">
       <a class="app-brand" href="{{ url_for('index') }}" aria-label="LOTOSCOPE 6 ホーム">
-        <span class="app-brand-mark">6</span>
+        <span class="app-brand-mark" aria-hidden="true">6</span>
         <span class="app-brand-copy">
           <strong>LOTOSCOPE 6</strong>
-          <small>iPhoneライクUI</small>
+          <small>ロト6数字選びサポート</small>
         </span>
       </a>
       <div class="app-bar-actions">
-        <span class="status-chip app-status">iPhone UI</span>
+        <span class="status-chip app-status">公開版</span>
       </div>
     </header>
 
     {% if data_status.is_stale %}
-    <div class="alert warning data-warning app-banner">
-      過去データは第{{ data_status.latest_draw_no }}回（{{ data_status.latest_draw_date }}）までです。最新結果は公式情報で確認してください。
+    <div class="alert warning data-warning app-banner" role="status">
+      同梱の過去データは第{{ data_status.latest_draw_no }}回（{{ data_status.latest_draw_date }}）までです。最新回の照合と当せん確認は、宝くじ公式情報をご利用ください。
     </div>
     {% endif %}
 
     {% block content %}{% endblock %}
 
-    <div id="draw-loader" class="draw-loader" aria-hidden="true">
+    <div id="draw-loader" class="draw-loader" aria-hidden="true" role="status" aria-live="polite">
       <div class="draw-loader-card">
-        <div class="draw-loader-ring">
+        <div class="draw-loader-ring" aria-hidden="true">
           <span class="loader-ball b1">06</span>
           <span class="loader-ball b2">24</span>
           <span class="loader-ball b3">37</span>
-          <span class="loader-core">SCOPE</span>
+          <span class="loader-core">PICK</span>
         </div>
-        <div class="loader-title">数字をスコープ中</div>
-        <div class="loader-text">好きな数字と過去データを重ねています</div>
-        <div class="loader-dots"><i></i><i></i><i></i></div>
+        <div class="loader-title">買い目を作成しています</div>
+        <div class="loader-text">入力条件と過去データを組み合わせています</div>
+        <div class="loader-dots" aria-hidden="true"><i></i><i></i><i></i></div>
       </div>
     </div>
 
-    <p class="footer app-footer">このツールは数字選びを補助するものです。当選を保証するものではありません。購入・当せん確認は公式情報をご確認ください。</p>
+    <p class="footer app-footer">
+      このツールは数字選びを補助するもので、当せんを保証するものではありません。過去の出現傾向は将来の抽せん結果を予測するものではありません。当せん結果は宝くじ公式情報でご確認ください。
+    </p>
   </main>
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>

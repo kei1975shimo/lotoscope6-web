@@ -4,53 +4,74 @@
 <section class="hero compact app-hero">
   <div class="hero-grid">
     <div>
-      <div class="hero-kicker">Mobile Result Check</div>
-      <h1>CHECK RESULT<small>スマホで結果照合</small></h1>
-      <p>生成した買い目と抽せん結果を、回号でも手入力でも手早く確認できます。</p>
-      <div class="hero-points"><span>買い目照合</span><span>回号検索</span><span>手入力対応</span></div>
+      <div class="hero-kicker">RESULT CHECK</div>
+      <h1>LOTOSCOPE 6<small>生成した買い目を照合</small></h1>
+      <p>同梱データ内の抽せん回を指定するか、本数字とボーナス数字を直接入力して照合します。</p>
+      <div class="hero-points"><span>抽せん回を指定</span><span>数字を直接入力</span><span>全買い目を一括照合</span></div>
     </div>
-    <div class="hero-visual small" aria-hidden="true"><div class="orbital"></div><div class="center-core">VERIFY<br>SCOPE</div></div>
+    <div class="hero-visual small" aria-hidden="true"><div class="orbital"></div><div class="center-core">RESULT<br>CHECK</div></div>
   </div>
 </section>
 
-{% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+{% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
 
-<nav class="mobile-section-nav">
-  <a href="#check-config">照合設定</a>
-  <a href="#manual-input">手入力</a>
+<nav class="mobile-section-nav" aria-label="ページ内メニュー">
+  <a href="#check-config">照合方法</a>
+  <a href="#draw-panel">抽せん回</a>
+  <a href="#manual-panel">直接入力</a>
 </nav>
 
-<form id="check-config" class="panel app-form-panel" method="post" action="{{ url_for('check_result') }}">
+<form id="check-config" class="panel app-form-panel" method="post" action="{{ url_for('check_result') }}" data-check-form>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="ticket_token" value="{{ ticket_token }}">
   <div class="panel-head app-panel-head">
-    <div><span>Step 1</span><h2>照合設定</h2></div><p>回号または手入力で照合できます。</p>
+    <div><span>Step 1</span><h2>照合方法を選ぶ</h2></div><p>どちらか一方を選択してください。</p>
   </div>
 
-  <label class="switch-row check-row app-check-row">
-    <input id="use_draw_no" name="use_draw_no" type="checkbox" {% if use_draw_no %}checked{% endif %}>
-    <span class="switch-copy"><strong>過去データ内の回号で照合する</strong><small>オンにすると下の回号を使って照合します。</small></span>
-  </label>
-
-  <div class="field">
-    <div class="label-row"><label>回号</label><span>最新データ: 第{{ latest.get('draw_no','') }}回 {{ latest.get('draw_date','') }}</span></div>
-    <input name="draw_no" type="number" inputmode="numeric" value="{{ latest.get('draw_no','') }}">
-    <div class="hint">回号を指定すると、過去データ内の抽せん結果で照合します。</div>
+  <div class="method-grid" role="radiogroup" aria-label="照合方法">
+    <label class="method-card">
+      <input type="radio" name="check_method" value="draw" {% if check_method != 'manual' %}checked{% endif %}>
+      <span class="method-icon" aria-hidden="true">#</span>
+      <strong>抽せん回を指定する</strong>
+      <small>同梱データ内の回を選んで照合します。</small>
+    </label>
+    <label class="method-card">
+      <input type="radio" name="check_method" value="manual" {% if check_method == 'manual' %}checked{% endif %}>
+      <span class="method-icon" aria-hidden="true">123</span>
+      <strong>抽せん数字を直接入力する</strong>
+      <small>最新回など、同梱データにない結果も照合できます。</small>
+    </label>
   </div>
 
-  <div id="manual-input" class="field">
-    <div class="label-row"><label>手入力で照合する場合</label><span>本数字6個 + ボーナス</span></div>
-    <div class="draw-grid app-draw-grid">
-      {% for i in range(1,7) %}
-      <div><small>本数字{{ i }}</small><input class="num-box" name="main_{{ i }}" type="number" inputmode="numeric" min="1" max="43" value="{{ draw_values.get('main_' ~ i, '') }}"></div>
-      {% endfor %}
-      <div><small>ボーナス</small><input class="num-box bonus-box" name="bonus" type="number" inputmode="numeric" min="1" max="43" value="{{ draw_values.get('bonus', '') }}"></div>
+  <section id="draw-panel" class="method-panel" data-method-panel="draw" {% if check_method == 'manual' %}hidden{% endif %}>
+    <div class="panel-subhead"><span>方法A</span><h3>抽せん回を指定</h3></div>
+    <div class="field">
+      <div class="label-row"><label for="draw_no">抽せん回</label><span>同梱データの最新: 第{{ latest.get('draw_no','') }}回（{{ latest.get('draw_date','') }}）</span></div>
+      <input id="draw_no" name="draw_no" type="number" inputmode="numeric" min="1" value="{{ draw_no_value }}" {% if check_method == 'manual' %}disabled{% endif %}>
+      <div class="hint">入力した回が同梱データにない場合は照合できません。その場合は「抽せん数字を直接入力する」を選んでください。</div>
     </div>
-    <div class="hint">本数字6個とボーナス数字を入力して照合することもできます。</div>
+  </section>
+
+  <section id="manual-panel" class="method-panel" data-method-panel="manual" {% if check_method != 'manual' %}hidden{% endif %}>
+    <div class="panel-subhead"><span>方法B</span><h3>抽せん数字を直接入力</h3></div>
+    <div class="field">
+      <div class="label-row"><span class="field-label">本数字とボーナス数字</span><span>本数字6個 + ボーナス1個</span></div>
+      <div class="draw-grid app-draw-grid" data-number-group>
+        {% for i in range(1,7) %}
+        <div><label for="main_{{ i }}">本数字{{ i }}</label><input class="num-box" id="main_{{ i }}" name="main_{{ i }}" type="number" inputmode="numeric" min="1" max="43" autocomplete="off" value="{{ draw_values.get('main_' ~ i, '') }}" {% if check_method != 'manual' %}disabled{% endif %}></div>
+        {% endfor %}
+        <div><label for="bonus">ボーナス</label><input class="num-box bonus-box" id="bonus" name="bonus" type="number" inputmode="numeric" min="1" max="43" autocomplete="off" value="{{ draw_values.get('bonus', '') }}" {% if check_method != 'manual' %}disabled{% endif %}></div>
+      </div>
+      <div class="hint">本数字は重複なしの6個、ボーナス数字は本数字と異なる数字を入力してください。</div>
+    </div>
+  </section>
+
+  <div class="form-disclaimer">
+    当せん金額は表示しません。数字の一致数と、ロト6の等級条件に該当するかを確認します。
   </div>
 
   <div class="sticky-submit">
-    <button type="submit">結果を照合する</button>
+    <button type="submit">選択した方法で照合する</button>
   </div>
 </form>
 {% endblock %}

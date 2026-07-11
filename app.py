@@ -8,9 +8,9 @@ import time
 from collections import defaultdict, deque
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Deque, Dict, Iterable, List, Tuple
+from typing import Any, Deque, Dict, List, Tuple
 
-from flask import Flask, abort, render_template, request, session
+from flask import Flask, abort, render_template, request, session, url_for
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -21,25 +21,55 @@ if str(SRC_DIR) not in sys.path:
 from generate_tickets import generate_tickets  # noqa: E402
 from pools import build_pools  # noqa: E402
 from result_checker import check_ticket_rows, draw_numbers_from_row, load_draw_by_no, load_latest_draw  # noqa: E402
-from utils import clean_number_list, load_json, read_csv_dicts  # noqa: E402
+from utils import load_json, read_csv_dicts  # noqa: E402
 
-APP_VERSION = "v1.0.16-public"
+APP_VERSION = "v1.1.0-public"
 MODE_CHOICES = [
-    ("all", "全モード", "迷ったらこれ", "5つのモードをまとめて生成します。比較しながら選べる標準スタートです。"),
-    ("balance", "バランス型", "基本", "好きな数字・データ・32以上をバランスよく使います。"),
-    ("personal", "好きな数字重視型", "自分の数字", "入力した好きな数字をやや多めに使います。"),
-    ("data", "データ重視型", "過去データ", "過去データ側のスコアを強めに使います。"),
-    ("cold", "未出現数字重視型", "変化球", "しばらく出ていない数字を変化要素として使います。"),
-    ("payout", "高配当意識型", "かぶりにくさ", "32以上を厚めに入れ、誕生日数字偏重を避けます。"),
+    (
+        "all",
+        "全モード比較",
+        "迷ったらこれ",
+        "5種類すべてを、指定した口数ずつ生成します。各モードの違いをまとめて比較できます。",
+    ),
+    (
+        "balance",
+        "総合バランス型",
+        "基本",
+        "過去データ、数字の構成、入力した数字、32〜43の配分を組み合わせます。",
+    ),
+    (
+        "personal",
+        "好きな数字重視型",
+        "自分の数字",
+        "入力した好きな数字を多めに使います。未入力の場合は他の条件から補います。",
+    ),
+    (
+        "data",
+        "過去データ重視型",
+        "出現傾向",
+        "過去の出現回数、直近30回・100回、出現間隔などの独自スコアを強めに使います。",
+    ),
+    (
+        "cold",
+        "出現間隔重視型",
+        "変化要素",
+        "最近の出現間隔が比較的長い数字を、組み合わせの変化要素として使います。",
+    ),
+    (
+        "payout",
+        "32〜43重視型",
+        "誕生日偏重を避ける",
+        "32〜43の数字を多めに含め、1〜31だけに偏りにくい組み合わせを作ります。",
+    ),
 ]
 MODE_IDS = {m[0] for m in MODE_CHOICES}
+GENERATION_MODE_IDS = [m[0] for m in MODE_CHOICES if m[0] != "all"]
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    secret_key = resolve_secret_key()
-    app.config["SECRET_KEY"] = secret_key
-    app.config["MAX_CONTENT_LENGTH"] = 64 * 1024
+    app.config["SECRET_KEY"] = resolve_secret_key()
+    app.config["MAX_CONTENT_LENGTH"] = 256 * 1024
     app.config["TICKET_TOKEN_MAX_AGE_SECONDS"] = int(os.environ.get("TICKET_TOKEN_MAX_AGE_SECONDS", "86400"))
     app.config["RATE_LIMIT_PER_MINUTE"] = int(os.environ.get("RATE_LIMIT_PER_MINUTE", "30"))
     app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -48,11 +78,15 @@ def create_app() -> Flask:
 
     @app.context_processor
     def inject_common() -> Dict[str, Any]:
+        settings = load_json("config/app_settings.json")
         return {
             "app_version": APP_VERSION,
             "mode_choices": MODE_CHOICES,
             "csrf_token": get_csrf_token,
             "data_status": data_status(),
+            "default_ticket_count": int(settings.get("default_ticket_count", 2)),
+            "max_ticket_count": int(settings.get("max_ticket_count", 10)),
+            "generation_mode_count": len(GENERATION_MODE_IDS),
         }
 
     @app.before_request
@@ -68,18 +102,28 @@ def create_app() -> Flask:
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
+            "script-src 'self'; font-src 'self' data:; form-action 'self'; base-uri 'self'; frame-ancestors 'none'",
+        )
+        if response.mimetype == "text/html":
+            response.headers.setdefault("Cache-Control", "no-store")
         return response
 
     @app.get("/")
     def index():
-        return render_template("index.html", values={}, error="")
+        values = dict(request.args.items())
+        return render_template("index.html", values=values, error="")
 
     @app.post("/generate")
     def generate():
         try:
-            favorite_numbers, avoided_numbers, mode, count = parse_generate_form(request.form)
-            rows = generate_ticket_rows(favorite_numbers, avoided_numbers, mode, count)
+            favorite_numbers, avoided_numbers, mode, count, seed = parse_generate_form(request.form)
+            rows = generate_ticket_rows(favorite_numbers, avoided_numbers, mode, count, seed)
             token = sign_payload({"rows": rows})
+            edit_url = build_edit_url(favorite_numbers, avoided_numbers, mode, count, seed)
             return render_template(
                 "result.html",
                 rows=rows,
@@ -88,59 +132,107 @@ def create_app() -> Flask:
                 avoided_numbers=avoided_numbers,
                 mode=mode,
                 count=count,
+                seed=seed,
+                edit_url=edit_url,
             )
-        except Exception as exc:
+        except (ValueError, RuntimeError) as exc:
             values = dict(request.form.items())
             return render_template("index.html", values=values, error=str(exc)), 400
+        except Exception:
+            app.logger.exception("Unexpected generation error")
+            values = dict(request.form.items())
+            return render_template(
+                "index.html",
+                values=values,
+                error="買い目を生成できませんでした。入力内容を確認して、もう一度お試しください。",
+            ), 500
 
     @app.post("/check")
     def check_form():
         try:
-            rows = rows_from_token(request.form.get("ticket_token", ""))
+            ticket_token = request.form.get("ticket_token", "")
+            rows_from_token(ticket_token)
             latest = load_latest_draw()
-            main_numbers, bonus = draw_numbers_from_row(latest)
-            draw_values = {f"main_{idx}": str(n) for idx, n in enumerate(main_numbers, start=1)}
-            draw_values["bonus"] = str(bonus)
+            incoming = dict(request.form.items())
+            check_method = incoming.get("check_method", "draw")
+            if check_method not in {"draw", "manual"}:
+                check_method = "draw"
+            draw_values = {
+                f"main_{idx}": incoming.get(f"main_{idx}", "") for idx in range(1, 7)
+            }
+            draw_values["bonus"] = incoming.get("bonus", "")
+            draw_no_value = incoming.get("draw_no", "") or str(latest.get("draw_no", ""))
             return render_template(
                 "check.html",
-                ticket_token=request.form.get("ticket_token", ""),
+                ticket_token=ticket_token,
                 latest=latest,
                 draw_values=draw_values,
-                use_draw_no=True,
+                draw_no_value=draw_no_value,
+                check_method=check_method,
                 error="",
             )
-        except Exception as exc:
+        except (ValueError, RuntimeError) as exc:
             return render_template("error.html", message=str(exc)), 400
+        except Exception:
+            app.logger.exception("Unexpected check form error")
+            return render_template("error.html", message="照合画面を開けませんでした。もう一度買い目を生成してください。"), 500
 
     @app.post("/check-result")
     def check_result():
+        ticket_token = request.form.get("ticket_token", "")
+        check_values = dict(request.form.items())
         try:
-            ticket_token = request.form.get("ticket_token", "")
             rows = rows_from_token(ticket_token)
-            use_draw_no = request.form.get("use_draw_no") == "on"
-            if use_draw_no:
-                draw_no_text = request.form.get("draw_no", "").strip()
-                draw_row = load_draw_by_no(int(draw_no_text)) if draw_no_text else load_latest_draw()
+            check_method = request.form.get("check_method", "draw")
+            if check_method == "draw":
+                draw_no = parse_draw_no(request.form.get("draw_no", ""))
+                draw_row = load_draw_by_no(draw_no)
                 main_numbers, bonus = draw_numbers_from_row(draw_row)
-                draw_no = str(draw_row.get("draw_no", ""))
-                draw_date = str(draw_row.get("draw_date", ""))
+                checked_draw_no = str(draw_row.get("draw_no", ""))
+                checked_draw_date = str(draw_row.get("draw_date", ""))
+            elif check_method == "manual":
+                main_numbers, bonus = parse_manual_draw(request.form)
+                checked_draw_no = ""
+                checked_draw_date = "手入力"
             else:
-                main_numbers = [int(request.form.get(f"main_{i}", "")) for i in range(1, 7)]
-                bonus = int(request.form.get("bonus", ""))
-                draw_no = ""
-                draw_date = "手入力"
-            checked_rows = check_ticket_rows(rows, main_numbers, bonus, draw_no=draw_no, draw_date=draw_date)
-            return render_template("checked.html", rows=checked_rows)
-        except Exception as exc:
+                raise ValueError("照合方法を選択してください。")
+
+            checked_rows = check_ticket_rows(
+                rows,
+                main_numbers,
+                bonus,
+                draw_no=checked_draw_no,
+                draw_date=checked_draw_date,
+            )
+            return render_template(
+                "checked.html",
+                rows=checked_rows,
+                ticket_token=ticket_token,
+                check_values=check_values,
+            )
+        except (ValueError, RuntimeError) as exc:
             latest = safe_latest_draw()
             return render_template(
                 "check.html",
-                ticket_token=request.form.get("ticket_token", ""),
+                ticket_token=ticket_token,
                 latest=latest,
-                draw_values=dict(request.form.items()),
-                use_draw_no=request.form.get("use_draw_no") == "on",
+                draw_values=check_values,
+                draw_no_value=check_values.get("draw_no", str(latest.get("draw_no", ""))),
+                check_method=check_values.get("check_method", "draw"),
                 error=str(exc),
             ), 400
+        except Exception:
+            app.logger.exception("Unexpected result check error")
+            latest = safe_latest_draw()
+            return render_template(
+                "check.html",
+                ticket_token=ticket_token,
+                latest=latest,
+                draw_values=check_values,
+                draw_no_value=check_values.get("draw_no", str(latest.get("draw_no", ""))),
+                check_method=check_values.get("check_method", "draw"),
+                error="照合処理でエラーが発生しました。入力内容を確認して、もう一度お試しください。",
+            ), 500
 
     @app.get("/health")
     def health():
@@ -155,6 +247,10 @@ def create_app() -> Flask:
     def not_found(_err):
         return render_template("error.html", message="ページが見つかりません。"), 404
 
+    @app.errorhandler(413)
+    def request_too_large(_err):
+        return render_template("error.html", message="送信データが大きすぎます。口数を減らして、もう一度お試しください。"), 413
+
     @app.errorhandler(429)
     def too_many_requests(err):
         message = getattr(err, "description", "短時間に操作が集中しています。少し時間をおいてからお試しください。")
@@ -167,46 +263,102 @@ def create_app() -> Flask:
     return app
 
 
-def parse_generate_form(form: Any) -> Tuple[List[int], List[int], str, int]:
-    favorite_numbers = read_box_numbers(form, "favorite", 5)
-    avoided_numbers = read_box_numbers(form, "avoid", 5)
-    avoided_set = set(avoided_numbers)
-    favorite_numbers = [n for n in favorite_numbers if n not in avoided_set]
+def parse_generate_form(form: Any) -> Tuple[List[int], List[int], str, int, str]:
+    favorite_numbers = read_box_numbers(form, "favorite", 5, "好きな数字")
+    avoided_numbers = read_box_numbers(form, "avoid", 5, "避けたい数字")
 
-    mode = str(form.get("mode", "all"))
+    overlap = sorted(set(favorite_numbers) & set(avoided_numbers))
+    if overlap:
+        joined = "、".join(str(n) for n in overlap)
+        raise ValueError(f"同じ数字を「好きな数字」と「避けたい数字」の両方には指定できません: {joined}")
+
+    mode = str(form.get("mode", "all")).strip()
     if mode not in MODE_IDS:
-        mode = "all"
+        raise ValueError("生成モードを選択してください。")
 
-    try:
-        count = int(form.get("count", 5))
-    except Exception:
-        count = 5
     settings = load_json("config/app_settings.json")
     max_count = int(settings.get("max_ticket_count", 10))
-    count = max(1, min(count, max_count))
+    try:
+        count = int(str(form.get("count", "")).strip())
+    except Exception as exc:
+        raise ValueError(f"各モードの生成口数を1〜{max_count}で入力してください。") from exc
+    if not 1 <= count <= max_count:
+        raise ValueError(f"各モードの生成口数は1〜{max_count}で入力してください。")
 
     seed = str(form.get("seed", "")).strip()
-    if seed:
-        try:
-            random.seed(int(seed))
-        except ValueError:
-            random.seed(seed)
+    if len(seed) > 80:
+        raise ValueError("再現用キーワードは80文字以内で入力してください。")
 
-    return favorite_numbers, avoided_numbers, mode, count
+    return favorite_numbers, avoided_numbers, mode, count, seed
 
 
-def read_box_numbers(form: Any, prefix: str, max_count: int) -> List[int]:
-    values: List[str] = []
+def read_box_numbers(form: Any, prefix: str, max_count: int, field_label: str) -> List[int]:
+    numbers: List[int] = []
     for idx in range(1, max_count + 1):
-        values.append(str(form.get(f"{prefix}_{idx}", "")).strip())
-    return clean_number_list(",".join(v for v in values if v))[:max_count]
+        raw = str(form.get(f"{prefix}_{idx}", "")).strip()
+        if not raw:
+            continue
+        try:
+            number = int(raw)
+        except ValueError as exc:
+            raise ValueError(f"{field_label}は1〜43の整数で入力してください。") from exc
+        if not 1 <= number <= 43:
+            raise ValueError(f"{field_label}は1〜43の範囲で入力してください。")
+        if number in numbers:
+            raise ValueError(f"{field_label}に同じ数字が重複しています: {number}")
+        numbers.append(number)
+    return sorted(numbers)
+
+
+def parse_draw_no(value: Any) -> int:
+    text = str(value or "").strip()
+    if not text:
+        raise ValueError("抽せん回を入力してください。")
+    try:
+        draw_no = int(text)
+    except ValueError as exc:
+        raise ValueError("抽せん回は数字で入力してください。") from exc
+    if draw_no <= 0:
+        raise ValueError("抽せん回は1以上で入力してください。")
+    return draw_no
+
+
+def parse_manual_draw(form: Any) -> Tuple[List[int], int]:
+    main_numbers: List[int] = []
+    for idx in range(1, 7):
+        raw = str(form.get(f"main_{idx}", "")).strip()
+        if not raw:
+            raise ValueError("本数字を6個すべて入力してください。")
+        try:
+            number = int(raw)
+        except ValueError as exc:
+            raise ValueError("本数字は1〜43の整数で入力してください。") from exc
+        if not 1 <= number <= 43:
+            raise ValueError("本数字は1〜43の範囲で入力してください。")
+        if number in main_numbers:
+            raise ValueError(f"本数字に同じ数字が重複しています: {number}")
+        main_numbers.append(number)
+
+    bonus_raw = str(form.get("bonus", "")).strip()
+    if not bonus_raw:
+        raise ValueError("ボーナス数字を入力してください。")
+    try:
+        bonus = int(bonus_raw)
+    except ValueError as exc:
+        raise ValueError("ボーナス数字は1〜43の整数で入力してください。") from exc
+    if not 1 <= bonus <= 43:
+        raise ValueError("ボーナス数字は1〜43の範囲で入力してください。")
+    if bonus in main_numbers:
+        raise ValueError("ボーナス数字は本数字と異なる数字を入力してください。")
+
+    return sorted(main_numbers), bonus
 
 
 def load_number_stats() -> List[Dict[str, Any]]:
     settings = load_json("config/app_settings.json")
     rows = read_csv_dicts(settings.get("number_stats_path", "data/processed/number_stats.csv"))
     if not rows:
-        raise RuntimeError("number_stats.csv が空です。")
+        raise RuntimeError("数字別の集計データを読み込めませんでした。管理者にデータ更新を依頼してください。")
     return rows
 
 
@@ -215,26 +367,36 @@ def generate_ticket_rows(
     avoided_numbers: List[int],
     mode: str,
     count: int,
+    seed: str = "",
 ) -> List[Dict[str, Any]]:
     mode_rules = load_json("config/mode_rules.json")
     balance_rules = load_json("config/balance_rules.json")
     number_stats = load_number_stats()
     pools = build_pools(number_stats, favorite_numbers, avoided_numbers)
-    modes = list(mode_rules.keys()) if mode == "all" else [mode]
+    modes = GENERATION_MODE_IDS if mode == "all" else [mode]
+    rng: random.Random | random.SystemRandom
+    rng = random.Random(seed) if seed else random.SystemRandom()
 
     tickets: List[Dict[str, Any]] = []
+    shared_seen: set[tuple[int, ...]] = set()
     for mode_id in modes:
-        tickets.extend(
-            generate_tickets(
-                mode_id=mode_id,
-                ticket_count=count,
-                pools=pools,
-                number_stats=number_stats,
-                mode_rules=mode_rules,
-                balance_rules=balance_rules,
-                favorite_numbers=favorite_numbers,
-            )
+        generated = generate_tickets(
+            mode_id=mode_id,
+            ticket_count=count,
+            pools=pools,
+            number_stats=number_stats,
+            mode_rules=mode_rules,
+            balance_rules=balance_rules,
+            favorite_numbers=favorite_numbers,
+            rng=rng,
+            seen=shared_seen,
         )
+        if len(generated) < count:
+            raise RuntimeError(
+                f"{mode_rules.get(mode_id, {}).get('mode_name_ja', mode_id)}で指定口数を生成できませんでした。"
+                "避けたい数字を減らすか、各モードの口数を少なくしてください。"
+            )
+        tickets.extend(generated)
 
     if not tickets:
         raise RuntimeError("買い目を生成できませんでした。避けたい数字を減らすか、口数を少なくしてください。")
@@ -247,11 +409,12 @@ def flatten_tickets(
     avoided_numbers: List[int],
 ) -> List[Dict[str, Any]]:
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    id_stamp = datetime.now().strftime("%Y%m%d%H%M%S")
     rows: List[Dict[str, Any]] = []
     for idx, ticket in enumerate(tickets, start=1):
         nums = [int(n) for n in ticket["numbers"]]
         row = {
-            "ticket_id": f"web_{datetime.now().strftime('%Y%m%d%H%M%S')}_{idx:03d}",
+            "ticket_id": f"web_{id_stamp}_{idx:03d}",
             "generated_at": generated_at,
             "mode_id": ticket.get("mode_id", ""),
             "mode_name": ticket.get("mode_name", ""),
@@ -282,6 +445,23 @@ def flatten_tickets(
         }
         rows.append(row)
     return rows
+
+
+def build_edit_url(
+    favorite_numbers: List[int],
+    avoided_numbers: List[int],
+    mode: str,
+    count: int,
+    seed: str,
+) -> str:
+    params: Dict[str, Any] = {"mode": mode, "count": count}
+    for idx, number in enumerate(favorite_numbers, start=1):
+        params[f"favorite_{idx}"] = number
+    for idx, number in enumerate(avoided_numbers, start=1):
+        params[f"avoid_{idx}"] = number
+    if seed:
+        params["seed"] = seed
+    return url_for("index", **params)
 
 
 def is_production_environment() -> bool:
@@ -343,15 +523,24 @@ def validate_csrf_token() -> None:
 
 
 _RATE_LIMIT_BUCKETS: Dict[str, Deque[float]] = defaultdict(deque)
+_RATE_LIMIT_LAST_CLEANUP = 0.0
 
 
 def enforce_rate_limit(app: Flask) -> None:
+    global _RATE_LIMIT_LAST_CLEANUP
     limit = int(app.config.get("RATE_LIMIT_PER_MINUTE", 30))
     if limit <= 0:
         return
     key = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
     now = time.time()
     window_start = now - 60
+
+    if now - _RATE_LIMIT_LAST_CLEANUP > 300:
+        stale_keys = [bucket_key for bucket_key, bucket in _RATE_LIMIT_BUCKETS.items() if not bucket or bucket[-1] < window_start]
+        for bucket_key in stale_keys:
+            _RATE_LIMIT_BUCKETS.pop(bucket_key, None)
+        _RATE_LIMIT_LAST_CLEANUP = now
+
     bucket = _RATE_LIMIT_BUCKETS[key]
     while bucket and bucket[0] < window_start:
         bucket.popleft()

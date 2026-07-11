@@ -4,7 +4,7 @@
 
 ## 1. 抽せん結果CSVを更新
 
-`data/raw/loto6_results.csv` に新しい回号を追加します。最低限、以下の列が必要です。
+`data/raw/loto6_results.csv` に新しい抽せん回を追加します。最低限、以下の列が必要です。
 
 ```text
 draw_no,draw_date,weekday,main_1,main_2,main_3,main_4,main_5,main_6,bonus

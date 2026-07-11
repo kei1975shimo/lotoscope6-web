@@ -28,8 +28,8 @@ def rank_label(rank: str) -> str:
         "3": "3等",
         "4": "4等",
         "5": "5等",
-        "": "該当なし",
-    }.get(str(rank), "該当なし")
+        "": "等級なし",
+    }.get(str(rank), "等級なし")
 
 
 def check_ticket(ticket: Sequence[int], main_numbers: Sequence[int], bonus: int) -> dict:
@@ -81,6 +81,14 @@ def normalize_bonus_number(value: int) -> int:
     return n
 
 
+def validate_draw_numbers(main_numbers: Sequence[int], bonus: int) -> tuple[List[int], int]:
+    main = normalize_main_numbers(main_numbers)
+    bonus_n = normalize_bonus_number(bonus)
+    if bonus_n in main:
+        raise ValueError("ボーナス数字は本数字と異なる数字である必要があります。")
+    return main, bonus_n
+
+
 def read_csv_rows(path: str | Path, encoding: str = "utf-8-sig") -> List[Dict[str, Any]]:
     p = resolve_path(path)
     if not p.exists():
@@ -95,7 +103,7 @@ def load_draw_by_no(draw_no: int, draws_path: str | Path = "data/raw/loto6_resul
     for row in rows:
         if str(row.get("draw_no", "")).strip() == target:
             return row
-    raise ValueError(f"指定回号の抽せん結果が見つかりません: {draw_no}")
+    raise ValueError(f"第{draw_no}回の抽せん結果は、同梱データ内に見つかりません。")
 
 
 def load_latest_draw(draws_path: str | Path = "data/raw/loto6_results.csv") -> Dict[str, Any]:
@@ -113,7 +121,7 @@ def load_latest_draw(draws_path: str | Path = "data/raw/loto6_results.csv") -> D
 def draw_numbers_from_row(row: Dict[str, Any]) -> Tuple[List[int], int]:
     main = [int(float(row.get(f"main_{i}", 0))) for i in range(1, 7)]
     bonus = int(float(row.get("bonus", 0)))
-    return normalize_main_numbers(main), normalize_bonus_number(bonus)
+    return validate_draw_numbers(main, bonus)
 
 
 def check_ticket_rows(
@@ -123,8 +131,7 @@ def check_ticket_rows(
     draw_no: str = "",
     draw_date: str = "",
 ) -> List[Dict[str, Any]]:
-    main = normalize_main_numbers(main_numbers)
-    bonus_n = normalize_bonus_number(bonus)
+    main, bonus_n = validate_draw_numbers(main_numbers, bonus)
     checked_at = now_stamp()
     checked_rows: List[Dict[str, Any]] = []
     for row in ticket_rows:

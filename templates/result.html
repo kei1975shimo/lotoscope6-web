@@ -9,60 +9,61 @@
   {%- elif ni <= 20 -%}{%- set band = 'num-band-2' -%}
   {%- elif ni <= 31 -%}{%- set band = 'num-band-3' -%}
   {%- else -%}{%- set band = 'num-band-4' -%}{%- endif -%}
-  <span class="num {{ band }} {% if ns in favs %}favorite{% endif %} {% if ni >= 32 %}over31{% endif %}" {% if ns in favs %}title="あなたが入力した数字"{% endif %}>{% if ns in favs %}<i class="fav-mark">★</i>{% endif %}{{ '%02d'|format(ni) }}</span>
+  <span class="num {{ band }} {% if ns in favs %}favorite{% endif %} {% if ni >= 32 %}over31{% endif %}" {% if ns in favs %}title="入力した好きな数字" aria-label="{{ ni }}、入力した好きな数字"{% else %}aria-label="{{ ni }}"{% endif %}>{% if ns in favs %}<i class="fav-mark" aria-hidden="true">★</i>{% endif %}{{ '%02d'|format(ni) }}</span>
 {%- endmacro %}
 
 <section class="hero compact result-hero">
   <div class="hero-grid">
     <div>
-      <div class="hero-kicker">Celestial Ticket Dashboard</div>
-      <h1>LOTOSCOPE 6<small>買い目レポート</small></h1>
-      <p>おすすめの買い目を先に表示し、モード別の候補は必要なところだけ開いて確認できます。</p>
+      <div class="hero-kicker">GENERATED PICKS</div>
+      <h1>LOTOSCOPE 6<small>買い目候補の比較結果</small></h1>
+      <p>総合スコアの高い候補を先に表示し、詳しい構成はモード別に確認できます。</p>
       <div class="hero-points">
-        <span>{{ rows|length }}口</span>
-        <span>好きな数字: {{ favorite_numbers|join(', ') if favorite_numbers else 'なし' }}</span>
-        <span>避けたい数字: {{ avoided_numbers|join(', ') if avoided_numbers else 'なし' }}</span>
+        <span>生成数: {{ rows|length }}口</span>
+        <span>{% if mode == 'all' %}5種類 × 各{{ count }}口{% else %}選択モード × {{ count }}口{% endif %}</span>
+        <span>好きな数字: {{ favorite_numbers|join('・') if favorite_numbers else '指定なし' }}</span>
+        <span>避けたい数字: {{ avoided_numbers|join('・') if avoided_numbers else '指定なし' }}</span>
       </div>
     </div>
     <div class="hero-visual small desktop-only" aria-hidden="true">
-      <div class="orbital"></div><div class="center-core">LOTUS<br>MAP</div>
+      <div class="orbital"></div><div class="center-core">PICK<br>REPORT</div>
     </div>
   </div>
 </section>
 
-<div class="sticky-mobile-nav">
-  <a href="#recommended">おすすめ</a>
+<nav class="sticky-mobile-nav" aria-label="結果内メニュー">
+  <a href="#best-pick">評価1位</a>
   <a href="#top3">上位3口</a>
   <a href="#mode-results">モード別</a>
-</div>
+</nav>
 
-<div class="action-row compact-actions">
-  <a class="ghost-button" href="{{ url_for('index') }}">入力画面に戻る</a>
+<div class="bottom-action-bar">
+  <a class="ghost-button" href="{{ edit_url }}">入力条件を変更</a>
   <form method="post" action="{{ url_for('check_form') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="ticket_token" value="{{ token }}">
-    <button class="small-button" type="submit">この買い目を照合</button>
+    <button type="submit">全買い目を照合</button>
   </form>
 </div>
 
 {% if favorite_numbers %}
 <section class="favorite-guide panel compact-panel">
-  <div class="section-kicker">Your Numbers</div>
-  <h2>あなたが入力した数字</h2>
+  <div class="section-kicker">YOUR NUMBERS</div>
+  <h2>入力した好きな数字</h2>
   <div class="numbers favorite-guide-numbers">
     {% for n in favorite_numbers %}{{ ball(n, favorite_numbers|join(',')) }}{% endfor %}
   </div>
-  <p class="note">結果の中では、★マークと光る枠で表示されます。</p>
+  <p class="note">買い目の中では、★マークと金色の外枠で表示します。</p>
 </section>
 {% endif %}
 
 {% set best = rows|sort(attribute='ticket_score')|last %}
 {% if best %}
-<section id="recommended" class="panel hero-recommend compact-panel">
+<section id="best-pick" class="panel hero-recommend compact-panel">
   <div class="recommend-grid">
     <div>
-      <div class="section-kicker">Recommended</div>
-      <h2>今回の見やすいおすすめ</h2>
+      <div class="section-kicker">TOP SCORE</div>
+      <h2>総合スコア1位</h2>
       <div class="big-mode">{{ best.mode_name_ja or best.mode_name }}</div>
       <div class="numbers hero-numbers">
         {% for n in [best.n1,best.n2,best.n3,best.n4,best.n5,best.n6] %}
@@ -71,13 +72,20 @@
       </div>
       <p class="lead-text">{{ best.reason }}</p>
     </div>
-    <div class="score-orb"><span>バランス</span><strong>{{ best.ticket_score }}</strong></div>
+    <div class="score-orb"><span>総合スコア</span><strong>{{ best.ticket_score }}</strong><small>/ 100</small></div>
   </div>
+  <div class="score-breakdown" aria-label="総合スコアの内訳">
+    <div><span>過去データ評価</span><strong>{{ best.data_score_avg }}</strong><small>40%</small></div>
+    <div><span>数字構成評価</span><strong>{{ best.balance_fit_score }}</strong><small>30%</small></div>
+    <div><span>入力数字との適合</span><strong>{{ best.personal_fit_score }}</strong><small>15%</small></div>
+    <div><span>32〜43の配分</span><strong>{{ best.uniqueness_score }}</strong><small>15%</small></div>
+  </div>
+  <p class="score-note">総合スコアは上記4項目を重み付けした、このツール独自の比較値です。当せん確率ではありません。</p>
 </section>
 {% endif %}
 
 <section id="top3" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">Top Picks</div><h2>バランス上位3口</h2></div><p>まずは気になる3口を確認できます。</p></div>
+  <div class="panel-head compact-head"><div><div class="section-kicker">TOP 3</div><h2>総合スコア上位3口</h2></div><p>候補を絞る際の比較用です。</p></div>
   <div class="ticket-list compact-list">
     {% for row in rows|sort(attribute='ticket_score', reverse=true) %}
     {% if loop.index <= 3 %}
@@ -91,7 +99,7 @@
             {% endfor %}
           </div>
         </div>
-        <div class="score-pill"><span>バランス</span>{{ row.ticket_score }}</div>
+        <div class="score-pill"><span>総合</span>{{ row.ticket_score }}</div>
       </div>
     </article>
     {% endif %}
@@ -100,7 +108,7 @@
 </section>
 
 <section id="mode-results" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">Mode View</div><h2>モード別の買い目</h2></div><p>気になるモードだけ開いて、買い目の内容を確認できます。</p></div>
+  <div class="panel-head compact-head"><div><div class="section-kicker">BY MODE</div><h2>生成方法別の買い目</h2></div><p>各買い目を開くと構成の詳細を確認できます。</p></div>
 
   <div class="accordion-group">
     {% for mode_id, title, badge, desc in mode_choices %}
@@ -124,18 +132,24 @@
                     {% endfor %}
                   </div>
                 </div>
-                <div class="score-pill"><span>バランス</span>{{ row.ticket_score }}</div>
+                <div class="score-pill"><span>総合</span>{{ row.ticket_score }}</div>
               </summary>
               <div class="ticket-extra">
-                {% if row.personal_hit_count|int > 0 %}<div class="favorite-hit-note">★ あなたの数字が {{ row.personal_hit_count }}個 入っています</div>{% endif %}
-                <div class="score-bar"><span style="width:{{ row.ticket_score }}%"></span></div>
+                {% if row.personal_hit_count|int > 0 %}<div class="favorite-hit-note">★ 入力した好きな数字を{{ row.personal_hit_count }}個含みます</div>{% endif %}
+                <div class="score-bar" aria-label="総合スコア {{ row.ticket_score }}点"><span style="width:{{ row.ticket_score }}%"></span></div>
                 <div class="metrics">
-                  <div><span>合計</span><strong>{{ row.set_sum }}</strong></div>
-                  <div><span>奇偶</span><strong>{{ row.odd_count }}:{{ row.even_count }}</strong></div>
-                  <div><span>分布</span><strong>低{{ row.low_count }} / 中{{ row.mid_count }} / 高{{ row.high_count }}</strong></div>
-                  <div><span>32以上</span><strong>{{ row.over31_count }}</strong></div>
-                  <div><span>好きな数字</span><strong>{{ row.personal_hit_count }}</strong></div>
-                  <div><span>連番</span><strong>{{ row.consecutive_count }}</strong></div>
+                  <div><span>合計値</span><strong>{{ row.set_sum }}</strong></div>
+                  <div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div>
+                  <div><span>範囲別</span><strong>1〜14: {{ row.low_count }}／15〜29: {{ row.mid_count }}／30〜43: {{ row.high_count }}</strong></div>
+                  <div><span>32〜43</span><strong>{{ row.over31_count }}個</strong></div>
+                  <div><span>好きな数字</span><strong>{{ row.personal_hit_count }}個</strong></div>
+                  <div><span>連続数字の組</span><strong>{{ row.consecutive_count }}組</strong></div>
+                </div>
+                <div class="score-mini-breakdown">
+                  <span>過去データ {{ row.data_score_avg }}</span>
+                  <span>数字構成 {{ row.balance_fit_score }}</span>
+                  <span>入力数字 {{ row.personal_fit_score }}</span>
+                  <span>32〜43配分 {{ row.uniqueness_score }}</span>
                 </div>
                 <p class="reason">{{ row.reason }}</p>
               </div>
@@ -149,13 +163,5 @@
   </div>
 </section>
 
-<div class="bottom-action-bar">
-  <a href="{{ url_for('index') }}">戻る</a>
-  <form method="post" action="{{ url_for('check_form') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input type="hidden" name="ticket_token" value="{{ token }}">
-    <button type="submit">照合する</button>
-  </form>
-</div>
-<button class="float-top" type="button" data-scroll-top aria-label="上へ戻る">↑</button>
+<button class="float-top" type="button" data-scroll-top aria-label="ページ上部へ戻る">↑</button>
 {% endblock %}

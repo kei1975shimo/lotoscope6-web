@@ -1,7 +1,7 @@
 {
   "raw_results_path": "data/raw/loto6_results.csv",
   "number_stats_path": "data/processed/number_stats.csv",
-  "default_ticket_count": 5,
+  "default_ticket_count": 2,
   "max_ticket_count": 10,
   "public_mode": true
 }
