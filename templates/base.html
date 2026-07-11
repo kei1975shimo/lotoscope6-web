@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f2f2f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>{% block title %}LOTOSCOPE 6{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}app-mobile app-ios{% endblock %}">
+  <main class="wrap app-shell">
+    <header class="app-bar">
+      <a class="app-brand" href="{{ url_for('index') }}" aria-label="LOTOSCOPE 6 ホーム">
+        <span class="app-brand-mark">6</span>
+        <span class="app-brand-copy">
+          <strong>LOTOSCOPE 6</strong>
+          <small>iPhoneライクUI</small>
+        </span>
+      </a>
+      <div class="app-bar-actions">
+        <span class="status-chip app-status">iPhone UI</span>
+      </div>
+    </header>
+
+    {% if data_status.is_stale %}
+    <div class="alert warning data-warning app-banner">
+      過去データは第{{ data_status.latest_draw_no }}回（{{ data_status.latest_draw_date }}）までです。最新結果は公式情報で確認してください。
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <div id="draw-loader" class="draw-loader" aria-hidden="true">
+      <div class="draw-loader-card">
+        <div class="draw-loader-ring">
+          <span class="loader-ball b1">06</span>
+          <span class="loader-ball b2">24</span>
+          <span class="loader-ball b3">37</span>
+          <span class="loader-core">SCOPE</span>
+        </div>
+        <div class="loader-title">数字をスコープ中</div>
+        <div class="loader-text">好きな数字と過去データを重ねています</div>
+        <div class="loader-dots"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+
+    <p class="footer app-footer">このツールは数字選びを補助するものです。当選を保証するものではありません。購入・当せん確認は公式情報をご確認ください。</p>
+  </main>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

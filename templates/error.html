@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}LOTOSCOPE 6 | エラー{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div class="hero-kicker">System Message</div>
+  <h1>LOTOSCOPE 6<small>エラー</small></h1>
+  <p>{{ message }}</p>
+  <div class="action-row"><a class="ghost-button" href="{{ url_for('index') }}">入力画面に戻る</a></div>
+</section>
+{% endblock %}

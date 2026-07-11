@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: lotoscope6-web
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: TICKET_TOKEN_MAX_AGE_SECONDS
+        value: "86400"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "30"
