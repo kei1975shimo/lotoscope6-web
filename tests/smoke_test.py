@@ -58,7 +58,7 @@ class LotoscopeSmokeTests(unittest.TestCase):
         self.assertIn("合計予定口数", html)
         self.assertIn("数字の受け取り方", html)
         self.assertIn("birth_year", html)
-        self.assertIn("星図への刻印", html)
+        self.assertIn("星図に刻まれた誕生日", html)
         self.assertIn("CELESTIAL DIVINATION", html)
 
     def test_all_mode_generates_requested_total_without_duplicates(self) -> None:
