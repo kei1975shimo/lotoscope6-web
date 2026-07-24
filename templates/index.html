@@ -3,6 +3,13 @@
 {% block content %}
 {% set current_mode = values.get('mode', 'all') %}
 {% set current_count = values.get('count', default_ticket_count|string) %}
+{% set astrology_setting_present = values.get('astrology_setting_present') or values.get('use_astrology') is not none %}
+{% set astrology_requested = values.get('use_astrology') in ['1', 'true', 'on', 'yes'] %}
+{% set astrology_enabled = current_mode == 'astrology' or values.get('birth_date') or astrology_requested or not astrology_setting_present %}
+{% set birth_iso = values.get('birth_date', '') %}
+{% set birth_year_value = birth_iso[0:4] if birth_iso|length >= 10 else '' %}
+{% set birth_month_value = birth_iso[5:7] if birth_iso|length >= 10 else '' %}
+{% set birth_day_value = birth_iso[8:10] if birth_iso|length >= 10 else '' %}
 <section class="hero app-hero home-hero mystic-hero">
   <svg class="hero-constellation constellation-left" viewBox="0 0 180 130" aria-hidden="true">
     <path d="M18 96 L52 62 L83 76 L118 34 L154 52" />
@@ -15,13 +22,13 @@
   <div class="moon-phase-row" aria-hidden="true"><span>●</span><span>◐</span><span>○</span><span>◑</span><span>●</span></div>
   <div class="hero-grid">
     <div class="hero-copy">
-      <div class="hero-kicker">CELESTIAL NUMBER ORACLE</div>
-      <h1>LOTOSCOPE 6<small>数字の星図から、買い目候補をひらく</small></h1>
-      <p>好きな数字と避けたい数字、過去データの傾向を重ね、あなたの条件に合う数字の組み合わせを星図のように描きます。</p>
+      <div class="hero-kicker">CELESTIAL LOTTERY ORACLE</div>
+      <h1>LOTOSCOPE 6<small>あなたの星がささやく、六つの数字</small></h1>
+      <p>あなたが生まれた日の星と、今日めぐる天体を重ねてみましょう。過去の数字の記憶にも耳を澄ませながら、今のあなたに響く六つの候補をそっと結びます。</p>
       <div class="hero-points">
-        <span>☾ 入力はすべて任意</span>
-        <span>✦ 5種類を比較</span>
-        <span>☉ 結果照合つき</span>
+        <span>☾ あなたの誕生星を読む</span>
+        <span>✦ 五つの導きを重ねる</span>
+        <span>☉ 今日の天体に耳を澄ます</span>
       </div>
     </div>
     <div class="hero-visual mystic-hero-visual" aria-hidden="true">
@@ -54,50 +61,119 @@
 {% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
 
 <nav class="mobile-section-nav" aria-label="ページ内メニュー">
-  <a href="#number-form">数字入力</a>
-  <a href="#mode-panel">生成方法</a>
-  <a href="#guide-panel">使い方</a>
+  <a href="#number-form">あなたの星</a>
+  <a href="#mode-panel">数字の受け取り方</a>
+  <a href="#guide-panel">星読みの流れ</a>
 </nav>
 
 <section class="app-summary-strip" aria-label="ツール概要">
   <div class="summary-pill"><strong>1〜43</strong><span>数字の範囲</span></div>
-  <div class="summary-pill"><strong>各1〜{{ max_ticket_count }}口</strong><span>モードごとの口数</span></div>
+  <div class="summary-pill"><strong>5つ</strong><span>数字へ続く導き</span></div>
   <div class="summary-pill"><strong id="planned-total">—</strong><span>合計予定口数</span></div>
 </section>
 
-<form id="number-form" class="panel app-form-panel" method="post" action="{{ url_for('generate') }}" data-generate-form data-mode-count="{{ generation_mode_count }}">
+<form id="number-form" class="panel app-form-panel" method="post" action="{{ url_for('generate') }}" data-generate-form data-mode-count="{{ generation_mode_count }}" data-mode-count-astrology="{{ generation_mode_count_with_astrology }}" data-today="{{ today_date }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="astrology_setting_present" value="1">
 
   <div class="panel-head app-panel-head">
     <div>
       <span>Step 1</span>
-      <h2>数字を入力する</h2>
+      <h2>まず、あなたの星を教えてください</h2>
     </div>
-    <p>好きな数字と避けたい数字は、どちらも任意です。</p>
+    <p>あなたがこの世界に生まれた日を、星図へそっと預けてください。</p>
   </div>
 
-  <div class="field">
-    <div class="label-row"><label for="favorite_1">好きな数字</label><span>最大5個・任意</span></div>
-    <div class="number-grid app-number-grid" data-number-group>
-      {% for i in range(1, 6) %}
-      <input class="num-box" id="favorite_{{ i }}" name="favorite_{{ i }}" type="number" inputmode="numeric" min="1" max="43" autocomplete="off" value="{{ values.get('favorite_' ~ i, '') }}" aria-label="好きな数字 {{ i }}個目">
-      {% endfor %}
+  <div class="astrology-entry {% if astrology_enabled %}is-oracle-active{% endif %}" data-astrology-entry>
+    <div class="astrology-entry-head">
+      <div>
+        <span class="section-kicker">BIRTH CHART × TODAY</span>
+        <span class="oracle-default-badge">✦ STANDARD ORACLE</span>
+        <h3>誕生の星に、今日の空を重ねてみましょう</h3>
+        <p>生年月日をお預かりすると、誕生の日の星と今日の七天体を読み合わせ、1〜43の中から今のあなたに響く数字を探します。</p>
+      </div>
+      <label class="astro-switch" for="use_astrology">
+        <input id="use_astrology" name="use_astrology" type="checkbox" value="1" {% if astrology_enabled %}checked{% endif %}>
+        <span aria-hidden="true"></span>
+        <b>星からの導きを受け取る</b>
+      </label>
     </div>
-    <div class="hint">よく選ぶ数字や、思い入れのある数字だけ入力してください。同じ数字は重複して入力できません。</div>
-  </div>
+    <div class="astrology-date-field" data-astrology-fields>
+      <input id="birth_date" name="birth_date" type="hidden" value="{{ birth_iso }}">
+      <div class="fortune-date-card">
+        <div class="fortune-date-heading">
+          <div class="fortune-date-emblem" aria-hidden="true"><span>☾</span><b>✦</b><span>☉</span></div>
+          <div>
+            <span class="fortune-question">YOUR BIRTH DATE</span>
+            <label id="birth-date-label" for="birth_year">あなたが生まれた日を選んでください</label>
+            <p>その日は、あなたの物語が星空に刻まれた大切な日です。</p>
+          </div>
+        </div>
 
-  <div class="field">
-    <div class="label-row"><label for="avoid_1">避けたい数字</label><span>最大5個・任意</span></div>
-    <div class="number-grid app-number-grid" data-number-group>
-      {% for i in range(1, 6) %}
-      <input class="num-box" id="avoid_{{ i }}" name="avoid_{{ i }}" type="number" inputmode="numeric" min="1" max="43" autocomplete="off" value="{{ values.get('avoid_' ~ i, '') }}" aria-label="避けたい数字 {{ i }}個目">
-      {% endfor %}
+        <div class="date-select-grid" role="group" aria-labelledby="birth-date-label">
+          <label class="date-select-field" for="birth_year">
+            <span>西暦</span>
+            <span class="select-shell">
+              <select id="birth_year" data-birth-part="year" autocomplete="bday-year" aria-label="生まれた年">
+                <option value="">年を選択</option>
+                {% for year in range(current_year, 1899, -1) %}
+                <option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+              </select>
+              <b>年</b>
+            </span>
+          </label>
+          <label class="date-select-field" for="birth_month">
+            <span>月</span>
+            <span class="select-shell">
+              <select id="birth_month" data-birth-part="month" autocomplete="bday-month" aria-label="生まれた月">
+                <option value="">月</option>
+                {% for month in range(1, 13) %}
+                <option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ '%02d'|format(month) }}</option>
+                {% endfor %}
+              </select>
+              <b>月</b>
+            </span>
+          </label>
+          <label class="date-select-field" for="birth_day">
+            <span>日</span>
+            <span class="select-shell">
+              <select id="birth_day" data-birth-part="day" autocomplete="bday-day" aria-label="生まれた日">
+                <option value="">日</option>
+                {% for day in range(1, 32) %}
+                <option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ '%02d'|format(day) }}</option>
+                {% endfor %}
+              </select>
+              <b>日</b>
+            </span>
+          </label>
+        </div>
+
+        <div class="birth-date-seal" data-birth-preview aria-live="polite">
+          <span class="seal-symbol" aria-hidden="true">✦</span>
+          <div class="seal-copy">
+            <small>星図に刻まれた誕生日</small>
+            <strong data-birth-preview-date>年月日を選ぶと、あなたの星が目を覚まします</strong>
+          </div>
+          <span class="seal-status" data-birth-preview-status>WAITING</span>
+          <div class="birth-zodiac-preview" data-birth-zodiac hidden>
+            <span class="birth-zodiac-symbol" data-zodiac-symbol aria-hidden="true">✦</span>
+            <span class="birth-zodiac-copy">
+              <small>あなたを照らす太陽星座</small>
+              <b data-zodiac-name>星の位置を確かめています</b>
+              <em data-zodiac-english>CELESTIAL SIGN</em>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="hint">あなたの誕生日と今日の正午（日本時間）を基準に、太陽・月・水星・金星・火星・木星・土星の位置を読み解きます。</div>
+      <div class="oracle-invocation" aria-hidden="true"><span>☾</span><i></i><b>誕生の星図 × 今日の天体 × 数字の記憶</b><i></i><span>☉</span></div>
+      <div class="privacy-note">お預かりした生年月日は保存せず、この一度の星読みにだけ大切に使います。</div>
     </div>
-    <div class="hint">今回は含めたくない数字がある場合だけ入力してください。好きな数字と同じ数字は指定できません。</div>
   </div>
 
   <div id="mode-panel" class="field">
-    <div class="label-row"><span class="field-label">生成方法</span><span>迷ったら全モード比較</span></div>
+    <div class="label-row"><span class="field-label">数字の受け取り方</span><span>迷った日は五つの導きを重ねて</span></div>
     <div class="mode-grid app-mode-grid">
       {% for mode_id, title, badge, desc in mode_choices %}
       <label class="mode-card mode-{{ mode_id }}">
@@ -112,34 +188,34 @@
 
   <div class="row app-compact-row">
     <div class="field">
-      <label for="count">各モードの生成口数</label>
+      <label for="count">それぞれの導きから受け取る口数</label>
       <input id="count" name="count" type="number" inputmode="numeric" min="1" max="{{ max_ticket_count }}" value="{{ current_count }}">
-      <div id="count-help" class="hint">全モード比較では、指定口数を5種類それぞれに生成します。</div>
+      <div id="count-help" class="hint">五つの導きを選ぶと、それぞれから同じ口数の候補を受け取れます。星読みを外した場合は四つになります。</div>
     </div>
     <div class="field">
-      <span class="field-label">合計予定</span>
+      <span class="field-label">受け取る候補の合計</span>
       <div class="tip app-tip-card">
         <strong id="planned-total-detail">計算中</strong>
-        <span class="tiny">初めて使う場合は「全モード比較・各2口（合計10口）」が見やすい設定です。</span>
+        <span class="tiny">初めての方は「五つの導き・各2口」がおすすめです。十通りの中から、心に残る数字をゆっくり眺めてみてください。</span>
       </div>
     </div>
   </div>
 
   <details class="advanced app-advanced">
-    <summary><span data-toggle-label data-open-label="閉じる" data-closed-label="再現用設定を開く">再現用設定を開く</span></summary>
+    <summary><span data-toggle-label data-open-label="閉じる" data-closed-label="同じ星読みをもう一度呼び出す">同じ星読みをもう一度呼び出す</span></summary>
     <div class="field advanced-inner">
-      <label for="seed">再現用キーワード（任意）</label>
+      <label for="seed">星読みの合言葉（任意）</label>
       <input id="seed" name="seed" maxlength="80" autocomplete="off" value="{{ values.get('seed', '') }}">
-      <div class="hint">同じ入力条件と同じキーワードを使うと、同じ買い目を再現できます。通常は空欄で構いません。氏名や連絡先などの個人情報は入力しないでください。</div>
+      <div class="hint">同じ生年月日・条件・合言葉を使うと、同じ数字をもう一度呼び出せます。普段は空欄のままで構いません。氏名や連絡先などは入力しないでください。</div>
     </div>
   </details>
 
   <div class="form-disclaimer">
-    総合スコアは、このツール内で候補を比較するための独自評価です。当せん確率を示すものではありません。
+    星が示すのは、数字と向き合うための小さなきっかけです。最後にどの数字を選ぶかは、あなたの心の響きを大切にしてください。
   </div>
 
   <div class="sticky-submit">
-    <button type="submit">買い目候補を作成する</button>
+    <button type="submit"><span aria-hidden="true">✦</span> 星からの数字を受け取る</button>
   </div>
 </form>
 
@@ -147,21 +223,21 @@
   <div class="panel-head app-panel-head">
     <div>
       <span>Step 2</span>
-      <h2>使い方</h2>
+      <h2>星読みの流れ</h2>
     </div>
-    <p>入力から照合まで、4つの手順です。</p>
+    <p>難しいことはありません。星の案内に沿って、ゆっくり進んでください。</p>
   </div>
   <div class="quick-grid app-quick-grid">
-    <div class="quick-card"><strong>好きな数字</strong><span>1個だけでも、空欄でも利用できます。</span></div>
-    <div class="quick-card"><strong>避けたい数字</strong><span>指定した数字は買い目から除外します。</span></div>
-    <div class="quick-card"><strong>全モード比較</strong><span>5種類を同じ口数ずつ作り、違いを比較します。</span></div>
-    <div class="quick-card"><strong>結果照合</strong><span>抽せん回の指定、または数字の手入力で照合できます。</span></div>
+    <div class="quick-card"><strong>あなたの星</strong><span>誕生日と今日の七天体を重ね、今響く数字を探します。</span></div>
+    <div class="quick-card"><strong>数字の記憶</strong><span>これまで数字が見せてきた流れにも、静かに耳を澄ませます。</span></div>
+    <div class="quick-card"><strong>五つの導き</strong><span>異なる五つの視点から、あなたに届いた候補を見比べます。</span></div>
+    <div class="quick-card"><strong>答え合わせ</strong><span>抽せんのあとには、選んだ数字との重なりを確かめられます。</span></div>
   </div>
   <ol class="steps">
-    <li><b>1</b><div><strong>数字を入力する</strong><div class="tiny">好きな数字・避けたい数字はどちらも任意です。</div></div></li>
-    <li><b>2</b><div><strong>生成方法と口数を選ぶ</strong><div class="tiny">全モード比較の口数は「各モードあたり」です。</div></div></li>
-    <li><b>3</b><div><strong>候補を比較する</strong><div class="tiny">総合スコアや数字構成を見ながら候補を確認します。</div></div></li>
-    <li><b>4</b><div><strong>抽せん結果と照合する</strong><div class="tiny">同梱データにない最新回は、手入力で照合できます。</div></div></li>
+    <li><b>1</b><div><strong>あなたの誕生日を星図へ預ける</strong><div class="tiny">西暦・月・日を選ぶと、太陽星座が姿を現します。</div></div></li>
+    <li><b>2</b><div><strong>数字の受け取り方を選ぶ</strong><div class="tiny">迷った日は、五つの導きを重ねる方法がおすすめです。</div></div></li>
+    <li><b>3</b><div><strong>星から届いた数字を眺める</strong><div class="tiny">すぐに決めず、なぜか心に残る組み合わせを探してみましょう。</div></div></li>
+    <li><b>4</b><div><strong>選んだ数字と答え合わせをする</strong><div class="tiny">最新回は抽せん数字を手入力して、重なりを確かめられます。</div></div></li>
   </ol>
 </section>
 {% endblock %}

@@ -45,16 +45,16 @@ def balance_fit_score(metrics: Dict[str, Any]) -> float:
     return max(0.0, min(100.0, score))
 
 
-def personal_fit_score(personal_hit_count: int) -> float:
-    if personal_hit_count <= 0:
-        return 40.0
-    if personal_hit_count == 1:
-        return 70.0
-    if personal_hit_count == 2:
+def astrology_fit_score(astrology_hit_count: int) -> float:
+    if astrology_hit_count <= 0:
+        return 25.0
+    if astrology_hit_count == 1:
+        return 60.0
+    if astrology_hit_count == 2:
+        return 85.0
+    if astrology_hit_count == 3:
         return 100.0
-    if personal_hit_count == 3:
-        return 90.0
-    return 60.0
+    return 95.0
 
 
 def uniqueness_score(over31_count: int) -> float:
@@ -70,21 +70,29 @@ def uniqueness_score(over31_count: int) -> float:
 def compute_ticket_score(
     ticket: Sequence[int],
     stats_lookup: Dict[int, Dict[str, Any]],
-    favorite_numbers: Sequence[int] | None = None,
+    astrology_numbers: Sequence[int] | None = None,
 ) -> Dict[str, Any]:
-    metrics = ticket_metrics(ticket, favorite_numbers)
+    metrics = ticket_metrics(ticket, astrology_numbers)
     d_avg = data_score_average(ticket, stats_lookup)
     b_score = balance_fit_score(metrics)
-    p_score = personal_fit_score(metrics["personal_hit_count"])
     u_score = uniqueness_score(metrics["over31_count"])
+    a_score = astrology_fit_score(metrics["astrology_hit_count"])
+    has_astrology = bool(astrology_numbers)
 
-    ticket_score = d_avg * 0.40 + b_score * 0.30 + p_score * 0.15 + u_score * 0.15
+    if has_astrology:
+        weights = {"data": 35, "balance": 25, "uniqueness": 15, "astrology": 25}
+        ticket_score = d_avg * 0.35 + b_score * 0.25 + u_score * 0.15 + a_score * 0.25
+    else:
+        weights = {"data": 45, "balance": 35, "uniqueness": 20, "astrology": 0}
+        ticket_score = d_avg * 0.45 + b_score * 0.35 + u_score * 0.20
 
     return {
         "data_score_avg": round2(d_avg),
         "balance_fit_score": round2(b_score),
-        "personal_fit_score": round2(p_score),
         "uniqueness_score": round2(u_score),
+        "astrology_fit_score": round2(a_score),
+        "score_has_astrology": has_astrology,
+        "score_weights": weights,
         "ticket_score": round2(ticket_score),
         **metrics,
     }

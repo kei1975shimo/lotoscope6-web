@@ -6,11 +6,11 @@ import secrets
 import sys
 import time
 from collections import defaultdict, deque
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Deque, Dict, List, Tuple
 
-from flask import Flask, abort, render_template, request, session, url_for
+from flask import Flask, abort, jsonify, render_template, request, session, url_for
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -18,52 +18,63 @@ SRC_DIR = ROOT_DIR / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+from astrology_numbers import (  # noqa: E402
+    JST,
+    apply_astrology_scores,
+    astrology_numbers_from_profile,
+    astrology_pool_from_profile,
+    calculate_astrology_profile,
+    calculate_birth_sun_sign,
+    parse_birth_date,
+)
 from generate_tickets import generate_tickets  # noqa: E402
 from pools import build_pools  # noqa: E402
 from result_checker import check_ticket_rows, draw_numbers_from_row, load_draw_by_no, load_latest_draw  # noqa: E402
 from utils import load_json, read_csv_dicts  # noqa: E402
 
-APP_VERSION = "v1.3.0-public"
+APP_VERSION = "v1.5.4-public"
 MODE_CHOICES = [
     (
         "all",
-        "全モード比較",
-        "迷ったらこれ",
-        "5種類すべてを、指定した口数ずつ生成します。各モードの違いをまとめて比較できます。",
+        "五つの導きを重ねる",
+        "迷ったらこちら",
+        "どの流れを選ぶか迷う日は、星読みを含む五つの導きを重ねてみましょう。星読みを外した場合は四つの導きになります。",
     ),
     (
         "balance",
-        "総合バランス型",
-        "基本",
-        "過去データ、数字の構成、入力した数字、32〜43の配分を組み合わせます。",
-    ),
-    (
-        "personal",
-        "好きな数字重視型",
-        "自分の数字",
-        "入力した好きな数字を多めに使います。未入力の場合は他の条件から補います。",
+        "調和のバランス型",
+        "穏やかな導き",
+        "過去の数字の流れと全体のまとまりを、偏りすぎないよう静かに整えます。",
     ),
     (
         "data",
-        "過去データ重視型",
-        "出現傾向",
-        "過去の出現回数、直近30回・100回、出現間隔などの独自スコアを強めに使います。",
+        "数字の記憶重視型",
+        "過去からの導き",
+        "これまで数字が見せてきた出現の流れや間隔を、いつもより深く読み取ります。",
     ),
     (
         "cold",
-        "出現間隔重視型",
-        "変化要素",
-        "最近の出現間隔が比較的長い数字を、組み合わせの変化要素として使います。",
+        "眠れる数字を呼ぶ型",
+        "変化の気配",
+        "しばらく姿を見せていない数字にも目を向け、組み合わせへ新しい風を招きます。",
     ),
     (
         "payout",
-        "32〜43重視型",
-        "誕生日偏重を避ける",
-        "32〜43の数字を多めに含め、1〜31だけに偏りにくい組み合わせを作ります。",
+        "高位数のひらめき型",
+        "視野を広げる",
+        "誕生日数字だけに心が寄りすぎないよう、32〜43の数字にも光を当てます。",
+    ),
+    (
+        "astrology",
+        "誕生星のラッキー型",
+        "あなたの星から",
+        "あなたが生まれた日の星と、今日めぐる七天体から響く数字を中心に結びます。",
     ),
 ]
 MODE_IDS = {m[0] for m in MODE_CHOICES}
-GENERATION_MODE_IDS = [m[0] for m in MODE_CHOICES if m[0] != "all"]
+ASTROLOGY_MODE_ID = "astrology"
+BASE_GENERATION_MODE_IDS = [m[0] for m in MODE_CHOICES if m[0] not in {"all", ASTROLOGY_MODE_ID}]
+GENERATION_MODE_IDS = [*BASE_GENERATION_MODE_IDS, ASTROLOGY_MODE_ID]
 
 
 def create_app() -> Flask:
@@ -86,7 +97,10 @@ def create_app() -> Flask:
             "data_status": data_status(),
             "default_ticket_count": int(settings.get("default_ticket_count", 2)),
             "max_ticket_count": int(settings.get("max_ticket_count", 10)),
-            "generation_mode_count": len(GENERATION_MODE_IDS),
+            "generation_mode_count": len(BASE_GENERATION_MODE_IDS),
+            "generation_mode_count_with_astrology": len(GENERATION_MODE_IDS),
+            "today_date": datetime.now(JST).date().isoformat(),
+            "current_year": datetime.now(JST).year,
         }
 
     @app.before_request
@@ -117,23 +131,43 @@ def create_app() -> Flask:
         values = dict(request.args.items())
         return render_template("index.html", values=values, error="")
 
+    @app.get("/zodiac-preview")
+    def zodiac_preview():
+        try:
+            birth_date_value = parse_birth_date(request.args.get("birth_date", ""))
+            return jsonify(calculate_birth_sun_sign(birth_date_value))
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
     @app.post("/generate")
     def generate():
         try:
-            favorite_numbers, avoided_numbers, mode, count, seed = parse_generate_form(request.form)
-            rows = generate_ticket_rows(favorite_numbers, avoided_numbers, mode, count, seed)
+            mode, count, seed, birth_date_value = parse_generate_form(request.form)
+            astrology_profile = calculate_astrology_profile(birth_date_value) if birth_date_value else None
+            rows = generate_ticket_rows(
+                mode,
+                count,
+                seed,
+                astrology_profile=astrology_profile,
+            )
             token = sign_payload({"rows": rows})
-            edit_url = build_edit_url(favorite_numbers, avoided_numbers, mode, count, seed)
+            edit_url = build_edit_url(
+                mode,
+                count,
+                seed,
+                birth_date_value,
+            )
+            active_mode_count = len(BASE_GENERATION_MODE_IDS) + (1 if astrology_profile else 0) if mode == "all" else 1
             return render_template(
                 "result.html",
                 rows=rows,
                 token=token,
-                favorite_numbers=favorite_numbers,
-                avoided_numbers=avoided_numbers,
                 mode=mode,
                 count=count,
                 seed=seed,
                 edit_url=edit_url,
+                astrology_profile=astrology_profile,
+                active_mode_count=active_mode_count,
             )
         except (ValueError, RuntimeError) as exc:
             values = dict(request.form.items())
@@ -263,15 +297,7 @@ def create_app() -> Flask:
     return app
 
 
-def parse_generate_form(form: Any) -> Tuple[List[int], List[int], str, int, str]:
-    favorite_numbers = read_box_numbers(form, "favorite", 5, "好きな数字")
-    avoided_numbers = read_box_numbers(form, "avoid", 5, "避けたい数字")
-
-    overlap = sorted(set(favorite_numbers) & set(avoided_numbers))
-    if overlap:
-        joined = "、".join(str(n) for n in overlap)
-        raise ValueError(f"同じ数字を「好きな数字」と「避けたい数字」の両方には指定できません: {joined}")
-
+def parse_generate_form(form: Any) -> Tuple[str, int, str, date | None]:
     mode = str(form.get("mode", "all")).strip()
     if mode not in MODE_IDS:
         raise ValueError("生成モードを選択してください。")
@@ -281,34 +307,20 @@ def parse_generate_form(form: Any) -> Tuple[List[int], List[int], str, int, str]
     try:
         count = int(str(form.get("count", "")).strip())
     except Exception as exc:
-        raise ValueError(f"各モードの生成口数を1〜{max_count}で入力してください。") from exc
+        raise ValueError(f"それぞれの導きから受け取る口数を1〜{max_count}で選んでください。") from exc
     if not 1 <= count <= max_count:
-        raise ValueError(f"各モードの生成口数は1〜{max_count}で入力してください。")
+        raise ValueError(f"それぞれの導きから受け取る口数は1〜{max_count}の範囲で選んでください。")
 
     seed = str(form.get("seed", "")).strip()
     if len(seed) > 80:
         raise ValueError("再現用キーワードは80文字以内で入力してください。")
 
-    return favorite_numbers, avoided_numbers, mode, count, seed
+    birth_date_text = str(form.get("birth_date", "")).strip()
+    use_astrology = str(form.get("use_astrology", "")).strip().lower() in {"1", "true", "on", "yes"}
+    use_astrology = use_astrology or mode == ASTROLOGY_MODE_ID or bool(birth_date_text)
+    birth_date_value = parse_birth_date(birth_date_text) if use_astrology else None
 
-
-def read_box_numbers(form: Any, prefix: str, max_count: int, field_label: str) -> List[int]:
-    numbers: List[int] = []
-    for idx in range(1, max_count + 1):
-        raw = str(form.get(f"{prefix}_{idx}", "")).strip()
-        if not raw:
-            continue
-        try:
-            number = int(raw)
-        except ValueError as exc:
-            raise ValueError(f"{field_label}は1〜43の整数で入力してください。") from exc
-        if not 1 <= number <= 43:
-            raise ValueError(f"{field_label}は1〜43の範囲で入力してください。")
-        if number in numbers:
-            raise ValueError(f"{field_label}に同じ数字が重複しています: {number}")
-        numbers.append(number)
-    return sorted(numbers)
-
+    return mode, count, seed, birth_date_value
 
 def parse_draw_no(value: Any) -> int:
     text = str(value or "").strip()
@@ -363,17 +375,27 @@ def load_number_stats() -> List[Dict[str, Any]]:
 
 
 def generate_ticket_rows(
-    favorite_numbers: List[int],
-    avoided_numbers: List[int],
     mode: str,
     count: int,
     seed: str = "",
+    astrology_profile: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
     mode_rules = load_json("config/mode_rules.json")
     balance_rules = load_json("config/balance_rules.json")
-    number_stats = load_number_stats()
-    pools = build_pools(number_stats, favorite_numbers, avoided_numbers)
-    modes = GENERATION_MODE_IDS if mode == "all" else [mode]
+    astrology_numbers = astrology_numbers_from_profile(astrology_profile)
+    astrology_pool = astrology_pool_from_profile(astrology_profile)
+    number_stats = apply_astrology_scores(load_number_stats(), astrology_profile)
+    pools = build_pools(
+        number_stats,
+        astrology_numbers=astrology_numbers,
+        astrology_pool=astrology_pool,
+    )
+    if mode == "all":
+        modes = [*BASE_GENERATION_MODE_IDS, *([ASTROLOGY_MODE_ID] if astrology_profile else [])]
+    else:
+        modes = [mode]
+    if ASTROLOGY_MODE_ID in modes and not astrology_profile:
+        raise ValueError("誕生星のラッキー型を受け取るには、生年月日を西暦で教えてください。")
     rng: random.Random | random.SystemRandom
     rng = random.Random(seed) if seed else random.SystemRandom()
 
@@ -387,29 +409,29 @@ def generate_ticket_rows(
             number_stats=number_stats,
             mode_rules=mode_rules,
             balance_rules=balance_rules,
-            favorite_numbers=favorite_numbers,
+            astrology_numbers=astrology_numbers,
             rng=rng,
             seen=shared_seen,
         )
         if len(generated) < count:
             raise RuntimeError(
                 f"{mode_rules.get(mode_id, {}).get('mode_name_ja', mode_id)}で指定口数を生成できませんでした。"
-                "避けたい数字を減らすか、各モードの口数を少なくしてください。"
+                "各モードの口数を少なくして、もう一度お試しください。"
             )
         tickets.extend(generated)
 
     if not tickets:
-        raise RuntimeError("買い目を生成できませんでした。避けたい数字を減らすか、口数を少なくしてください。")
-    return flatten_tickets(tickets, favorite_numbers, avoided_numbers)
+        raise RuntimeError("買い目を生成できませんでした。各モードの口数を少なくして、もう一度お試しください。")
+    return flatten_tickets(tickets, astrology_profile)
 
 
 def flatten_tickets(
     tickets: List[Dict[str, Any]],
-    user_numbers: List[int],
-    avoided_numbers: List[int],
+    astrology_profile: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     id_stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    astrology_numbers = astrology_numbers_from_profile(astrology_profile)
     rows: List[Dict[str, Any]] = []
     for idx, ticket in enumerate(tickets, start=1):
         nums = [int(n) for n in ticket["numbers"]]
@@ -419,8 +441,7 @@ def flatten_tickets(
             "mode_id": ticket.get("mode_id", ""),
             "mode_name": ticket.get("mode_name", ""),
             "mode_name_ja": ticket.get("mode_name_ja", ""),
-            "user_numbers": ",".join(str(n) for n in user_numbers),
-            "avoided_numbers": ",".join(str(n) for n in avoided_numbers),
+            "astrology_numbers": ",".join(str(n) for n in astrology_numbers),
             "n1": nums[0],
             "n2": nums[1],
             "n3": nums[2],
@@ -435,10 +456,12 @@ def flatten_tickets(
             "high_count": ticket.get("high_count", ""),
             "over31_count": ticket.get("over31_count", ""),
             "consecutive_count": ticket.get("consecutive_count", ""),
-            "personal_hit_count": ticket.get("personal_hit_count", ""),
             "data_score_avg": ticket.get("data_score_avg", ""),
             "balance_fit_score": ticket.get("balance_fit_score", ""),
-            "personal_fit_score": ticket.get("personal_fit_score", ""),
+            "astrology_hit_count": ticket.get("astrology_hit_count", 0),
+            "astrology_fit_score": ticket.get("astrology_fit_score", ""),
+            "score_has_astrology": ticket.get("score_has_astrology", False),
+            "score_weights": ticket.get("score_weights", {}),
             "uniqueness_score": ticket.get("uniqueness_score", ""),
             "ticket_score": ticket.get("ticket_score", ""),
             "reason": ticket.get("reason", ""),
@@ -448,21 +471,21 @@ def flatten_tickets(
 
 
 def build_edit_url(
-    favorite_numbers: List[int],
-    avoided_numbers: List[int],
     mode: str,
     count: int,
     seed: str,
+    birth_date_value: date | None = None,
 ) -> str:
     params: Dict[str, Any] = {"mode": mode, "count": count}
-    for idx, number in enumerate(favorite_numbers, start=1):
-        params[f"favorite_{idx}"] = number
-    for idx, number in enumerate(avoided_numbers, start=1):
-        params[f"avoid_{idx}"] = number
     if seed:
         params["seed"] = seed
+    params["astrology_setting_present"] = "1"
+    if birth_date_value:
+        params["use_astrology"] = "1"
+        params["birth_date"] = birth_date_value.isoformat()
+    else:
+        params["use_astrology"] = "0"
     return url_for("index", **params)
-
 
 def is_production_environment() -> bool:
     app_env = os.environ.get("APP_ENV", "").strip().lower()

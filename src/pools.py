@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List
 
 from utils import clean_number_list
 
@@ -17,26 +17,18 @@ def sort_numbers_by_score(number_stats: List[Dict[str, Any]], score_key: str, li
 
 def build_pools(
     number_stats: List[Dict[str, Any]],
-    favorite_numbers: List[int] | str | None = None,
-    avoided_numbers: List[int] | str | None = None,
+    astrology_numbers: List[int] | str | None = None,
+    astrology_pool: List[int] | str | None = None,
 ) -> Dict[str, List[int]]:
-    favorites = clean_number_list(favorite_numbers)
-    avoided = set(clean_number_list(avoided_numbers))
-
-    favorites = [n for n in favorites if n not in avoided]
-    all_allowed = [n for n in range(1, 44) if n not in avoided]
-
-    data_pool = [n for n in sort_numbers_by_score(number_stats, "base_data_score", 18) if n not in avoided]
-    hot_pool = [n for n in sort_numbers_by_score(number_stats, "recent_score", 12) if n not in avoided]
-    cold_pool = [n for n in sort_numbers_by_score(number_stats, "absence_score", 12) if n not in avoided]
-    over31_pool = [n for n in range(32, 44) if n not in avoided]
+    astrology_core = clean_number_list(astrology_numbers)
+    astrology_candidates = clean_number_list(astrology_pool)
 
     return {
-        "personal_pool": favorites,
-        "data_pool": data_pool,
-        "hot_pool": hot_pool,
-        "cold_pool": cold_pool,
-        "over31_pool": over31_pool,
-        "all_pool": all_allowed,
-        "avoided_numbers": sorted(avoided),
+        "data_pool": sort_numbers_by_score(number_stats, "base_data_score", 18),
+        "hot_pool": sort_numbers_by_score(number_stats, "recent_score", 12),
+        "cold_pool": sort_numbers_by_score(number_stats, "absence_score", 12),
+        "over31_pool": list(range(32, 44)),
+        "astrology_core_pool": astrology_core,
+        "astrology_pool": astrology_candidates,
+        "all_pool": list(range(1, 44)),
     }

@@ -11,9 +11,12 @@ from utils import (
 )
 
 
-def ticket_metrics(ticket: Sequence[int], favorite_numbers: Sequence[int] | None = None) -> Dict[str, Any]:
+def ticket_metrics(
+    ticket: Sequence[int],
+    astrology_numbers: Sequence[int] | None = None,
+) -> Dict[str, Any]:
     nums = sorted(int(n) for n in ticket)
-    favorite_set = set(favorite_numbers or [])
+    astrology_set = set(astrology_numbers or [])
 
     odd_count, even_count = count_odd_even(nums)
     low_count, mid_count, high_count = count_zones(nums)
@@ -34,15 +37,13 @@ def ticket_metrics(ticket: Sequence[int], favorite_numbers: Sequence[int] | None
         "over31_count": count_over31(nums),
         "consecutive_count": count_consecutive_pairs(nums),
         "same_tens_max": count_same_tens_max(nums),
-        "personal_hit_count": sum(1 for n in nums if n in favorite_set),
+        "astrology_hit_count": sum(1 for n in nums if n in astrology_set),
     }
 
 
 def validate_ticket(
     ticket: Sequence[int],
     balance_rules: Dict[str, Any],
-    favorite_numbers: Sequence[int] | None = None,
-    mode_rule: Dict[str, Any] | None = None,
 ) -> tuple[bool, List[str], Dict[str, Any]]:
     errors: List[str] = []
     nums = sorted(int(n) for n in ticket)
@@ -57,7 +58,7 @@ def validate_ticket(
     if errors:
         return False, errors, {}
 
-    metrics = ticket_metrics(nums, favorite_numbers)
+    metrics = ticket_metrics(nums)
 
     if metrics["set_sum"] < int(balance_rules.get("min_sum", 80)):
         errors.append("sum_low")
@@ -77,10 +78,5 @@ def validate_ticket(
         errors.append("too_many_consecutive")
     if metrics["same_tens_max"] > int(balance_rules.get("max_same_tens_count", 3)):
         errors.append("same_tens_bias")
-
-    if mode_rule:
-        max_personal = int(mode_rule.get("max_personal_count", 3))
-        if metrics["personal_hit_count"] > max_personal:
-            errors.append("too_many_personal")
 
     return len(errors) == 0, errors, metrics

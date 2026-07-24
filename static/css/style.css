@@ -683,10 +683,8 @@ button:disabled{opacity:.58;pointer-events:none}
 .num-band-2{background:radial-gradient(circle at 30% 22%,#c5f8e5,var(--jade) 55%,#1d7057)}
 .num-band-3{background:radial-gradient(circle at 30% 22%,#fff0bd,var(--gold-light) 55%,#9a651d);color:#2b1b05;text-shadow:none}
 .num-band-4{background:radial-gradient(circle at 30% 22%,#eadfff,var(--violet) 55%,#4d378f)}
-.num.favorite{outline:3px solid var(--gold-bright);outline-offset:2px;box-shadow:inset 0 3px 8px rgba(255,255,255,.32),inset 0 -10px 16px rgba(0,0,0,.28),0 0 18px rgba(243,207,135,.46)}
 .num.hit{box-shadow:inset 0 3px 8px rgba(255,255,255,.32),inset 0 -10px 16px rgba(0,0,0,.28),0 0 0 4px rgba(82,211,164,.34),0 0 18px rgba(82,211,164,.38)}
 .num.bonus{box-shadow:inset 0 3px 8px rgba(255,255,255,.32),inset 0 -10px 16px rgba(0,0,0,.28),0 0 0 4px rgba(240,154,185,.34),0 0 18px rgba(240,154,185,.38)}
-.fav-mark{position:absolute;right:-3px;top:-10px;color:var(--gold-bright);font-size:13px;font-style:normal;text-shadow:0 0 9px rgba(243,207,135,.85)}
 .bonus-sep{width:100%;margin-top:3px;color:var(--muted);font-size:13px;font-weight:800}
 
 .recommend-grid{display:grid;grid-template-columns:1fr;gap:18px}
@@ -758,7 +756,6 @@ button:disabled{opacity:.58;pointer-events:none}
 .compact-ticket{padding:0}
 .ticket-card-summary{padding:14px}
 .ticket-extra{padding:0 14px 16px}
-.favorite-hit-note{margin-bottom:10px;color:var(--gold-bright);font-size:13px;font-weight:850}
 
 .smooth-content{overflow:hidden;transition:height .34s var(--ease),opacity .24s ease,transform .28s var(--ease)}
 .score-bar,.bar{height:8px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
@@ -788,13 +785,12 @@ button:disabled{opacity:.58;pointer-events:none}
 .tone-green{border-color:rgba(82,211,164,.32)}
 .tone-pink{border-color:rgba(240,154,185,.32)}
 
-.favorite-guide h2,.draw-strip h2,.hero-recommend h2{margin-top:4px;margin-bottom:13px;font-size:23px}
+.draw-strip h2,.hero-recommend h2{margin-top:4px;margin-bottom:13px;font-size:23px}
 .result-legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:15px;padding-top:14px;border-top:1px solid var(--line-soft)}
 .result-legend span{display:inline-flex;align-items:center;gap:7px;color:var(--muted-strong);font-size:13px}
 .legend-ring{width:15px;height:15px;border-radius:50%;display:inline-block;background:rgba(255,255,255,.07)}
 .hit-ring{box-shadow:0 0 0 4px rgba(82,211,164,.35)}
 .bonus-ring{box-shadow:0 0 0 4px rgba(240,154,185,.35)}
-.legend-star{color:var(--gold-bright);font-size:15px;font-style:normal}
 
 .bar-list,.mode-list{padding:0 14px 15px}
 .bar-row{display:grid;grid-template-columns:66px 1fr 28px;gap:9px;align-items:center;margin:12px 0;font-size:13px}
@@ -903,7 +899,7 @@ body.is-drawing{overflow:hidden}
 }
 
 /* ========================================================================== 
-   LOTOSCOPE 6 — Horoscope Fortune UI v1.3.0
+   LOTOSCOPE 6 — Horoscope Fortune UI v1.4.0
    読みやすさはv1.2.0のまま、ホロスコープ／天球儀／月相の世界観を復活
    ========================================================================== */
 
@@ -1451,4 +1447,350 @@ button::after,.small-button::after{
   .scope-orbit-c{width:184px;height:184px;margin:-92px}
   .scope-core{width:91px;height:91px}
   .scope-core strong{font-size:32px}
+}
+
+/* ========================================================================== 
+   LOTOSCOPE 6 — Astrology Number Engine v1.4.0
+   ========================================================================== */
+.astrology-entry{
+  margin:0 0 24px;
+  padding:17px;
+  border:1px solid rgba(241,205,121,.34);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 92% 8%,rgba(241,205,121,.14),transparent 34%),
+    linear-gradient(145deg,rgba(57,37,103,.78),rgba(13,10,36,.92));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 15px 32px rgba(0,0,0,.20);
+}
+.astrology-entry-head{display:flex;flex-direction:column;gap:14px}
+.astrology-entry h3{margin:3px 0 5px;color:#fffaf3;font-size:21px;line-height:1.4}
+.astrology-entry p{color:var(--muted-strong);font-size:14px;line-height:1.65}
+.astro-switch{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:max-content;
+  min-height:46px;
+  padding:7px 13px 7px 8px;
+  border:1px solid rgba(241,205,121,.25);
+  border-radius:999px;
+  cursor:pointer;
+  background:rgba(5,3,18,.52);
+}
+.astro-switch input{position:absolute;width:1px;height:1px;min-height:0;opacity:0;pointer-events:none}
+.astro-switch span{
+  position:relative;
+  width:48px;height:30px;
+  border:1px solid rgba(255,255,255,.20);
+  border-radius:999px;
+  background:rgba(255,255,255,.09);
+  transition:.2s ease;
+}
+.astro-switch span::after{
+  content:"☾";
+  position:absolute;
+  left:3px;top:3px;
+  width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  color:#281b08;
+  background:var(--gold-light);
+  font-size:13px;font-weight:900;
+  box-shadow:0 3px 9px rgba(0,0,0,.28);
+  transition:.2s ease;
+}
+.astro-switch input:checked + span{border-color:rgba(255,232,169,.72);background:linear-gradient(90deg,rgba(169,140,255,.82),rgba(241,205,121,.55))}
+.astro-switch input:checked + span::after{content:"☉";transform:translateX(18px);background:var(--gold-bright)}
+.astro-switch b{color:var(--text);font-size:14px;white-space:nowrap}
+.astrology-date-field{margin-top:16px;padding-top:15px;border-top:1px solid rgba(255,255,255,.10);transition:opacity .2s ease}
+.astrology-date-field.is-disabled{opacity:.47}
+.astrology-date-field label{display:block;margin-bottom:8px}
+.astrology-date-field input[type="date"]{color-scheme:dark;font-variant-numeric:tabular-nums}
+.astrology-date-field input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.72}
+.privacy-note{margin-top:8px;color:var(--gold-bright);font-size:12px;font-weight:800;line-height:1.5}
+.mode-astrology .mode-badge{color:#fff0ba;background:rgba(169,140,255,.16)}
+.mode-astrology::after{box-shadow:0 0 0 3px rgba(169,140,255,.24)}
+
+.astrology-report{border-color:rgba(190,157,255,.42)}
+.astrology-summary-grid{display:grid;grid-template-columns:1fr;gap:9px;margin:4px 0 16px}
+.astrology-summary-grid div{padding:12px;border:1px solid rgba(190,157,255,.20);border-radius:16px;background:rgba(169,140,255,.07)}
+.astrology-summary-grid span{display:block;color:var(--muted);font-size:12px}
+.astrology-summary-grid strong{display:block;margin-top:4px;color:var(--gold-bright);font-size:18px}
+.astrology-core-numbers{margin:6px 0 12px}
+.num.astrology-number{
+  outline:3px solid rgba(189,155,255,.92);
+  outline-offset:2px;
+  box-shadow:inset 0 3px 8px rgba(255,255,255,.32),inset 0 -10px 16px rgba(0,0,0,.28),0 0 20px rgba(169,140,255,.50);
+}
+.astro-mark{position:absolute;left:-4px;top:-10px;color:#d8c2ff;font-size:14px;font-style:normal;text-shadow:0 0 10px rgba(169,140,255,.95)}
+.astrology-hit-note{margin:-3px 0 10px;color:#d8c2ff;font-size:13px;font-weight:850}
+.astrology-details{margin-top:15px}
+.planet-table{display:grid;gap:8px;margin:4px 0 12px}
+.planet-row{display:grid;grid-template-columns:1fr;gap:3px;padding:11px 12px;border:1px solid rgba(190,157,255,.18);border-radius:15px;background:rgba(5,3,18,.28)}
+.planet-row strong{color:var(--gold-bright);font-size:15px}
+.planet-row span{color:var(--muted-strong);font-size:12px;line-height:1.5}
+.score-breakdown.with-astrology div:last-child{border-color:rgba(190,157,255,.34);background:rgba(169,140,255,.08)}
+
+@media (min-width:430px){
+  .astrology-summary-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media (min-width:560px){
+  .astrology-entry-head{flex-direction:row;align-items:center;justify-content:space-between}
+  .astrology-entry-head>div{max-width:360px}
+  .score-breakdown.with-astrology{grid-template-columns:repeat(3,1fr)}
+  .planet-row{grid-template-columns:110px 1fr 1fr;align-items:center}
+  .planet-row span:last-child{grid-column:2/-1}
+}
+
+
+/* ========================================================================== 
+   LOTOSCOPE 6 — Celestial Oracle default experience v1.4.2
+   ========================================================================== */
+.astrology-entry{position:relative;overflow:hidden}
+.astrology-entry::before{
+  content:"✦  ·  ☾  ·  ✧  ·  ☉  ·  ✦";
+  position:absolute;right:-12px;top:8px;
+  color:rgba(255,238,184,.10);font-family:Georgia,serif;font-size:34px;letter-spacing:.18em;
+  transform:rotate(-8deg);pointer-events:none;white-space:nowrap
+}
+.astrology-entry.is-oracle-active{
+  border-color:rgba(255,226,148,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(169,140,255,.08),0 18px 44px rgba(14,5,38,.38),0 0 34px rgba(169,140,255,.10)
+}
+.oracle-default-badge{
+  display:inline-flex;align-items:center;width:max-content;margin:7px 0 2px;padding:4px 8px;
+  border:1px solid rgba(255,230,158,.28);border-radius:999px;
+  color:#ffe6a8;background:rgba(241,205,121,.08);font-size:9px;font-weight:900;letter-spacing:.15em
+}
+.oracle-invocation{
+  display:flex;align-items:center;gap:8px;margin-top:13px;color:#d9c8f4;font-size:10px;font-weight:850;letter-spacing:.06em;text-align:center
+}
+.oracle-invocation i{height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(220,195,255,.45),transparent)}
+.oracle-invocation span{color:var(--gold-bright);font-size:15px;text-shadow:0 0 12px rgba(255,226,148,.45)}
+.oracle-invocation b{font-size:10px;white-space:nowrap}
+.sticky-submit button{position:relative;letter-spacing:.03em;text-shadow:0 1px 5px rgba(37,16,3,.25)}
+.sticky-submit button::before{content:"☾";margin-right:7px;font-size:16px}
+.draw-loader-card::before{
+  content:"♈  ♉  ♊  ♋  ♌  ♍  ♎  ♏  ♐  ♑  ♒  ♓";
+  display:block;margin-bottom:12px;color:rgba(238,220,255,.54);font-size:11px;letter-spacing:.16em;white-space:nowrap
+}
+@media (max-width:390px){
+  .oracle-invocation b{font-size:9px;letter-spacing:0}
+  .oracle-invocation{gap:5px}
+}
+
+
+/* ========================================================================== 
+   LOTOSCOPE 6 — Fortune date ritual & celestial reveal v1.5.1
+   ========================================================================== */
+select{font:inherit}
+.fortune-date-card{
+  position:relative;overflow:hidden;padding:17px;border:1px solid rgba(222,199,255,.25);border-radius:22px;
+  background:radial-gradient(circle at 85% 5%,rgba(255,221,137,.12),transparent 34%),linear-gradient(155deg,rgba(8,5,27,.92),rgba(31,20,65,.78));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 30px rgba(169,140,255,.035)
+}
+.fortune-date-card::after{content:"♈  ♉  ♊  ♋  ♌  ♍  ♎  ♏  ♐  ♑  ♒  ♓";position:absolute;left:14px;right:14px;bottom:5px;color:rgba(222,199,255,.07);font-size:11px;letter-spacing:.18em;white-space:nowrap;pointer-events:none}
+.fortune-date-heading{display:flex;align-items:center;gap:13px;margin-bottom:17px}
+.fortune-date-emblem{position:relative;flex:0 0 62px;width:62px;height:62px;display:flex;align-items:center;justify-content:center;gap:3px;border:1px solid rgba(255,227,157,.34);border-radius:50%;color:#ffe6a8;background:radial-gradient(circle,rgba(169,140,255,.25),rgba(5,3,18,.92) 68%);box-shadow:0 0 24px rgba(169,140,255,.16),inset 0 0 18px rgba(255,225,145,.06)}
+.fortune-date-emblem::before,.fortune-date-emblem::after{content:"";position:absolute;inset:7px;border:1px dotted rgba(222,199,255,.27);border-radius:50%}
+.fortune-date-emblem::after{inset:14px;border-style:solid;transform:rotate(45deg)}
+.fortune-date-emblem span,.fortune-date-emblem b{position:relative;z-index:2;font-family:Georgia,serif;font-size:13px}.fortune-date-emblem b{font-size:16px;text-shadow:0 0 12px rgba(255,229,156,.65)}
+.fortune-question{display:block;color:#d9c6ff;font-size:9px;font-weight:900;letter-spacing:.18em}
+.fortune-date-heading label{display:block;margin:3px 0 2px;color:#fffaf3;font-family:"Yu Mincho",Georgia,serif;font-size:19px;font-weight:800}
+.fortune-date-heading p{font-size:12px;line-height:1.55}
+.date-select-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,.9fr) minmax(0,.9fr);gap:8px}
+.date-select-field{display:block;min-width:0}
+.date-select-field>span:first-child{display:block;margin:0 0 6px 3px;color:#cbb8ec;font-size:10px;font-weight:900;letter-spacing:.1em}
+.select-shell{position:relative;display:block}
+.select-shell select{
+  width:100%;height:58px;padding:0 34px 0 12px;border:1px solid rgba(226,207,255,.26);border-radius:15px;outline:none;
+  appearance:none;-webkit-appearance:none;color:#fffaf3;background:linear-gradient(180deg,rgba(6,4,21,.96),rgba(23,15,51,.92));
+  color-scheme:dark;font-size:17px;font-weight:850;font-variant-numeric:tabular-nums;box-shadow:inset 0 0 18px rgba(169,140,255,.04);transition:.2s ease
+}
+/* Windows / Edge で候補一覧が白背景・白文字になるのを防ぐ */
+.select-shell select option,.select-shell select optgroup{background:#090615;color:#fffaf3}
+.select-shell select option:checked{background:#3a265f;color:#fff4c9}
+.select-shell select option:disabled{background:#090615;color:#8f82a6}
+@media (forced-colors:active){.select-shell select{forced-color-adjust:auto}}
+.select-shell select:focus{border-color:#f1cd79;box-shadow:0 0 0 4px rgba(241,205,121,.11),0 0 20px rgba(169,140,255,.12)}
+.select-shell select:disabled{opacity:.5;cursor:not-allowed}
+.select-shell::after{content:"⌄";position:absolute;right:13px;top:50%;transform:translateY(-57%);color:#d9c7ff;font-size:16px;pointer-events:none}
+.select-shell b{position:absolute;right:29px;top:50%;transform:translateY(-50%);color:#bca9df;font-size:10px;pointer-events:none}
+.date-select-field:first-child .select-shell b{right:28px}
+.birth-date-seal{position:relative;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:9px;margin-top:13px;padding:10px 11px;border:1px dashed rgba(222,199,255,.20);border-radius:15px;background:rgba(2,1,12,.34);transition:.3s ease}
+.birth-date-seal .seal-symbol{width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(222,199,255,.20);border-radius:50%;color:#9f8cbf;background:rgba(169,140,255,.06);transition:.3s ease}
+.birth-date-seal small{display:block;color:#9e8dbd;font-size:9px;font-weight:900;letter-spacing:.12em}.birth-date-seal strong{display:block;margin-top:2px;color:#cbbde2;font-size:12px}
+.seal-status{padding:4px 6px;border:1px solid rgba(222,199,255,.16);border-radius:999px;color:#8f7cae;font-size:8px;font-weight:900;letter-spacing:.12em}
+.birth-date-seal.is-complete{border-color:rgba(255,225,145,.42);background:linear-gradient(90deg,rgba(241,205,121,.06),rgba(169,140,255,.08));box-shadow:0 0 20px rgba(169,140,255,.08)}
+.birth-date-seal.is-complete .seal-symbol{color:#ffe6a8;border-color:rgba(255,225,145,.48);background:rgba(241,205,121,.10);box-shadow:0 0 14px rgba(255,225,145,.18)}
+.birth-date-seal.is-complete strong{color:#fff5d8}.birth-date-seal.is-complete .seal-status{color:#ffe6a8;border-color:rgba(255,225,145,.34)}
+.astrology-date-field.is-disabled .fortune-date-card{filter:saturate(.55)}
+.sticky-submit button>span{display:inline-block;margin-right:5px;filter:drop-shadow(0 0 8px rgba(255,232,168,.65))}
+
+/* Full-screen divination ritual */
+.draw-loader{background:radial-gradient(circle at 50% 35%,rgba(54,31,103,.34),transparent 42%),rgba(1,1,8,.95);backdrop-filter:blur(20px)}
+.ritual-loader-card{position:relative;overflow:hidden;width:min(94vw,390px);padding:22px 19px 21px;border-color:rgba(226,204,255,.30);background:radial-gradient(circle at 50% 22%,rgba(63,39,118,.34),transparent 36%),linear-gradient(180deg,rgba(10,6,30,.98),rgba(3,2,14,.98));box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 50px rgba(142,105,226,.14),inset 0 1px 0 rgba(255,255,255,.06)}
+.ritual-loader-card::before{content:"";position:absolute;inset:8px;border:1px solid rgba(255,225,145,.08);border-radius:22px;pointer-events:none}
+.ritual-loader-card::after{content:"☾  ·  ✦  ·  ☉";position:absolute;left:0;right:0;bottom:5px;color:rgba(255,232,168,.12);font-family:Georgia,serif;font-size:9px;letter-spacing:.35em}
+.ritual-kicker{position:relative;z-index:3;margin-bottom:8px;color:#c9b5ed;font-size:9px;font-weight:900;letter-spacing:.24em}
+.ritual-stars{position:absolute;inset:0;pointer-events:none}.ritual-stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff2c4;box-shadow:0 0 8px #d7c0ff;animation:ritualTwinkle 1.5s ease-in-out infinite alternate}
+.ritual-stars i:nth-child(1){left:8%;top:17%}.ritual-stars i:nth-child(2){left:18%;top:43%;animation-delay:.3s}.ritual-stars i:nth-child(3){right:10%;top:22%;animation-delay:.6s}.ritual-stars i:nth-child(4){right:17%;top:48%;animation-delay:.9s}.ritual-stars i:nth-child(5){left:12%;bottom:20%;animation-delay:1.1s}.ritual-stars i:nth-child(6){right:8%;bottom:24%;animation-delay:.2s}.ritual-stars i:nth-child(7){left:47%;top:7%;animation-delay:.8s}.ritual-stars i:nth-child(8){right:38%;bottom:8%;animation-delay:.45s}
+.ritual-scope{position:relative;width:190px;height:190px;margin:0 auto 13px;border:1px solid rgba(223,202,255,.27);border-radius:50%;background:radial-gradient(circle,rgba(33,20,70,.40),rgba(3,2,14,.94) 70%);box-shadow:0 0 40px rgba(169,140,255,.12),inset 0 0 28px rgba(169,140,255,.08)}
+.ritual-halo{position:absolute;inset:-9px;border:1px dotted rgba(255,226,148,.28);border-radius:50%;animation:ritualRotate 12s linear infinite}
+.ritual-zodiac{position:absolute;inset:0;border-radius:50%;animation:ritualRotate 14s linear infinite}.ritual-zodiac span{position:absolute;left:50%;top:50%;color:#d9c7f8;font-family:Georgia,serif;font-size:11px;transform:translate(-50%,-50%) rotate(calc(var(--i) * 30deg)) translateY(-80px) rotate(calc(var(--i) * -30deg));text-shadow:0 0 8px rgba(169,140,255,.38)}
+.ritual-orbit{position:absolute;left:50%;top:50%;border:1px solid rgba(255,226,148,.20);border-radius:50%;transform-origin:center}.ritual-orbit i{position:absolute;left:50%;top:-9px;width:18px;height:18px;display:grid;place-items:center;border:1px solid rgba(255,225,145,.30);border-radius:50%;color:#ffe8ad;background:#100a27;font-family:Georgia,serif;font-size:10px;box-shadow:0 0 12px rgba(255,225,145,.18)}
+.orbit-one{width:130px;height:130px;margin:-65px;animation:ritualRotate 5.5s linear infinite}.orbit-two{width:100px;height:100px;margin:-50px;animation:ritualRotateReverse 4.2s linear infinite}.orbit-three{width:158px;height:158px;margin:-79px;animation:ritualRotateReverse 8s linear infinite}
+.ritual-cross{position:absolute;left:50%;top:50%;width:150px;height:1px;background:linear-gradient(90deg,transparent,rgba(224,202,255,.18),transparent);transform-origin:center}.cross-one{transform:translate(-50%,-50%) rotate(0deg)}.cross-two{transform:translate(-50%,-50%) rotate(90deg)}
+.ritual-core{position:absolute;left:50%;top:50%;width:70px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(255,225,145,.36);border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(92,58,149,.44),rgba(5,3,18,.96) 70%);box-shadow:0 0 24px rgba(169,140,255,.18),inset 0 0 15px rgba(255,225,145,.05)}
+.ritual-core span{color:#ffe8ad;font-family:Georgia,serif;font-size:25px;line-height:1;text-shadow:0 0 15px rgba(255,225,145,.72);animation:coreOraclePulse 1.2s ease-in-out infinite alternate}.ritual-core b{margin-top:3px;color:#fff5d8;font-size:7px;letter-spacing:.16em}.ritual-core small{margin-top:2px;color:#aa96cc;font-size:5px;letter-spacing:.08em}
+.ritual-seals{position:relative;z-index:3;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:0 auto 15px;max-width:290px}.ritual-seals span{height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(221,199,255,.16);border-radius:50%;color:#6f5d8f;background:rgba(8,5,27,.80);transform:scale(.88);transition:.55s cubic-bezier(.2,.8,.2,1)}.ritual-seals i{font-style:normal;font-size:11px}.ritual-seals b{margin-top:1px;font-size:7px;font-weight:800}.ritual-seals span.is-lit{color:#fff0bd;border-color:rgba(255,226,148,.63);background:radial-gradient(circle,rgba(241,205,121,.20),rgba(35,19,66,.86));box-shadow:0 0 19px rgba(255,226,148,.22),inset 0 0 12px rgba(169,140,255,.12);transform:scale(1)}
+.ritual-loader-card .loader-title{position:relative;z-index:3;font-size:20px;transition:.3s ease}.ritual-loader-card .loader-text{position:relative;z-index:3;min-height:43px;padding:0 5px;font-size:12px;line-height:1.65;transition:.3s ease}.loader-stage{position:relative;z-index:3;margin-top:6px;color:#bba6df;font-size:8px;font-weight:900;letter-spacing:.22em}.ritual-progress{position:relative;z-index:3;width:78%;height:2px;margin:9px auto 0;overflow:hidden;border-radius:999px;background:rgba(226,205,255,.11)}.ritual-progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,#9f7bea,#f1cd79,#fff2c4);box-shadow:0 0 12px rgba(255,226,148,.45);transition-property:width;transition-timing-function:linear}.ritual-loader-card .loader-dots{margin-top:10px}.draw-loader.is-final-phase .ritual-scope{box-shadow:0 0 55px rgba(255,226,148,.18),inset 0 0 34px rgba(169,140,255,.13)}.draw-loader.is-final-phase .loader-title{color:#fff0bd;text-shadow:0 0 16px rgba(255,226,148,.28)}
+
+/* Numbers emerge after the ritual completes */
+.number-reveal-group.is-revealing .num{opacity:0;transform:translateY(12px) scale(.35);filter:blur(5px)}
+.number-reveal-group.is-revealing.reveal-start .num{animation:numberOracleReveal .82s cubic-bezier(.17,.84,.28,1.25) forwards;animation-delay:var(--reveal-delay,0s)}
+@keyframes numberOracleReveal{0%{opacity:0;transform:translateY(12px) scale(.35) rotate(-12deg);filter:blur(5px)}62%{opacity:1;transform:translateY(-3px) scale(1.12) rotate(2deg);filter:blur(0);box-shadow:0 0 28px rgba(255,226,148,.34),inset 0 3px 8px rgba(255,255,255,.3),inset 0 -10px 16px rgba(0,0,0,.3)}100%{opacity:1;transform:none;filter:none}}
+@keyframes ritualRotate{to{transform:rotate(360deg)}}
+@keyframes ritualRotateReverse{to{transform:rotate(-360deg)}}
+@keyframes ritualTwinkle{from{opacity:.18;transform:scale(.65)}to{opacity:1;transform:scale(1.5)}}
+@keyframes coreOraclePulse{from{opacity:.72;transform:scale(.92)}to{opacity:1;transform:scale(1.12)}}
+@media(max-width:370px){.date-select-grid{grid-template-columns:1.45fr .82fr .82fr;gap:6px}.select-shell select{height:55px;padding-left:8px;font-size:15px}.select-shell b{display:none}.fortune-date-heading{align-items:flex-start}.fortune-date-emblem{flex-basis:54px;width:54px;height:54px}.ritual-scope{width:174px;height:174px}.ritual-zodiac span{transform:translate(-50%,-50%) rotate(calc(var(--i) * 30deg)) translateY(-72px) rotate(calc(var(--i) * -30deg))}}
+@media(prefers-reduced-motion:reduce){.ritual-stars i,.ritual-halo,.ritual-zodiac,.ritual-orbit,.ritual-core span,.number-reveal-group.is-revealing.reveal-start .num{animation:none!important}.number-reveal-group.is-revealing .num{opacity:1;transform:none;filter:none}}
+
+.sticky-submit button::before{content:none}
+
+
+/* ========================================================================== 
+   LOTOSCOPE 6 v1.5.2 — Mobile readability + instant zodiac seal
+   ========================================================================== */
+
+/* A readable baseline for a smartphone-first fortune experience. */
+body{font-size:18px}
+.app-brand-copy strong{font-size:18px}.app-brand-copy small{font-size:14px}
+.status-chip{font-size:14px}
+.mystic-hero .hero-kicker{font-size:12px}
+.mystic-hero h1 small{font-size:clamp(20px,5.6vw,25px);line-height:1.55}
+.mystic-hero p,.hero p{font-size:17px;line-height:1.9}
+.hero-points span{font-size:15px}
+.mobile-section-nav a,.sticky-mobile-nav a{font-size:16px}
+.summary-pill strong{font-size:22px}.summary-pill span{font-size:15px}
+.panel-head span,.panel-subhead span{font-size:14px}
+.panel-head h2{font-size:28px}.panel-subhead h3{font-size:23px}
+.panel-head p,.compact-head p{font-size:16px;line-height:1.75}
+.label-row label,label,.field-label{font-size:18px}
+.label-row span,.hint,.note,.tiny{font-size:16px;line-height:1.72}
+input,select,textarea{font-size:18px}
+.mode-badge{font-size:14px}.mode-card strong{font-size:19px}.mode-card em{font-size:16px;line-height:1.72}
+.quick-card strong,.tip strong{font-size:18px}.quick-card span,.tip span{font-size:16px;line-height:1.7}
+.advanced summary,.form-disclaimer,.privacy-note{font-size:15px}
+button,.small-button,.bottom-action-bar button,.bottom-action-bar a{font-size:18px}
+.app-footer,.footer{font-size:15px}
+.astrology-entry h3{font-size:24px}.astrology-entry p{font-size:16px;line-height:1.75}
+.astro-switch b{font-size:16px}.oracle-default-badge{font-size:11px}
+.fortune-question{font-size:11px}
+.fortune-date-heading label{font-size:22px;line-height:1.45}
+.fortune-date-heading p{font-size:15px;line-height:1.65}
+.date-select-field>span:first-child{font-size:12px}
+.select-shell select{height:62px;font-size:20px}
+.select-shell b{font-size:12px}
+.oracle-invocation{font-size:12px}.oracle-invocation b{font-size:12px}
+.birth-date-seal{grid-template-columns:42px minmax(0,1fr) auto;align-items:start;gap:11px;padding:13px}
+.birth-date-seal .seal-symbol{width:38px;height:38px;font-size:18px}
+.birth-date-seal small{font-size:11px}.birth-date-seal strong{font-size:16px;line-height:1.55}
+.seal-status{margin-top:2px;padding:5px 8px;font-size:10px}
+
+/* The Sun sign appears beneath the engraved birth date. */
+.birth-zodiac-preview[hidden]{display:none}
+.birth-zodiac-preview{display:flex;align-items:center;gap:11px;margin-top:11px;padding:10px 11px;border:1px solid rgba(255,225,145,.22);border-radius:13px;background:linear-gradient(90deg,rgba(169,140,255,.11),rgba(241,205,121,.07));opacity:.7;transform:translateY(3px);transition:opacity .35s ease,transform .35s ease,border-color .35s ease,box-shadow .35s ease}
+.birth-zodiac-symbol{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,225,145,.30);border-radius:50%;color:#ffe8ad;background:radial-gradient(circle,rgba(169,140,255,.27),rgba(7,4,23,.94) 70%);font-family:Georgia,serif;font-size:25px;text-shadow:0 0 15px rgba(255,226,148,.55)}
+.birth-zodiac-copy{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;min-width:0}
+.birth-zodiac-copy small{flex-basis:100%;margin-bottom:1px;color:#cbb9ea;font-size:11px;letter-spacing:.08em}
+.birth-zodiac-copy b{color:#fff4cf;font-family:"Yu Mincho",Georgia,serif;font-size:19px;line-height:1.35}
+.birth-zodiac-copy em{color:#cdb9ef;font-size:11px;font-style:normal;font-weight:900;letter-spacing:.10em;overflow-wrap:anywhere}
+.birth-zodiac-preview.is-reading .birth-zodiac-symbol{animation:coreOraclePulse 1s ease-in-out infinite alternate}
+.birth-zodiac-preview.is-ready{opacity:1;transform:none;border-color:rgba(255,225,145,.44);box-shadow:0 0 21px rgba(169,140,255,.10),inset 0 0 15px rgba(255,225,145,.035)}
+.birth-date-seal.is-complete .seal-copy>strong{color:#fff5d8}
+
+/* Results and checking pages also use the larger reading scale. */
+.big-mode{font-size:19px}.lead-text,.reason{font-size:16px;line-height:1.82}
+.ticket-kicker,.mode-label{font-size:15px}.match-title{font-size:18px}
+.score-pill span,.metrics span,.score-breakdown span,.summary-card span,.summary-card em{font-size:14px}
+.metrics strong{font-size:17px}.accordion summary b{font-size:18px}.accordion summary small{font-size:15px}
+.accordion summary em{font-size:15px}.score-note{font-size:15px}.result-legend span{font-size:15px}
+.mode-result-line{font-size:16px}.mode-result-line span{font-size:15px}
+.ritual-kicker{font-size:11px}.ritual-loader-card .loader-title{font-size:23px}
+.ritual-loader-card .loader-text{font-size:15px;line-height:1.72}.loader-stage{font-size:10px}
+
+@media(max-width:359px){
+  body{font-size:17px}
+  .mystic-hero p,.hero p{font-size:16px}
+  .panel-head h2{font-size:26px}
+  .label-row label,label,.field-label{font-size:17px}
+  .label-row span,.hint,.note,.tiny{font-size:15px}
+  .select-shell select{height:59px;padding-left:8px;font-size:18px}
+  .birth-date-seal{grid-template-columns:38px minmax(0,1fr);padding:11px}
+  .seal-status{grid-column:2;justify-self:start;margin-top:0}
+  .birth-zodiac-symbol{flex-basis:38px;width:38px;height:38px;font-size:22px}
+  .birth-zodiac-copy b{font-size:17px}.birth-zodiac-copy em{font-size:10px}
+  .oracle-invocation b{font-size:10px}
+}
+
+
+/* ========================================================================== 
+   LOTOSCOPE 6 v1.5.3 — Zodiac seal mobile layout correction
+   ========================================================================== */
+
+/* Keep the status badge from stealing the zodiac card's reading width. */
+.birth-date-seal{
+  grid-template-columns:42px minmax(0,1fr);
+  align-items:center;
+  padding-top:13px;
+}
+.birth-date-seal .seal-copy{min-width:0}
+.birth-date-seal .seal-copy>strong{padding-right:2px}
+.birth-date-seal .seal-status{
+  position:absolute;
+  top:13px;
+  right:13px;
+  z-index:2;
+  margin:0;
+}
+.birth-zodiac-preview{
+  grid-column:1 / -1;
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  margin-top:3px;
+  padding:12px 13px;
+}
+.birth-zodiac-copy{
+  flex:1 1 auto;
+  min-width:0;
+  flex-wrap:wrap;
+  align-content:center;
+}
+.birth-zodiac-copy small{width:100%;flex-basis:100%}
+.birth-zodiac-copy b,
+.birth-zodiac-copy em{
+  flex:0 0 auto;
+  white-space:nowrap;
+  word-break:keep-all;
+  overflow-wrap:normal;
+}
+
+@media(max-width:359px){
+  .birth-date-seal{
+    grid-template-columns:38px minmax(0,1fr);
+    padding:11px;
+  }
+  .birth-date-seal .seal-status{
+    top:11px;
+    right:11px;
+    grid-column:auto;
+  }
+  .birth-zodiac-preview{
+    grid-column:1 / -1;
+    padding:11px;
+  }
 }

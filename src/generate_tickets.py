@@ -59,13 +59,14 @@ def build_one_ticket(
     pools: Dict[str, List[int]],
     number_stats: List[Dict[str, Any]],
     balance_rules: Dict[str, Any],
-    favorite_numbers: List[int],
+    astrology_numbers: List[int],
     rng: RandomSource,
 ) -> Dict[str, Any] | None:
     stats_lookup = make_stats_lookup(number_stats)
     ticket: set[int] = set()
 
-    add_numbers(ticket, pools["personal_pool"], random_count(mode_rule, "personal", rng), stats_lookup, "base_data_score", rng)
+    add_numbers(ticket, pools.get("astrology_core_pool", []), random_count(mode_rule, "astrology_core", rng), stats_lookup, "astrology_score", rng)
+    add_numbers(ticket, pools.get("astrology_pool", []), random_count(mode_rule, "astrology", rng), stats_lookup, "astrology_score", rng)
     add_numbers(ticket, pools["data_pool"], random_count(mode_rule, "data", rng), stats_lookup, "base_data_score", rng)
     add_numbers(ticket, pools["cold_pool"], random_count(mode_rule, "cold", rng), stats_lookup, "absence_score", rng)
     add_numbers(ticket, pools["over31_pool"], random_count(mode_rule, "over31", rng), stats_lookup, "base_data_score", rng)
@@ -77,11 +78,11 @@ def build_one_ticket(
         ticket.add(picked)
 
     nums = sorted(ticket)
-    ok, _errors, _metrics = validate_ticket(nums, balance_rules, favorite_numbers, mode_rule)
+    ok, _errors, _metrics = validate_ticket(nums, balance_rules)
     if not ok:
         return None
 
-    score_info = compute_ticket_score(nums, stats_lookup, favorite_numbers)
+    score_info = compute_ticket_score(nums, stats_lookup, astrology_numbers)
     reason = build_reason(nums, mode_rule, score_info, pools)
 
     return {
@@ -101,7 +102,7 @@ def generate_tickets(
     number_stats: List[Dict[str, Any]],
     mode_rules: Dict[str, Any],
     balance_rules: Dict[str, Any],
-    favorite_numbers: List[int],
+    astrology_numbers: List[int] | None = None,
     rng: RandomSource | None = None,
     seen: MutableSet[tuple[int, ...]] | None = None,
 ) -> List[Dict[str, Any]]:
@@ -124,7 +125,7 @@ def generate_tickets(
             pools,
             number_stats,
             balance_rules,
-            favorite_numbers,
+            list(astrology_numbers or []),
             random_source,
         )
         if ticket is None:

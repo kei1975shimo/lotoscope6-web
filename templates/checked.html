@@ -1,16 +1,15 @@
 {% extends "base.html" %}
 {% block title %}LOTOSCOPE 6 | 照合結果{% endblock %}
 {% block content %}
-{% macro ball(n, user_numbers='', draw_main='', draw_bonus='') -%}
+{% macro ball(n, draw_main='', draw_bonus='') -%}
   {%- set ni = n|int -%}
   {%- set ns = ni|string -%}
-  {%- set favs = user_numbers.split(',') if user_numbers else [] -%}
   {%- set draws = draw_main.split(',') if draw_main else [] -%}
   {%- if ni <= 10 -%}{%- set band = 'num-band-1' -%}
   {%- elif ni <= 20 -%}{%- set band = 'num-band-2' -%}
   {%- elif ni <= 31 -%}{%- set band = 'num-band-3' -%}
   {%- else -%}{%- set band = 'num-band-4' -%}{%- endif -%}
-  <span class="num {{ band }} {% if ns in draws %}hit{% endif %} {% if ns == draw_bonus|string %}bonus{% endif %} {% if ns in favs %}favorite{% endif %} {% if ni >= 32 %}over31{% endif %}" aria-label="{{ ni }}{% if ns in draws %}、本数字と一致{% endif %}{% if ns == draw_bonus|string %}、ボーナス数字{% endif %}{% if ns in favs %}、入力した好きな数字{% endif %}">{% if ns in favs %}<i class="fav-mark" aria-hidden="true">★</i>{% endif %}{{ '%02d'|format(ni) }}</span>
+  <span class="num {{ band }} {% if ns in draws %}hit{% endif %} {% if ns == draw_bonus|string %}bonus{% endif %} {% if ni >= 32 %}over31{% endif %}" aria-label="{{ ni }}{% if ns in draws %}、本数字と一致{% endif %}{% if ns == draw_bonus|string %}、ボーナス数字{% endif %}">{{ '%02d'|format(ni) }}</span>
 {%- endmacro %}
 
 {% set first = rows[0] if rows else {} %}
@@ -21,8 +20,8 @@
   <div class="hero-grid">
     <div>
       <div class="hero-kicker">CHECK SUMMARY</div>
-      <h1>LOTOSCOPE 6<small>買い目の照合結果</small></h1>
-      <p>一致数の多い買い目を先に表示し、全件は一致数ごとに確認できます。</p>
+      <h1>LOTOSCOPE 6<small>星から受け取った数字の答え合わせ</small></h1>
+      <p>選んだ数字と抽せん数字が、どのように重なったかを見ていきましょう。一致の多い組み合わせから順にご案内します。</p>
       <div class="hero-points">
         <span>{% if first.checked_draw_no %}第{{ first.checked_draw_no }}回{% else %}数字を直接入力{% endif %}</span>
         {% if first.checked_draw_date %}<span>{{ first.checked_draw_date }}</span>{% endif %}
@@ -41,28 +40,17 @@
   <a href="#all-results">全件</a>
 </nav>
 
-{% if first.user_numbers %}
-<section class="favorite-guide panel compact-panel">
-  <div class="section-kicker">YOUR NUMBERS</div>
-  <h2>入力した好きな数字</h2>
-  <div class="numbers favorite-guide-numbers">
-    {% for n in first.user_numbers.split(',') if n %}{{ ball(n, first.user_numbers) }}{% endfor %}
-  </div>
-  <p class="note">買い目の中では、★マークと金色の外枠で表示します。</p>
-</section>
-{% endif %}
 
 <section id="draw" class="draw-strip panel compact-panel">
   <div class="section-kicker">DRAW NUMBERS</div>
   <h2>{% if first.checked_draw_no %}第{{ first.checked_draw_no }}回の抽せん数字{% else %}入力した抽せん数字{% endif %}</h2>
   <div class="numbers draw-numbers">
-    {% for n in first.draw_main_numbers.split(',') if first.draw_main_numbers %}{{ ball(n, first.user_numbers) }}{% endfor %}
-    {% if first.draw_bonus %}<span class="bonus-sep">ボーナス</span>{{ ball(first.draw_bonus, first.user_numbers, '', first.draw_bonus) }}{% endif %}
+    {% for n in first.draw_main_numbers.split(',') if first.draw_main_numbers %}{{ ball(n) }}{% endfor %}
+    {% if first.draw_bonus %}<span class="bonus-sep">ボーナス</span>{{ ball(first.draw_bonus, '', first.draw_bonus) }}{% endif %}
   </div>
   <div class="result-legend" aria-label="表示記号の説明">
     <span><i class="legend-ring hit-ring"></i>本数字と一致</span>
     <span><i class="legend-ring bonus-ring"></i>ボーナス数字を含む</span>
-    <span><i class="legend-star">★</i>入力した好きな数字</span>
   </div>
 </section>
 
@@ -74,7 +62,7 @@
 </section>
 
 <section id="top-matches" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">CLOSEST 3</div><h2>一致数上位3口</h2></div><p>本数字の一致数、ボーナス、総合スコアの順で並べています。</p></div>
+  <div class="panel-head compact-head"><div><div class="section-kicker">CLOSEST 3</div><h2>もっとも強く重なった三つ</h2></div><p>本数字の一致数、ボーナス、調和の目安の順に並べています。</p></div>
   <div class="ticket-list compact-list">
     {% for row in rows|sort(attribute='ticket_score', reverse=true)|sort(attribute='bonus_match', reverse=true)|sort(attribute='match_count', reverse=true) %}
     {% if loop.index <= 3 %}
@@ -85,7 +73,7 @@
           <strong class="match-title">本数字{{ row.match_count }}個一致{% if row.bonus_match == '1' %} + ボーナス{% endif %}</strong>
           <div class="numbers">
             {% for n in [row.n1,row.n2,row.n3,row.n4,row.n5,row.n6] %}
-              {{ ball(n, row.user_numbers, row.draw_main_numbers, row.draw_bonus) }}
+              {{ ball(n, row.draw_main_numbers, row.draw_bonus) }}
             {% endfor %}
           </div>
         </div>
@@ -98,7 +86,7 @@
 </section>
 
 <section class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">BREAKDOWN</div><h2>一致数・生成方法別</h2></div><p>項目を開いて内訳を確認できます。</p></div>
+  <div class="panel-head compact-head"><div><div class="section-kicker">BREAKDOWN</div><h2>重なり方を詳しく見る</h2></div><p>気になる項目を開くと、内訳を確かめられます。</p></div>
   <div class="accordion-group">
     <details class="accordion">
       <summary><span><b>一致数の分布</b><small>本数字の一致数ごとの口数</small></span><em data-toggle-label data-open-label="閉じる" data-closed-label="開く">開く</em></summary>
@@ -110,7 +98,7 @@
       </div>
     </details>
     <details class="accordion">
-      <summary><span><b>生成方法別の結果</b><small>生成方法ごとの最高一致数</small></span><em data-toggle-label data-open-label="閉じる" data-closed-label="開く">開く</em></summary>
+      <summary><span><b>導き別の結果</b><small>それぞれの導きで最も重なった数</small></span><em data-toggle-label data-open-label="閉じる" data-closed-label="開く">開く</em></summary>
       <div class="mode-list">
         {% for mode_id, title, badge, desc in mode_choices %}
           {% if mode_id != 'all' %}
@@ -129,7 +117,7 @@
 </section>
 
 <section id="all-results" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">ALL RESULTS</div><h2>全照合結果</h2></div><p>最高一致数のグループを最初から開いています。</p></div>
+  <div class="panel-head compact-head"><div><div class="section-kicker">ALL RESULTS</div><h2>すべての答え合わせ</h2></div><p>もっとも重なりの多かった組み合わせから開いています。</p></div>
   <div class="accordion-group">
     {% set opened = namespace(value=false) %}
     {% for k in ['6','5','4','3','2','1','0'] %}
@@ -146,19 +134,18 @@
                 <strong class="match-title">本数字{{ row.match_count }}個一致{% if row.bonus_match == '1' %} + ボーナス{% endif %}</strong>
                 <div class="numbers">
                   {% for n in [row.n1,row.n2,row.n3,row.n4,row.n5,row.n6] %}
-                    {{ ball(n, row.user_numbers, row.draw_main_numbers, row.draw_bonus) }}
+                    {{ ball(n, row.draw_main_numbers, row.draw_bonus) }}
                   {% endfor %}
                 </div>
               </div>
               <span class="rank {% if row.prize_rank %}rank-hit{% endif %}">{{ row.prize_rank_label }}</span>
             </summary>
             <div class="ticket-extra">
-              {% if row.personal_hit_count|int > 0 %}<div class="favorite-hit-note">★ 入力した好きな数字を{{ row.personal_hit_count }}個含みます</div>{% endif %}
               <div class="metrics">
                 <div><span>総合スコア</span><strong>{{ row.ticket_score }}</strong></div>
                 <div><span>合計値</span><strong>{{ row.set_sum }}</strong></div>
                 <div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div>
-                <div><span>生成方法</span><strong>{{ row.mode_name_ja or row.mode_name }}</strong></div>
+                <div><span>数字の導き</span><strong>{{ row.mode_name_ja or row.mode_name }}</strong></div>
               </div>
               <p class="reason">{{ row.reason }}</p>
             </div>
@@ -181,7 +168,7 @@
     <input type="hidden" name="bonus" value="{{ check_values.get('bonus', '') }}">
     <button class="ghost-action" type="submit">照合条件を変更</button>
   </form>
-  <a class="ghost-button" href="{{ url_for('index') }}">新しく作る</a>
+  <a class="ghost-button" href="{{ url_for('index') }}">もう一度、星に尋ねる</a>
 </div>
 <button class="float-top" type="button" data-scroll-top aria-label="ページ上部へ戻る">↑</button>
 {% endblock %}

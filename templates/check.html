@@ -5,8 +5,8 @@
   <div class="hero-grid">
     <div>
       <div class="hero-kicker">RESULT CHECK</div>
-      <h1>LOTOSCOPE 6<small>生成した買い目を照合</small></h1>
-      <p>同梱データ内の抽せん回を指定するか、本数字とボーナス数字を直接入力して照合します。</p>
+      <h1>LOTOSCOPE 6<small>選んだ数字と答え合わせ</small></h1>
+      <p>星から受け取った数字を、抽せん結果と静かに照らし合わせてみましょう。抽せん回を選ぶか、数字を直接入力してください。</p>
       <div class="hero-points"><span>抽せん回を指定</span><span>数字を直接入力</span><span>全買い目を一括照合</span></div>
     </div>
     <div class="hero-visual small" aria-hidden="true"><div class="orbital"></div><div class="center-core">RESULT<br>CHECK</div></div>
@@ -25,7 +25,7 @@
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="ticket_token" value="{{ ticket_token }}">
   <div class="panel-head app-panel-head">
-    <div><span>Step 1</span><h2>照合方法を選ぶ</h2></div><p>どちらか一方を選択してください。</p>
+    <div><span>Step 1</span><h2>答え合わせの方法を選びましょう</h2></div><p>使いやすいほうを一つ選んでください。</p>
   </div>
 
   <div class="method-grid" role="radiogroup" aria-label="照合方法">
@@ -71,7 +71,7 @@
   </div>
 
   <div class="sticky-submit">
-    <button type="submit">選択した方法で照合する</button>
+    <button type="submit">この方法で答え合わせをする</button>
   </div>
 </form>
 {% endblock %}
