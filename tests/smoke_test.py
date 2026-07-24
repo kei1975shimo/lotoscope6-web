@@ -3,13 +3,14 @@ from __future__ import annotations
 import os
 import re
 import unittest
+from unittest.mock import patch
 from datetime import date
 from pathlib import Path
 
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("RATE_LIMIT_PER_MINUTE", "0")
 
-from app import app, rows_from_token  # noqa: E402
+from app import app, load_generation_mode_rules, rows_from_token  # noqa: E402
 from astrology_numbers import calculate_astrology_profile  # noqa: E402
 
 
@@ -95,6 +96,20 @@ class LotoscopeSmokeTests(unittest.TestCase):
         self.assertRegex(html, r'id="use_astrology"[^>]*checked')
         self.assertIn("星からの導きを受け取る", html)
         self.assertIn("数字へ続く導き", html)
+
+    def test_astrology_rule_is_repaired_when_deployed_config_is_stale(self) -> None:
+        stale_rules = {
+            "balance": {
+                "mode_id": "balance",
+                "mode_name_ja": "調和のバランス型",
+            }
+        }
+        with patch("app.load_json", return_value=stale_rules):
+            rules = load_generation_mode_rules()
+
+        self.assertIn("astrology", rules)
+        self.assertEqual(rules["astrology"]["mode_id"], "astrology")
+        self.assertGreaterEqual(int(rules["astrology"]["astrology_core_min"]), 1)
 
     def test_astrology_opt_out_is_preserved_on_edit_url(self) -> None:
         response = self.generate(mode="all", count="1", astrology_setting_present="1", use_astrology="0")

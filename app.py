@@ -32,7 +32,7 @@ from pools import build_pools  # noqa: E402
 from result_checker import check_ticket_rows, draw_numbers_from_row, load_draw_by_no, load_latest_draw  # noqa: E402
 from utils import load_json, read_csv_dicts  # noqa: E402
 
-APP_VERSION = "v1.5.4-public"
+APP_VERSION = "v1.5.5-public"
 MODE_CHOICES = [
     (
         "all",
@@ -75,6 +75,26 @@ MODE_IDS = {m[0] for m in MODE_CHOICES}
 ASTROLOGY_MODE_ID = "astrology"
 BASE_GENERATION_MODE_IDS = [m[0] for m in MODE_CHOICES if m[0] not in {"all", ASTROLOGY_MODE_ID}]
 GENERATION_MODE_IDS = [*BASE_GENERATION_MODE_IDS, ASTROLOGY_MODE_ID]
+
+# v1.5.5 hotfix:
+# GitHubのWebアップロードなどで config/mode_rules.json だけが古い状態に残っても、
+# 画面側が送る astrology モードを必ず解決できるよう、アプリ側にも安全な既定値を持たせます。
+ASTROLOGY_MODE_RULE_FALLBACK: Dict[str, Any] = {
+    "mode_id": ASTROLOGY_MODE_ID,
+    "mode_name": "Astrology",
+    "mode_name_ja": "誕生星のラッキー型",
+    "description": "あなたが生まれた日の星と、今日めぐる七天体から響く数字を中心に結びます。",
+    "astrology_core_min": 2,
+    "astrology_core_max": 3,
+    "astrology_min": 1,
+    "astrology_max": 2,
+    "data_min": 1,
+    "data_max": 2,
+    "cold_min": 0,
+    "cold_max": 1,
+    "over31_min": 1,
+    "over31_max": 2,
+}
 
 
 def create_app() -> Flask:
@@ -374,13 +394,36 @@ def load_number_stats() -> List[Dict[str, Any]]:
     return rows
 
 
+def load_generation_mode_rules() -> Dict[str, Any]:
+    """Load generation rules and repair a stale/missing astrology rule safely."""
+    configured = load_json("config/mode_rules.json")
+    if not isinstance(configured, dict):
+        raise RuntimeError("生成モード設定を読み込めませんでした。")
+
+    mode_rules: Dict[str, Any] = {
+        mode_id: dict(rule)
+        for mode_id, rule in configured.items()
+        if isinstance(rule, dict)
+    }
+
+    # A stale deployment can contain the new UI/app.py but an older JSON file.
+    # Merge the built-in fallback so mode_id=astrology never becomes unknown.
+    astrology_rule = dict(ASTROLOGY_MODE_RULE_FALLBACK)
+    deployed_rule = mode_rules.get(ASTROLOGY_MODE_ID)
+    if isinstance(deployed_rule, dict):
+        astrology_rule.update(deployed_rule)
+    mode_rules[ASTROLOGY_MODE_ID] = astrology_rule
+
+    return mode_rules
+
+
 def generate_ticket_rows(
     mode: str,
     count: int,
     seed: str = "",
     astrology_profile: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
-    mode_rules = load_json("config/mode_rules.json")
+    mode_rules = load_generation_mode_rules()
     balance_rules = load_json("config/balance_rules.json")
     astrology_numbers = astrology_numbers_from_profile(astrology_profile)
     astrology_pool = astrology_pool_from_profile(astrology_profile)
