@@ -133,11 +133,6 @@ function setupGenerateValidation() {
   if (!form) return;
 
   form.addEventListener('submit', (event) => {
-    const astrologyToggle = form.querySelector('#use_astrology');
-    const selectedMode = form.querySelector('input[name="mode"]:checked')?.value || 'all';
-    const astrologyNeeded = Boolean(astrologyToggle?.checked || selectedMode === 'astrology');
-    if (!astrologyNeeded) return;
-
     const result = syncBirthDate(form, { report: true });
     if (!result.complete || !result.valid) event.preventDefault();
   });
@@ -153,10 +148,8 @@ function updatePlannedTotal() {
   if (!countInput || !selectedMode || !totalNode || !detailNode) return;
 
   const count = Math.max(1, Number(countInput.value) || 1);
-  const astrologyEnabled = Boolean(form.querySelector('#use_astrology')?.checked);
-  const normalModeCount = Number(form.dataset.modeCount || 4);
   const astrologyModeCount = Number(form.dataset.modeCountAstrology || 5);
-  const modeCount = selectedMode.value === 'all' ? (astrologyEnabled ? astrologyModeCount : normalModeCount) : 1;
+  const modeCount = selectedMode.value === 'all' ? astrologyModeCount : 1;
   const total = count * modeCount;
   totalNode.textContent = `${total}口`;
   detailNode.textContent = selectedMode.value === 'all'
@@ -167,13 +160,11 @@ function updatePlannedTotal() {
 function setupAstrologyControls() {
   const form = document.querySelector('form[data-generate-form]');
   if (!form) return;
-  const toggle = form.querySelector('#use_astrology');
   const fields = form.querySelector('[data-astrology-fields]');
   const entry = form.querySelector('[data-astrology-entry]');
-  const astrologyMode = form.querySelector('input[name="mode"][value="astrology"]');
   const controls = getBirthDateControls(form);
   const selects = [controls.year, controls.month, controls.day].filter(Boolean);
-  if (!toggle || !fields || !controls.hidden || selects.length !== 3) return;
+  if (!fields || !controls.hidden || selects.length !== 3) return;
 
   const updateDayOptions = () => {
     const year = Number(controls.year.value) || 2000;
@@ -187,26 +178,20 @@ function setupAstrologyControls() {
   };
 
   const update = () => {
-    const selectedMode = form.querySelector('input[name="mode"]:checked')?.value || 'all';
-    if (selectedMode === 'astrology' && !toggle.checked) toggle.checked = true;
-    const active = toggle.checked || selectedMode === 'astrology';
-    fields.classList.toggle('is-disabled', !active);
-    entry?.classList.toggle('is-oracle-active', active);
+    fields.classList.remove('is-disabled');
+    entry?.classList.add('is-oracle-active');
     selects.forEach((select) => {
-      select.required = active;
-      select.disabled = !active;
-      if (!active) select.setCustomValidity('');
+      select.required = true;
+      select.disabled = false;
     });
-    controls.hidden.disabled = !active;
-    if (active) syncBirthDate(form);
+    controls.hidden.disabled = false;
+    syncBirthDate(form);
     updateBirthDatePreview(form);
     updatePlannedTotal();
   };
 
-  toggle.addEventListener('change', update);
   selects.forEach((select) => {
     select.addEventListener('change', () => {
-      if (!toggle.checked) toggle.checked = true;
       updateDayOptions();
       syncBirthDate(form);
       updateBirthDatePreview(form);
@@ -214,7 +199,6 @@ function setupAstrologyControls() {
     });
   });
   form.querySelectorAll('input[name="mode"]').forEach((radio) => radio.addEventListener('change', update));
-  if (astrologyMode?.checked) toggle.checked = true;
   updateDayOptions();
   syncBirthDate(form);
   update();
@@ -223,7 +207,7 @@ function setupAstrologyControls() {
 function setupPlannedTotal() {
   const form = document.querySelector('form[data-generate-form]');
   if (!form) return;
-  form.querySelectorAll('input[name="mode"], #count, #use_astrology').forEach((input) => {
+  form.querySelectorAll('input[name="mode"], #count').forEach((input) => {
     input.addEventListener('input', updatePlannedTotal);
     input.addEventListener('change', updatePlannedTotal);
   });
@@ -422,7 +406,7 @@ function setupDrawAnimation() {
     const loaderProgress = loader.querySelector('[data-loader-progress]');
     const loaderCore = loader.querySelector('[data-loader-core]');
     const seals = Array.from(loader.querySelectorAll('[data-ritual-seal]'));
-    const astrologyEnabled = Boolean(form.querySelector('#use_astrology')?.checked);
+    const astrologyEnabled = true;
     const phases = astrologyEnabled
       ? [
           ['誕生の光', 'あなたが生まれた日の星をひらいています', '星空に刻まれた、あなたの最初の光をたどっています'],

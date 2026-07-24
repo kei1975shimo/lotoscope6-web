@@ -2,7 +2,7 @@
   "balance": {
     "mode_id": "balance",
     "mode_name": "Balance",
-    "mode_name_ja": "調和のバランス型",
+    "mode_name_ja": "バランス",
     "description": "過去の数字の流れと全体のまとまりを、偏りすぎないよう静かに整えます。",
     "data_min": 2,
     "data_max": 3,
@@ -14,7 +14,7 @@
   "data": {
     "mode_id": "data",
     "mode_name": "Data",
-    "mode_name_ja": "数字の記憶重視型",
+    "mode_name_ja": "過去データ",
     "description": "これまで数字が見せてきた出現の流れや間隔を、いつもより深く読み取ります。",
     "data_min": 3,
     "data_max": 4,
@@ -26,7 +26,7 @@
   "cold": {
     "mode_id": "cold",
     "mode_name": "Cold",
-    "mode_name_ja": "眠れる数字を呼ぶ型",
+    "mode_name_ja": "眠っている数字",
     "description": "しばらく姿を見せていない数字にも目を向け、組み合わせへ新しい風を招きます。",
     "data_min": 1,
     "data_max": 2,
@@ -38,7 +38,7 @@
   "payout": {
     "mode_id": "payout",
     "mode_name": "Payout",
-    "mode_name_ja": "高位数のひらめき型",
+    "mode_name_ja": "高い数字を含める",
     "description": "誕生日数字だけに心が寄りすぎないよう、32〜43の数字にも光を当てます。",
     "data_min": 1,
     "data_max": 2,
@@ -50,7 +50,7 @@
   "astrology": {
     "mode_id": "astrology",
     "mode_name": "Astrology",
-    "mode_name_ja": "誕生星のラッキー型",
+    "mode_name_ja": "星読み",
     "description": "あなたが生まれた日の星と、今日めぐる七天体から響く数字を中心に結びます。",
     "astrology_core_min": 2,
     "astrology_core_max": 3,

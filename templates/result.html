@@ -12,44 +12,45 @@
   <span class="num {{ band }} {% if ns in astros %}astrology-number{% endif %} {% if ni >= 32 %}over31{% endif %}" aria-label="{{ ni }}{% if ns in astros %}、星読みラッキーナンバー{% endif %}">{% if ns in astros %}<i class="astro-mark" aria-hidden="true">✦</i>{% endif %}{{ '%02d'|format(ni) }}</span>
 {%- endmacro %}
 
-<section class="hero compact result-hero">
-  <div class="hero-grid">
-    <div>
-      <div class="hero-kicker">CELESTIAL READING</div>
-      <h1>LOTOSCOPE 6<small>星があなたへ届けた六つの数字</small></h1>
-      <p>星読みは終わりました。まずは答えを急がず、並んだ数字をゆっくり眺めてください。ふと目に留まる組み合わせが、今日のあなたに近い導きかもしれません。</p>
-      <div class="hero-points">
-        <span>生成数: {{ rows|length }}口</span>
-        <span>{% if mode == 'all' %}{{ active_mode_count }}種類 × 各{{ count }}口{% else %}選択モード × {{ count }}口{% endif %}</span>
-        <span>星読み: {% if astrology_profile %}{{ astrology_profile.birth_date_ja }}から計算{% else %}未使用{% endif %}</span>
-      </div>
+{% set best = rows|sort(attribute='ticket_score')|last %}
+{% if best %}
+<section id="best-pick" class="hero compact result-hero primary-result-hero">
+  <div class="primary-result-copy">
+    <div class="hero-kicker">YOUR CELESTIAL NUMBERS</div>
+    <h1>今回、星が導いた六つの数字</h1>
+    <p class="primary-result-intro">
+      {% if astrology_profile %}{{ astrology_profile.birth_date_ja }}の星と、今日の天体を重ねて選びました。{% else %}今回の条件から、もっとも調和した組み合わせを選びました。{% endif %}
+    </p>
+    <div class="numbers primary-result-numbers number-reveal-group" aria-label="今回の六つの数字">
+      {% for n in [best.n1,best.n2,best.n3,best.n4,best.n5,best.n6] %}
+        {{ ball(n, best.astrology_numbers) }}
+      {% endfor %}
     </div>
-    <div class="hero-visual small desktop-only" aria-hidden="true">
-      <div class="orbital"></div><div class="center-core">PICK<br>REPORT</div>
+    <div class="primary-result-meta">
+      <span><small>導き方</small><strong>{{ best.mode_name_ja or best.mode_name }}</strong></span>
+      <span><small>調和の目安</small><strong>{{ best.ticket_score }} / 100</strong></span>
+      <span><small>生成した候補</small><strong>{{ rows|length }}口</strong></span>
+    </div>
+    <p class="primary-result-reason">{{ best.reason }}</p>
+    <div class="primary-result-action">
+      <a class="ghost-button primary-retry-button" href="{{ edit_url }}">もう一度、星を読む</a>
+      <span>誕生日や導き方を変えて、すぐに読み直せます。</span>
     </div>
   </div>
 </section>
+{% endif %}
 
-<nav class="sticky-mobile-nav" aria-label="結果内メニュー">
-  <a href="#best-pick">評価1位</a>
-  <a href="#top3">上位3口</a>
-  <a href="#mode-results">モード別</a>
+<nav class="sticky-mobile-nav result-section-nav" aria-label="結果内メニュー">
+  <a href="#best-pick">今回の数字</a>
+  {% if astrology_profile %}<a href="#astrology-reading">星読みの理由</a>{% endif %}
+  <a href="#mode-results">ほかの候補</a>
+  <a href="#answer-check">答え合わせ</a>
 </nav>
 
-<div class="bottom-action-bar">
-  <a class="ghost-button" href="{{ edit_url }}">星読みをやり直す</a>
-  <form method="post" action="{{ url_for('check_form') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input type="hidden" name="ticket_token" value="{{ token }}">
-    <button type="submit">抽せん結果と答え合わせ</button>
-  </form>
-</div>
-
-
 {% if astrology_profile %}
-<section class="panel compact-panel astrology-report">
+<section id="astrology-reading" class="panel compact-panel astrology-report">
   <div class="panel-head compact-head">
-    <div><div class="section-kicker">CELESTIAL NUMBERS</div><h2>今日、あなたの星に響いた数字</h2></div>
+    <div><div class="section-kicker">CELESTIAL READING</div><h2>この数字へつながった星読み</h2></div>
     <p>{{ astrology_profile.birth_date_ja }} × {{ astrology_profile.target_date_ja }}</p>
   </div>
   <div class="astrology-summary-grid">
@@ -57,10 +58,14 @@
     <div><span>月星座</span><strong>{{ astrology_profile.moon_sign }}</strong></div>
     <div><span>生成日の太陽</span><strong>{{ astrology_profile.current_sun_sign }}</strong></div>
   </div>
-  <div class="numbers astrology-core-numbers number-reveal-group">
+  <div class="reference-number-heading">
+    <strong>星読みで参考にした中心数字</strong>
+    <span>下の六つは買い目そのものではなく、組み合わせを選ぶための手がかりです。</span>
+  </div>
+  <div class="numbers astrology-core-numbers">
     {% for n in astrology_profile.core_numbers %}{{ ball(n, astrology_profile.core_numbers|join(',')) }}{% endfor %}
   </div>
-  <p class="note">この六つは、今回の星読みの中心となる数字です。候補の中では✦の印を添えています。</p>
+  <p class="note">実際の買い目は、ページ最上部に大きく表示した六つの数字です。候補内で中心数字と重なったものには✦を添えています。</p>
   <details class="advanced astrology-details">
     <summary><span data-toggle-label data-open-label="天体位置を閉じる" data-closed-label="星が重なった位置を詳しく見る">星が重なった位置を詳しく見る</span></summary>
     <div class="planet-table">
@@ -78,22 +83,11 @@
 </section>
 {% endif %}
 
-{% set best = rows|sort(attribute='ticket_score')|last %}
 {% if best %}
-<section id="best-pick" class="panel hero-recommend compact-panel">
-  <div class="recommend-grid">
-    <div>
-      <div class="section-kicker">TOP SCORE</div>
-      <h2>今回もっとも調和した組み合わせ</h2>
-      <div class="big-mode">{{ best.mode_name_ja or best.mode_name }}</div>
-      <div class="numbers hero-numbers number-reveal-group">
-        {% for n in [best.n1,best.n2,best.n3,best.n4,best.n5,best.n6] %}
-          {{ ball(n, best.astrology_numbers) }}
-        {% endfor %}
-      </div>
-      <p class="lead-text">{{ best.reason }}</p>
-    </div>
-    <div class="score-orb"><span>調和の目安</span><strong>{{ best.ticket_score }}</strong><small>/ 100</small></div>
+<section id="reading-details" class="panel compact-panel result-detail-panel">
+  <div class="panel-head compact-head">
+    <div><div class="section-kicker">WHY THESE NUMBERS</div><h2>この組み合わせを選んだ理由</h2></div>
+    <p>数字の見え方を確かめたい方だけ、ここから先をご覧ください。</p>
   </div>
   <div class="score-breakdown {% if astrology_profile %}with-astrology{% endif %}" aria-label="総合スコアの内訳">
     <div><span>過去データ評価</span><strong>{{ best.data_score_avg }}</strong><small>{% if astrology_profile %}35%{% else %}45%{% endif %}</small></div>
@@ -105,12 +99,13 @@
 </section>
 {% endif %}
 
+{% if rows|length > 1 %}
 <section id="top3" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">TOP 3</div><h2>心に留めておきたい三つの組み合わせ</h2></div><p>迷うときは、最初に惹かれた数字も大切にしてみてください。</p></div>
+  <div class="panel-head compact-head"><div><div class="section-kicker">OTHER PICKS</div><h2>ほかに心に留めておきたい組み合わせ</h2></div><p>最初の数字とは別に、気になる候補がないか見比べられます。</p></div>
   <div class="ticket-list compact-list">
     {% for row in rows|sort(attribute='ticket_score', reverse=true) %}
     {% if loop.index <= 3 %}
-    <article class="mini-ticket">
+    <article class="mini-ticket {% if loop.index == 1 %}is-primary-ticket{% endif %}">
       <div class="ticket-summary-row">
         <div>
           <div class="ticket-kicker">{{ row.mode_name_ja or row.mode_name }} <span>#{{ loop.index }}</span></div>
@@ -127,16 +122,20 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
 <section id="mode-results" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">BY GUIDANCE</div><h2>五つの導きから届いた数字</h2></div><p>それぞれの扉を開くと、数字が結ばれた理由を確認できます。</p></div>
+  <div class="panel-head compact-head">
+    <div><div class="section-kicker">ALL CANDIDATES</div><h2>{% if mode == 'all' %}五つの導きから届いた数字{% else %}今回届いたすべての候補{% endif %}</h2></div>
+    <p>扉を開くと、数字が結ばれた理由や構成を確認できます。</p>
+  </div>
 
   <div class="accordion-group">
     {% for mode_id, title, badge, desc in mode_choices %}
       {% if mode_id != 'all' %}
         {% set mode_rows = rows|selectattr('mode_id','equalto',mode_id)|list %}
         {% if mode_rows %}
-        <details class="accordion mode-{{ mode_id }}">
+        <details class="accordion mode-{{ mode_id }}" {% if mode != 'all' %}open{% endif %}>
           <summary>
             <span><b>{{ title }}</b><small>{{ desc }}</small></span>
             <em>{{ mode_rows|length }}口</em>
@@ -182,6 +181,20 @@
       {% endif %}
     {% endfor %}
   </div>
+</section>
+
+<section id="answer-check" class="panel compact-panel answer-check-panel">
+  <div class="answer-check-icon" aria-hidden="true">✓</div>
+  <div class="answer-check-copy">
+    <div class="section-kicker">AFTER THE DRAW</div>
+    <h2>抽せん後に、ここで答え合わせ</h2>
+    <p>いまは数字をゆっくり確かめてください。抽せん結果が出たあと、このページの下まで戻れば照合できます。</p>
+  </div>
+  <form method="post" action="{{ url_for('check_form') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="ticket_token" value="{{ token }}">
+    <button type="submit">抽せん結果と答え合わせ</button>
+  </form>
 </section>
 
 <button class="float-top" type="button" data-scroll-top aria-label="ページ上部へ戻る">↑</button>

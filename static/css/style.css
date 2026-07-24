@@ -1821,3 +1821,76 @@ button,.small-button,.bottom-action-bar button,.bottom-action-bar a{font-size:18
   .select-shell select.birth-select{padding-left:5px;padding-right:29px;font-size:16px}
   .select-shell::after{right:10px}
 }
+
+
+/* v1.5.7 — 星読みを主動線にした結果ファーストUI -------------------------- */
+.oracle-always-on{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  align-self:flex-start;
+  padding:10px 13px;
+  border:1px solid rgba(243,207,135,.34);
+  border-radius:999px;
+  color:var(--gold-bright);
+  background:rgba(243,207,135,.08);
+  font-size:14px;
+  white-space:nowrap;
+}
+.oracle-always-on span{font-size:16px;text-shadow:0 0 12px rgba(243,207,135,.75)}
+.oracle-always-on b{font-size:14px}
+
+.primary-result-hero{
+  padding:24px 18px 22px;
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(154,116,255,.20),transparent 40%),
+    linear-gradient(180deg,rgba(17,25,54,.98),rgba(7,11,27,.98));
+}
+.primary-result-copy{width:100%;max-width:760px;margin:0 auto}
+.primary-result-hero h1{margin:5px 0 8px;font-size:clamp(27px,8vw,46px);line-height:1.22}
+.primary-result-intro{max-width:620px;margin:0 auto;color:var(--muted-strong);font-size:15px;line-height:1.7}
+.primary-result-numbers{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:5px;
+  width:100%;
+  max-width:430px;
+  margin:22px auto 18px;
+}
+.primary-result-numbers .num{
+  justify-self:center;
+  width:clamp(39px,11.5vw,58px);
+  height:clamp(39px,11.5vw,58px);
+  flex-basis:auto;
+  font-size:clamp(14px,4.3vw,20px);
+  box-shadow:inset 0 3px 9px rgba(255,255,255,.36),inset 0 -12px 19px rgba(0,0,0,.3),0 8px 18px rgba(0,0,0,.28);
+}
+.primary-result-numbers .astro-mark{font-size:10px;top:-5px;right:-2px}
+.primary-result-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 auto;max-width:590px}
+.primary-result-meta span{padding:10px 6px;border:1px solid var(--line-soft);border-radius:14px;background:rgba(255,255,255,.04)}
+.primary-result-meta small{display:block;color:var(--muted);font-size:11px;line-height:1.35}
+.primary-result-meta strong{display:block;margin-top:4px;color:var(--text);font-size:13px;line-height:1.35}
+.primary-result-reason{max-width:650px;margin:16px auto 0;color:var(--text);font-size:15px;line-height:1.8}
+.primary-result-action{display:flex;flex-direction:column;align-items:center;gap:7px;margin-top:17px}
+.primary-result-action .primary-retry-button{width:min(100%,360px);min-height:54px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.primary-result-action span{color:var(--muted);font-size:12px;line-height:1.5}
+.result-section-nav{margin-top:12px}
+.reference-number-heading{display:flex;flex-direction:column;gap:4px;margin:17px 0 10px}
+.reference-number-heading strong{font-size:16px}
+.reference-number-heading span{color:var(--muted-strong);font-size:13px;line-height:1.6}
+.result-detail-panel{scroll-margin-top:84px}
+.mini-ticket.is-primary-ticket{border-color:rgba(243,207,135,.34);background:rgba(243,207,135,.045)}
+.answer-check-panel{display:grid;gap:14px;scroll-margin-top:84px;margin-bottom:72px;text-align:center}
+.answer-check-icon{width:50px;height:50px;margin:0 auto;display:grid;place-items:center;border:1px solid rgba(82,211,164,.35);border-radius:50%;color:var(--jade);background:rgba(82,211,164,.08);font-size:24px;font-weight:900}
+.answer-check-copy h2{margin:5px 0 8px;font-size:23px}
+.answer-check-copy p{max-width:620px;margin:0 auto;color:var(--muted-strong);font-size:14px;line-height:1.7}
+.answer-check-panel form{display:flex;justify-content:center;margin:0}
+.answer-check-panel button{width:min(100%,440px);min-height:58px;font-size:18px}
+
+@media (min-width:560px){
+  .oracle-always-on{align-self:center}
+  .primary-result-hero{padding:34px 30px 30px}
+  .primary-result-meta strong{font-size:15px}
+  .answer-check-panel{padding:28px}
+}

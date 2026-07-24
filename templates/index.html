@@ -1,11 +1,8 @@
 {% extends "base.html" %}
 {% block title %}LOTOSCOPE 6 | 買い目作成{% endblock %}
 {% block content %}
-{% set current_mode = values.get('mode', 'all') %}
+{% set current_mode = values.get('mode', 'astrology') %}
 {% set current_count = values.get('count', default_ticket_count|string) %}
-{% set astrology_setting_present = values.get('astrology_setting_present') or values.get('use_astrology') is not none %}
-{% set astrology_requested = values.get('use_astrology') in ['1', 'true', 'on', 'yes'] %}
-{% set astrology_enabled = current_mode == 'astrology' or values.get('birth_date') or astrology_requested or not astrology_setting_present %}
 {% set birth_iso = values.get('birth_date', '') %}
 {% set birth_year_value = birth_iso[0:4] if birth_iso|length >= 10 else '' %}
 {% set birth_month_value = birth_iso[5:7] if birth_iso|length >= 10 else '' %}
@@ -27,7 +24,7 @@
       <p>あなたが生まれた日の星と、今日めぐる天体を重ねてみましょう。過去の数字の記憶にも耳を澄ませながら、今のあなたに響く六つの候補をそっと結びます。</p>
       <div class="hero-points">
         <span>☾ あなたの誕生星を読む</span>
-        <span>✦ 五つの導きを重ねる</span>
+        <span>✦ 星読みを中心に数字を結ぶ</span>
         <span>☉ 今日の天体に耳を澄ます</span>
       </div>
     </div>
@@ -74,7 +71,6 @@
 
 <form id="number-form" class="panel app-form-panel" method="post" action="{{ url_for('generate') }}" data-generate-form data-mode-count="{{ generation_mode_count }}" data-mode-count-astrology="{{ generation_mode_count_with_astrology }}" data-today="{{ today_date }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <input type="hidden" name="astrology_setting_present" value="1">
 
   <div class="panel-head app-panel-head">
     <div>
@@ -84,7 +80,7 @@
     <p>あなたがこの世界に生まれた日を、星図へそっと預けてください。</p>
   </div>
 
-  <div class="astrology-entry {% if astrology_enabled %}is-oracle-active{% endif %}" data-astrology-entry>
+  <div class="astrology-entry is-oracle-active" data-astrology-entry>
     <div class="astrology-entry-head">
       <div>
         <span class="section-kicker">BIRTH CHART × TODAY</span>
@@ -92,11 +88,10 @@
         <h3>誕生の星に、今日の空を重ねてみましょう</h3>
         <p>生年月日をお預かりすると、誕生の日の星と今日の七天体を読み合わせ、1〜43の中から今のあなたに響く数字を探します。</p>
       </div>
-      <label class="astro-switch" for="use_astrology">
-        <input id="use_astrology" name="use_astrology" type="checkbox" value="1" {% if astrology_enabled %}checked{% endif %}>
-        <span aria-hidden="true"></span>
-        <b>星からの導きを受け取る</b>
-      </label>
+      <div class="oracle-always-on" aria-label="星読みは標準で有効です">
+        <span aria-hidden="true">✦</span>
+        <b>星読みは標準で有効です</b>
+      </div>
     </div>
     <div class="astrology-date-field" data-astrology-fields>
       <input id="birth_date" name="birth_date" type="hidden" value="{{ birth_iso }}">
@@ -170,7 +165,7 @@
   </div>
 
   <div id="mode-panel" class="field">
-    <div class="label-row"><span class="field-label">数字の受け取り方</span><span>迷った日は五つの導きを重ねて</span></div>
+    <div class="label-row"><span class="field-label">数字の受け取り方</span><span>まずは「星読み」がおすすめです</span></div>
     <div class="mode-grid app-mode-grid">
       {% for mode_id, title, badge, desc in mode_choices %}
       <label class="mode-card mode-{{ mode_id }}">
@@ -187,13 +182,13 @@
     <div class="field">
       <label for="count">それぞれの導きから受け取る口数</label>
       <input id="count" name="count" type="number" inputmode="numeric" min="1" max="{{ max_ticket_count }}" value="{{ current_count }}">
-      <div id="count-help" class="hint">五つの導きを選ぶと、それぞれから同じ口数の候補を受け取れます。星読みを外した場合は四つになります。</div>
+      <div id="count-help" class="hint">選んだ導きから、この口数の候補を受け取ります。「五つの導きをすべて試す」では、五種類それぞれから同じ口数を生成します。</div>
     </div>
     <div class="field">
       <span class="field-label">受け取る候補の合計</span>
       <div class="tip app-tip-card">
         <strong id="planned-total-detail">計算中</strong>
-        <span class="tiny">初めての方は「五つの導き・各2口」がおすすめです。十通りの中から、心に残る数字をゆっくり眺めてみてください。</span>
+        <span class="tiny">初めての方は「星読み・2口」がおすすめです。まずは数字を受け取り、気になるときだけ別の導きも試してみてください。</span>
       </div>
     </div>
   </div>
@@ -227,14 +222,14 @@
   <div class="quick-grid app-quick-grid">
     <div class="quick-card"><strong>あなたの星</strong><span>誕生日と今日の七天体を重ね、今響く数字を探します。</span></div>
     <div class="quick-card"><strong>数字の記憶</strong><span>これまで数字が見せてきた流れにも、静かに耳を澄ませます。</span></div>
-    <div class="quick-card"><strong>五つの導き</strong><span>異なる五つの視点から、あなたに届いた候補を見比べます。</span></div>
+    <div class="quick-card"><strong>選べる導き</strong><span>基本の星読みから、バランスや過去データなどへ切り替えられます。</span></div>
     <div class="quick-card"><strong>答え合わせ</strong><span>抽せんのあとには、選んだ数字との重なりを確かめられます。</span></div>
   </div>
   <ol class="steps">
     <li><b>1</b><div><strong>あなたの誕生日を星図へ預ける</strong><div class="tiny">西暦・月・日を選ぶと、太陽星座が姿を現します。</div></div></li>
-    <li><b>2</b><div><strong>数字の受け取り方を選ぶ</strong><div class="tiny">迷った日は、五つの導きを重ねる方法がおすすめです。</div></div></li>
-    <li><b>3</b><div><strong>星から届いた数字を眺める</strong><div class="tiny">すぐに決めず、なぜか心に残る組み合わせを探してみましょう。</div></div></li>
-    <li><b>4</b><div><strong>選んだ数字と答え合わせをする</strong><div class="tiny">最新回は抽せん数字を手入力して、重なりを確かめられます。</div></div></li>
+    <li><b>2</b><div><strong>数字の受け取り方を選ぶ</strong><div class="tiny">最初は一番上の「星読み」が選ばれています。必要に応じて別の方法へ切り替えられます。</div></div></li>
+    <li><b>3</b><div><strong>星から届いた数字を眺める</strong><div class="tiny">生成後は、最初に大きく表示される六つの数字を確かめましょう。</div></div></li>
+    <li><b>4</b><div><strong>選んだ数字と答え合わせをする</strong><div class="tiny">答え合わせは結果ページの下部にあり、抽せん後にゆっくり確認できます。</div></div></li>
   </ol>
 </section>
 {% endblock %}

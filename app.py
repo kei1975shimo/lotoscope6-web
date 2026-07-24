@@ -32,43 +32,43 @@ from pools import build_pools  # noqa: E402
 from result_checker import check_ticket_rows, draw_numbers_from_row, load_draw_by_no, load_latest_draw  # noqa: E402
 from utils import load_json, read_csv_dicts  # noqa: E402
 
-APP_VERSION = "v1.5.6-public"
+APP_VERSION = "v1.5.7-public"
 MODE_CHOICES = [
     (
-        "all",
-        "五つの導きを重ねる",
-        "迷ったらこちら",
-        "どの流れを選ぶか迷う日は、星読みを含む五つの導きを重ねてみましょう。星読みを外した場合は四つの導きになります。",
+        "astrology",
+        "星読み",
+        "おすすめ・基本",
+        "あなたが生まれた日の星と、今日めぐる七天体から響く数字を中心に結びます。",
     ),
     (
         "balance",
-        "調和のバランス型",
-        "穏やかな導き",
-        "過去の数字の流れと全体のまとまりを、偏りすぎないよう静かに整えます。",
+        "バランス",
+        "偏りを整える",
+        "過去の数字の流れと全体のまとまりを見ながら、偏りすぎない組み合わせへ整えます。",
     ),
     (
         "data",
-        "数字の記憶重視型",
-        "過去からの導き",
-        "これまで数字が見せてきた出現の流れや間隔を、いつもより深く読み取ります。",
+        "過去データ",
+        "数字の記憶",
+        "これまでの出現傾向や間隔をいつもより深く読み、流れのある数字を選びます。",
     ),
     (
         "cold",
-        "眠れる数字を呼ぶ型",
+        "眠っている数字",
         "変化の気配",
         "しばらく姿を見せていない数字にも目を向け、組み合わせへ新しい風を招きます。",
     ),
     (
         "payout",
-        "高位数のひらめき型",
-        "視野を広げる",
-        "誕生日数字だけに心が寄りすぎないよう、32〜43の数字にも光を当てます。",
+        "高い数字を含める",
+        "32〜43にも注目",
+        "誕生日に結びつきやすい数字だけでなく、32〜43の数字にも光を当てます。",
     ),
     (
-        "astrology",
-        "誕生星のラッキー型",
-        "あなたの星から",
-        "あなたが生まれた日の星と、今日めぐる七天体から響く数字を中心に結びます。",
+        "all",
+        "五つの導きをすべて試す",
+        "じっくり比較",
+        "星読み・バランス・過去データ・眠っている数字・高い数字の五つをまとめて試します。",
     ),
 ]
 MODE_IDS = {m[0] for m in MODE_CHOICES}
@@ -82,7 +82,7 @@ GENERATION_MODE_IDS = [*BASE_GENERATION_MODE_IDS, ASTROLOGY_MODE_ID]
 ASTROLOGY_MODE_RULE_FALLBACK: Dict[str, Any] = {
     "mode_id": ASTROLOGY_MODE_ID,
     "mode_name": "Astrology",
-    "mode_name_ja": "誕生星のラッキー型",
+    "mode_name_ja": "星読み",
     "description": "あなたが生まれた日の星と、今日めぐる七天体から響く数字を中心に結びます。",
     "astrology_core_min": 2,
     "astrology_core_max": 3,
@@ -318,7 +318,7 @@ def create_app() -> Flask:
 
 
 def parse_generate_form(form: Any) -> Tuple[str, int, str, date | None]:
-    mode = str(form.get("mode", "all")).strip()
+    mode = str(form.get("mode", "astrology")).strip()
     if mode not in MODE_IDS:
         raise ValueError("生成モードを選択してください。")
 
@@ -336,9 +336,9 @@ def parse_generate_form(form: Any) -> Tuple[str, int, str, date | None]:
         raise ValueError("再現用キーワードは80文字以内で入力してください。")
 
     birth_date_text = str(form.get("birth_date", "")).strip()
-    use_astrology = str(form.get("use_astrology", "")).strip().lower() in {"1", "true", "on", "yes"}
-    use_astrology = use_astrology or mode == ASTROLOGY_MODE_ID or bool(birth_date_text)
-    birth_date_value = parse_birth_date(birth_date_text) if use_astrology else None
+    # v1.5.7: 誕生日入力をすべての導きの共通入口に統一します。
+    # 星読みを画面上の別スイッチにせず、どの方法でも誕生日と今日の天体を土台にします。
+    birth_date_value = parse_birth_date(birth_date_text)
 
     return mode, count, seed, birth_date_value
 
@@ -522,12 +522,8 @@ def build_edit_url(
     params: Dict[str, Any] = {"mode": mode, "count": count}
     if seed:
         params["seed"] = seed
-    params["astrology_setting_present"] = "1"
     if birth_date_value:
-        params["use_astrology"] = "1"
         params["birth_date"] = birth_date_value.isoformat()
-    else:
-        params["use_astrology"] = "0"
     return url_for("index", **params)
 
 def is_production_environment() -> bool:

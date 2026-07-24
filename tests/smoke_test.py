@@ -44,6 +44,7 @@ class LotoscopeSmokeTests(unittest.TestCase):
             "mode": "all",
             "count": "2",
             "seed": "smoke-test",
+            "birth_date": "1975-08-16",
         }
         data.update(overrides)
         return self.client.post("/generate", data=data)
@@ -70,7 +71,8 @@ class LotoscopeSmokeTests(unittest.TestCase):
         response = self.generate()
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
-        self.assertIn("生成数: 8口", html)
+        self.assertIn("生成した候補", html)
+        self.assertIn("8口", html)
         rows = rows_from_token(self.ticket_token(html))
         self.assertEqual(len(rows), 8)
         combinations = {tuple(int(row[f"n{i}"]) for i in range(1, 7)) for row in rows}
@@ -96,11 +98,14 @@ class LotoscopeSmokeTests(unittest.TestCase):
         self.assertNotIn("避けたい数字", html)
         self.assertNotIn('value="personal"', html)
 
-    def test_astrology_is_enabled_by_default_in_the_ui(self) -> None:
+    def test_astrology_is_the_default_first_mode_in_the_ui(self) -> None:
         html, _csrf = self.get_index()
-        self.assertRegex(html, r'id="use_astrology"[^>]*checked')
-        self.assertIn("星からの導きを受け取る", html)
-        self.assertIn("数字へ続く導き", html)
+        astrology_pos = html.index('value="astrology"')
+        balance_pos = html.index('value="balance"')
+        self.assertLess(astrology_pos, balance_pos)
+        self.assertRegex(html, r'name="mode" value="astrology"[^>]*checked')
+        self.assertIn("星読みは標準で有効です", html)
+        self.assertNotIn("星からの導きを受け取る", html)
 
     def test_astrology_rule_is_repaired_when_deployed_config_is_stale(self) -> None:
         stale_rules = {
@@ -116,16 +121,17 @@ class LotoscopeSmokeTests(unittest.TestCase):
         self.assertEqual(rules["astrology"]["mode_id"], "astrology")
         self.assertGreaterEqual(int(rules["astrology"]["astrology_core_min"]), 1)
 
-    def test_astrology_opt_out_is_preserved_on_edit_url(self) -> None:
-        response = self.generate(mode="all", count="1", astrology_setting_present="1", use_astrology="0")
+    def test_result_shows_numbers_before_details_and_answer_check_last(self) -> None:
+        response = self.generate(mode="astrology", count="1")
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
-        self.assertIn("生成数: 4口", html)
-        edit_match = re.search(r'<a class="ghost-button" href="([^"]+)">星読みをやり直す</a>', html)
-        self.assertIsNotNone(edit_match)
-        edit_response = self.client.get(edit_match.group(1).replace("&amp;", "&"))
-        edit_html = edit_response.get_data(as_text=True)
-        self.assertNotRegex(edit_html, r'id="use_astrology"[^>]*checked')
+        number_pos = html.index("今回、星が導いた六つの数字")
+        detail_pos = html.index("この数字へつながった星読み")
+        check_pos = html.index("抽せん後に、ここで答え合わせ")
+        self.assertLess(number_pos, detail_pos)
+        self.assertLess(detail_pos, check_pos)
+        self.assertIn("もう一度、星を読む", html)
+        self.assertIn("下の六つは買い目そのものではなく", html)
 
     def test_manual_check_and_recheck_flow(self) -> None:
         generated = self.generate(mode="balance", count="2")
@@ -247,13 +253,12 @@ class LotoscopeSmokeTests(unittest.TestCase):
         response = self.generate(
             mode="astrology",
             count="2",
-            use_astrology="1",
             birth_date="1975-08-16",
             seed="astrology-smoke",
         )
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
-        self.assertIn("今日、あなたの星に響いた数字", html)
+        self.assertIn("この数字へつながった星読み", html)
         self.assertIn("太陽星座", html)
         rows = rows_from_token(self.ticket_token(html))
         self.assertEqual(len(rows), 2)
@@ -261,17 +266,17 @@ class LotoscopeSmokeTests(unittest.TestCase):
         self.assertTrue(all(row["astrology_numbers"] for row in rows))
         self.assertTrue(all("birth_date" not in row for row in rows))
 
-    def test_all_mode_adds_astrology_only_when_enabled(self) -> None:
+    def test_all_mode_includes_all_five_guidances(self) -> None:
         response = self.generate(
             mode="all",
             count="2",
-            use_astrology="1",
             birth_date="1975-08-16",
             seed="all-with-astrology",
         )
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
-        self.assertIn("生成数: 10口", html)
+        self.assertIn("生成した候補", html)
+        self.assertIn("10口", html)
         rows = rows_from_token(self.ticket_token(html))
         self.assertEqual(len(rows), 10)
         self.assertIn("astrology", {row["mode_id"] for row in rows})
