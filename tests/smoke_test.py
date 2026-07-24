@@ -58,6 +58,11 @@ class LotoscopeSmokeTests(unittest.TestCase):
         self.assertIn("合計予定口数", html)
         self.assertIn("数字の受け取り方", html)
         self.assertIn("birth_year", html)
+        self.assertIn(">2000年</option>", html)
+        self.assertIn(">10月</option>", html)
+        self.assertIn(">11日</option>", html)
+        self.assertNotIn("<b>月</b>", html)
+        self.assertNotIn("<b>日</b>", html)
         self.assertIn("星図に刻まれた誕生日", html)
         self.assertIn("CELESTIAL DIVINATION", html)
 

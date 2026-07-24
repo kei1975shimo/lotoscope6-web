@@ -114,37 +114,34 @@
           <label class="date-select-field" for="birth_year">
             <span>西暦</span>
             <span class="select-shell">
-              <select id="birth_year" data-birth-part="year" autocomplete="bday-year" aria-label="生まれた年">
+              <select id="birth_year" class="birth-select birth-select-year" data-birth-part="year" autocomplete="bday-year" aria-label="生まれた年">
                 <option value="">年を選択</option>
                 {% for year in range(current_year, 1899, -1) %}
-                <option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}</option>
+                <option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}年</option>
                 {% endfor %}
               </select>
-              <b>年</b>
             </span>
           </label>
           <label class="date-select-field" for="birth_month">
             <span>月</span>
             <span class="select-shell">
-              <select id="birth_month" data-birth-part="month" autocomplete="bday-month" aria-label="生まれた月">
+              <select id="birth_month" class="birth-select birth-select-month" data-birth-part="month" autocomplete="bday-month" aria-label="生まれた月">
                 <option value="">月</option>
                 {% for month in range(1, 13) %}
-                <option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ '%02d'|format(month) }}</option>
+                <option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ month }}月</option>
                 {% endfor %}
               </select>
-              <b>月</b>
             </span>
           </label>
           <label class="date-select-field" for="birth_day">
             <span>日</span>
             <span class="select-shell">
-              <select id="birth_day" data-birth-part="day" autocomplete="bday-day" aria-label="生まれた日">
+              <select id="birth_day" class="birth-select birth-select-day" data-birth-part="day" autocomplete="bday-day" aria-label="生まれた日">
                 <option value="">日</option>
                 {% for day in range(1, 32) %}
-                <option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ '%02d'|format(day) }}</option>
+                <option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ day }}日</option>
                 {% endfor %}
               </select>
-              <b>日</b>
             </span>
           </label>
         </div>

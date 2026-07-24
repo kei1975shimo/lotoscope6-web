@@ -1599,25 +1599,26 @@ select{font:inherit}
 .fortune-question{display:block;color:#d9c6ff;font-size:9px;font-weight:900;letter-spacing:.18em}
 .fortune-date-heading label{display:block;margin:3px 0 2px;color:#fffaf3;font-family:"Yu Mincho",Georgia,serif;font-size:19px;font-weight:800}
 .fortune-date-heading p{font-size:12px;line-height:1.55}
-.date-select-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,.9fr) minmax(0,.9fr);gap:8px}
+.date-select-grid{display:grid;grid-template-columns:minmax(0,1.48fr) minmax(0,1fr) minmax(0,1fr);gap:8px}
 .date-select-field{display:block;min-width:0}
 .date-select-field>span:first-child{display:block;margin:0 0 6px 3px;color:#cbb8ec;font-size:10px;font-weight:900;letter-spacing:.1em}
-.select-shell{position:relative;display:block}
+.select-shell{position:relative;display:block;min-width:0}
 .select-shell select{
-  width:100%;height:58px;padding:0 34px 0 12px;border:1px solid rgba(226,207,255,.26);border-radius:15px;outline:none;
-  appearance:none;-webkit-appearance:none;color:#fffaf3;background:linear-gradient(180deg,rgba(6,4,21,.96),rgba(23,15,51,.92));
-  color-scheme:dark;font-size:17px;font-weight:850;font-variant-numeric:tabular-nums;box-shadow:inset 0 0 18px rgba(169,140,255,.04);transition:.2s ease
+  display:block;box-sizing:border-box;width:100%;min-width:0;height:58px;padding:0 36px 0 10px;border:1px solid rgba(226,207,255,.26);border-radius:15px;outline:none;
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;color:#fffaf3;-webkit-text-fill-color:#fffaf3;background:linear-gradient(180deg,rgba(6,4,21,.96),rgba(23,15,51,.92));
+  color-scheme:dark;font-size:17px;font-weight:850;font-variant-numeric:tabular-nums;line-height:normal;text-align:center;text-align-last:center;white-space:nowrap;
+  box-shadow:inset 0 0 18px rgba(169,140,255,.04);transition:.2s ease
 }
 /* Windows / Edge で候補一覧が白背景・白文字になるのを防ぐ */
-.select-shell select option,.select-shell select optgroup{background:#090615;color:#fffaf3}
+.select-shell select option,.select-shell select optgroup{background:#090615;color:#fffaf3;-webkit-text-fill-color:#fffaf3;text-align:left}
 .select-shell select option:checked{background:#3a265f;color:#fff4c9}
 .select-shell select option:disabled{background:#090615;color:#8f82a6}
 @media (forced-colors:active){.select-shell select{forced-color-adjust:auto}}
 .select-shell select:focus{border-color:#f1cd79;box-shadow:0 0 0 4px rgba(241,205,121,.11),0 0 20px rgba(169,140,255,.12)}
 .select-shell select:disabled{opacity:.5;cursor:not-allowed}
 .select-shell::after{content:"⌄";position:absolute;right:13px;top:50%;transform:translateY(-57%);color:#d9c7ff;font-size:16px;pointer-events:none}
-.select-shell b{position:absolute;right:29px;top:50%;transform:translateY(-50%);color:#bca9df;font-size:10px;pointer-events:none}
-.date-select-field:first-child .select-shell b{right:28px}
+/* v1.5.6: units are part of each option label. Old overlay units are disabled for cached HTML safety. */
+.select-shell b{display:none!important}
 .birth-date-seal{position:relative;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:9px;margin-top:13px;padding:10px 11px;border:1px dashed rgba(222,199,255,.20);border-radius:15px;background:rgba(2,1,12,.34);transition:.3s ease}
 .birth-date-seal .seal-symbol{width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(222,199,255,.20);border-radius:50%;color:#9f8cbf;background:rgba(169,140,255,.06);transition:.3s ease}
 .birth-date-seal small{display:block;color:#9e8dbd;font-size:9px;font-weight:900;letter-spacing:.12em}.birth-date-seal strong{display:block;margin-top:2px;color:#cbbde2;font-size:12px}
@@ -1655,7 +1656,7 @@ select{font:inherit}
 @keyframes ritualRotateReverse{to{transform:rotate(-360deg)}}
 @keyframes ritualTwinkle{from{opacity:.18;transform:scale(.65)}to{opacity:1;transform:scale(1.5)}}
 @keyframes coreOraclePulse{from{opacity:.72;transform:scale(.92)}to{opacity:1;transform:scale(1.12)}}
-@media(max-width:370px){.date-select-grid{grid-template-columns:1.45fr .82fr .82fr;gap:6px}.select-shell select{height:55px;padding-left:8px;font-size:15px}.select-shell b{display:none}.fortune-date-heading{align-items:flex-start}.fortune-date-emblem{flex-basis:54px;width:54px;height:54px}.ritual-scope{width:174px;height:174px}.ritual-zodiac span{transform:translate(-50%,-50%) rotate(calc(var(--i) * 30deg)) translateY(-72px) rotate(calc(var(--i) * -30deg))}}
+@media(max-width:370px){.date-select-grid{grid-template-columns:1.42fr 1fr 1fr;gap:6px}.select-shell select{height:55px;padding:0 30px 0 6px;font-size:15px}.select-shell b{display:none}.fortune-date-heading{align-items:flex-start}.fortune-date-emblem{flex-basis:54px;width:54px;height:54px}.ritual-scope{width:174px;height:174px}.ritual-zodiac span{transform:translate(-50%,-50%) rotate(calc(var(--i) * 30deg)) translateY(-72px) rotate(calc(var(--i) * -30deg))}}
 @media(prefers-reduced-motion:reduce){.ritual-stars i,.ritual-halo,.ritual-zodiac,.ritual-orbit,.ritual-core span,.number-reveal-group.is-revealing.reveal-start .num{animation:none!important}.number-reveal-group.is-revealing .num{opacity:1;transform:none;filter:none}}
 
 .sticky-submit button::before{content:none}
@@ -1692,8 +1693,8 @@ button,.small-button,.bottom-action-bar button,.bottom-action-bar a{font-size:18
 .fortune-date-heading label{font-size:22px;line-height:1.45}
 .fortune-date-heading p{font-size:15px;line-height:1.65}
 .date-select-field>span:first-child{font-size:12px}
-.select-shell select{height:62px;font-size:20px}
-.select-shell b{font-size:12px}
+.select-shell select{height:62px;padding-right:38px;font-size:20px}
+.select-shell b{display:none}
 .oracle-invocation{font-size:12px}.oracle-invocation b{font-size:12px}
 .birth-date-seal{grid-template-columns:42px minmax(0,1fr) auto;align-items:start;gap:11px;padding:13px}
 .birth-date-seal .seal-symbol{width:38px;height:38px;font-size:18px}
@@ -1728,7 +1729,7 @@ button,.small-button,.bottom-action-bar button,.bottom-action-bar a{font-size:18
   .panel-head h2{font-size:26px}
   .label-row label,label,.field-label{font-size:17px}
   .label-row span,.hint,.note,.tiny{font-size:15px}
-  .select-shell select{height:59px;padding-left:8px;font-size:18px}
+  .select-shell select{height:59px;padding:0 31px 0 6px;font-size:18px}
   .birth-date-seal{grid-template-columns:38px minmax(0,1fr);padding:11px}
   .seal-status{grid-column:2;justify-self:start;margin-top:0}
   .birth-zodiac-symbol{flex-basis:38px;width:38px;height:38px;font-size:22px}
@@ -1793,4 +1794,30 @@ button,.small-button,.bottom-action-bar button,.bottom-action-bar a{font-size:18
     grid-column:1 / -1;
     padding:11px;
   }
+}
+
+
+/* ==========================================================================
+   LOTOSCOPE 6 v1.5.6 — iPhone birth-date selected-value visibility fix
+   Native select values now include 年/月/日 in the option label. This avoids
+   overlaying the second digit of 10–12 / 10–31 on iPhone browsers.
+   ========================================================================== */
+.date-select-grid{grid-template-columns:minmax(0,1.48fr) minmax(0,1fr) minmax(0,1fr)}
+.select-shell{min-width:0}
+.select-shell select.birth-select{
+  box-sizing:border-box;
+  min-width:0;
+  padding-left:8px;
+  padding-right:36px;
+  text-align:center;
+  text-align-last:center;
+  white-space:nowrap;
+  overflow:visible;
+}
+.select-shell select.birth-select-year{padding-left:10px}
+.select-shell b{display:none!important}
+@media(max-width:370px){
+  .date-select-grid{grid-template-columns:minmax(0,1.42fr) minmax(0,1fr) minmax(0,1fr)}
+  .select-shell select.birth-select{padding-left:5px;padding-right:29px;font-size:16px}
+  .select-shell::after{right:10px}
 }
