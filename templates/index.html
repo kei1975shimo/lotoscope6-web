@@ -1,54 +1,32 @@
 {% extends "base.html" %}
-{% block title %}LOTOSCOPE 6 | 買い目作成{% endblock %}
+{% block title %}ロトナンバーズ・スコープ | 星から数字を受け取る{% endblock %}
+{% block body_class %}app-mobile page-home ritual-theme-loto6{% endblock %}
 {% block content %}
-{% set current_mode = values.get('mode', 'astrology') %}
+{% set current_product = values.get('product', 'loto6') %}
 {% set current_count = values.get('count', default_ticket_count|string) %}
 {% set birth_iso = values.get('birth_date', '') %}
 {% set birth_year_value = birth_iso[0:4] if birth_iso|length >= 10 else '' %}
 {% set birth_month_value = birth_iso[5:7] if birth_iso|length >= 10 else '' %}
 {% set birth_day_value = birth_iso[8:10] if birth_iso|length >= 10 else '' %}
 <section class="hero app-hero home-hero mystic-hero">
-  <svg class="hero-constellation constellation-left" viewBox="0 0 180 130" aria-hidden="true">
-    <path d="M18 96 L52 62 L83 76 L118 34 L154 52" />
-    <circle cx="18" cy="96" r="2.4"/><circle cx="52" cy="62" r="3.1"/><circle cx="83" cy="76" r="2.2"/><circle cx="118" cy="34" r="3"/><circle cx="154" cy="52" r="2.2"/>
-  </svg>
-  <svg class="hero-constellation constellation-right" viewBox="0 0 170 120" aria-hidden="true">
-    <path d="M20 30 L48 54 L78 38 L104 74 L146 88" />
-    <circle cx="20" cy="30" r="2.2"/><circle cx="48" cy="54" r="2.8"/><circle cx="78" cy="38" r="2.1"/><circle cx="104" cy="74" r="3.2"/><circle cx="146" cy="88" r="2.4"/>
-  </svg>
+  <svg class="hero-constellation constellation-left" viewBox="0 0 180 130" aria-hidden="true"><path d="M18 96 L52 62 L83 76 L118 34 L154 52"/><circle cx="18" cy="96" r="2.4"/><circle cx="52" cy="62" r="3.1"/><circle cx="83" cy="76" r="2.2"/><circle cx="118" cy="34" r="3"/><circle cx="154" cy="52" r="2.2"/></svg>
+  <svg class="hero-constellation constellation-right" viewBox="0 0 170 120" aria-hidden="true"><path d="M20 30 L48 54 L78 38 L104 74 L146 88"/><circle cx="20" cy="30" r="2.2"/><circle cx="48" cy="54" r="2.8"/><circle cx="78" cy="38" r="2.1"/><circle cx="104" cy="74" r="3.2"/><circle cx="146" cy="88" r="2.4"/></svg>
   <div class="moon-phase-row" aria-hidden="true"><span>●</span><span>◐</span><span>○</span><span>◑</span><span>●</span></div>
   <div class="hero-grid">
     <div class="hero-copy">
-      <div class="hero-kicker">CELESTIAL LOTTERY ORACLE</div>
-      <h1>LOTOSCOPE 6<small>あなたの星がささやく、六つの数字</small></h1>
-      <p>あなたが生まれた日の星と、今日めぐる天体を重ねてみましょう。過去の数字の記憶にも耳を澄ませながら、今のあなたに響く六つの候補をそっと結びます。</p>
-      <div class="hero-points">
-        <span>☾ あなたの誕生星を読む</span>
-        <span>✦ 星読みを中心に数字を結ぶ</span>
-        <span>☉ 今日の天体に耳を澄ます</span>
-      </div>
+      <div class="hero-kicker">CELESTIAL NUMBER ORACLE</div>
+      <h1>ロトナンバーズ・スコープ<small>星が導く、あなただけの数字</small></h1>
+      <p>生まれた日の星と、今日めぐる七天体を重ねます。ミニロト、ロト6、ロト7、ナンバーズ3、ナンバーズ4。それぞれに用意された異なる星の儀式から、今あなたが尋ねたい数字を選んでください。</p>
+      <div class="hero-points"><span>☾ あなたの誕生星を読む</span><span>✦ 券種ごとに異なる星の儀式</span><span>☉ 今日の天体を重ねる</span></div>
     </div>
     <div class="hero-visual mystic-hero-visual" aria-hidden="true">
       <div class="scope-aura"></div>
       <div class="cosmic-scope">
         <div class="scope-ring scope-ring-outer"></div>
-        <div class="scope-zodiac">
-          <span style="--i:0">♈</span><span style="--i:1">♉</span><span style="--i:2">♊</span><span style="--i:3">♋</span>
-          <span style="--i:4">♌</span><span style="--i:5">♍</span><span style="--i:6">♎</span><span style="--i:7">♏</span>
-          <span style="--i:8">♐</span><span style="--i:9">♑</span><span style="--i:10">♒</span><span style="--i:11">♓</span>
-        </div>
-        <div class="scope-ring scope-ring-middle"></div>
-        <div class="scope-ring scope-ring-inner"></div>
-        <div class="scope-axis scope-axis-x"></div>
-        <div class="scope-axis scope-axis-y"></div>
-        <div class="scope-orbit scope-orbit-a"><span class="scope-number num-band-1">06</span></div>
-        <div class="scope-orbit scope-orbit-b"><span class="scope-number num-band-3">24</span></div>
-        <div class="scope-orbit scope-orbit-c"><span class="scope-number num-band-4">37</span></div>
-        <div class="scope-core">
-          <small>LOTOSCOPE</small>
-          <strong>6</strong>
-          <em>NUMBER ORACLE</em>
-        </div>
+        <div class="scope-zodiac"><span style="--i:0">♈</span><span style="--i:1">♉</span><span style="--i:2">♊</span><span style="--i:3">♋</span><span style="--i:4">♌</span><span style="--i:5">♍</span><span style="--i:6">♎</span><span style="--i:7">♏</span><span style="--i:8">♐</span><span style="--i:9">♑</span><span style="--i:10">♒</span><span style="--i:11">♓</span></div>
+        <div class="scope-ring scope-ring-middle"></div><div class="scope-ring scope-ring-inner"></div><div class="scope-axis scope-axis-x"></div><div class="scope-axis scope-axis-y"></div>
+        <div class="scope-orbit scope-orbit-a"><span class="scope-number num-band-1">06</span></div><div class="scope-orbit scope-orbit-b"><span class="scope-number num-band-3">24</span></div><div class="scope-orbit scope-orbit-c"><span class="scope-number num-band-4">37</span></div>
+        <div class="scope-core"><small>LOTO NUMBERS</small><strong>✦</strong><em>CELESTIAL SCOPE</em></div>
       </div>
       <div class="scope-caption"><span>☾</span> HOROSCOPE NUMBER MAP <span>☉</span></div>
     </div>
@@ -57,179 +35,125 @@
 
 {% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
 
-<nav class="mobile-section-nav" aria-label="ページ内メニュー">
-  <a href="#number-form">あなたの星</a>
-  <a href="#mode-panel">数字の受け取り方</a>
-  <a href="#guide-panel">星読みの流れ</a>
-</nav>
+<nav class="mobile-section-nav" aria-label="ページ内メニュー"><a href="#product-panel">宝くじを選ぶ</a><a href="#birth-panel">誕生日を入力</a><a href="#guide-panel">星の儀式</a></nav>
 
-<section class="app-summary-strip" aria-label="ツール概要">
-  <div class="summary-pill"><strong>1〜43</strong><span>数字の範囲</span></div>
-  <div class="summary-pill"><strong>5つ</strong><span>数字へ続く導き</span></div>
-  <div class="summary-pill"><strong id="planned-total">—</strong><span>合計予定口数</span></div>
-</section>
-
-<form id="number-form" class="panel app-form-panel" method="post" action="{{ url_for('generate') }}" data-generate-form data-mode-count="{{ generation_mode_count }}" data-mode-count-astrology="{{ generation_mode_count_with_astrology }}" data-today="{{ today_date }}">
+<form id="number-form" class="panel app-form-panel" method="post" action="{{ url_for('generate') }}" data-generate-form data-today="{{ today_date }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="panel-head app-panel-head"><div><span>Step 1</span><h2>まず、数字を尋ねるくじを選んでください</h2></div><p>選んだ券種に合わせて、数字の世界と星の儀式が切り替わります。</p></div>
 
-  <div class="panel-head app-panel-head">
-    <div>
-      <span>Step 1</span>
-      <h2>まず、あなたの星を教えてください</h2>
-    </div>
-    <p>あなたがこの世界に生まれた日を、星図へそっと預けてください。</p>
-  </div>
-
-  <div class="astrology-entry is-oracle-active" data-astrology-entry>
-    <div class="astrology-entry-head">
-      <div>
-        <span class="section-kicker">BIRTH CHART × TODAY</span>
-        <span class="oracle-default-badge">✦ STANDARD ORACLE</span>
-        <h3>誕生の星に、今日の空を重ねてみましょう</h3>
-        <p>生年月日をお預かりすると、誕生の日の星と今日の七天体を読み合わせ、1〜43の中から今のあなたに響く数字を探します。</p>
-      </div>
-      <div class="oracle-always-on" aria-label="星読みは標準で有効です">
-        <span aria-hidden="true">✦</span>
-        <b>星読みは標準で有効です</b>
-      </div>
-    </div>
-    <div class="astrology-date-field" data-astrology-fields>
-      <input id="birth_date" name="birth_date" type="hidden" value="{{ birth_iso }}">
-      <div class="fortune-date-card">
-        <div class="fortune-date-heading">
-          <div class="fortune-date-emblem" aria-hidden="true"><span>☾</span><b>✦</b><span>☉</span></div>
-          <div>
-            <span class="fortune-question">YOUR BIRTH DATE</span>
-            <label id="birth-date-label" for="birth_year">あなたが生まれた日を選んでください</label>
-            <p>その日は、あなたの物語が星空に刻まれた大切な日です。</p>
-          </div>
-        </div>
-
-        <div class="date-select-grid" role="group" aria-labelledby="birth-date-label">
-          <label class="date-select-field" for="birth_year">
-            <span>西暦</span>
-            <span class="select-shell">
-              <select id="birth_year" class="birth-select birth-select-year" data-birth-part="year" autocomplete="bday-year" aria-label="生まれた年">
-                <option value="">年を選択</option>
-                {% for year in range(current_year, 1899, -1) %}
-                <option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}年</option>
-                {% endfor %}
-              </select>
-            </span>
-          </label>
-          <label class="date-select-field" for="birth_month">
-            <span>月</span>
-            <span class="select-shell">
-              <select id="birth_month" class="birth-select birth-select-month" data-birth-part="month" autocomplete="bday-month" aria-label="生まれた月">
-                <option value="">月</option>
-                {% for month in range(1, 13) %}
-                <option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ month }}月</option>
-                {% endfor %}
-              </select>
-            </span>
-          </label>
-          <label class="date-select-field" for="birth_day">
-            <span>日</span>
-            <span class="select-shell">
-              <select id="birth_day" class="birth-select birth-select-day" data-birth-part="day" autocomplete="bday-day" aria-label="生まれた日">
-                <option value="">日</option>
-                {% for day in range(1, 32) %}
-                <option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ day }}日</option>
-                {% endfor %}
-              </select>
-            </span>
-          </label>
-        </div>
-
-        <div class="birth-date-seal" data-birth-preview aria-live="polite">
-          <span class="seal-symbol" aria-hidden="true">✦</span>
-          <div class="seal-copy">
-            <small>星図に刻まれた誕生日</small>
-            <strong data-birth-preview-date>年月日を選ぶと、あなたの星が目を覚まします</strong>
-          </div>
-          <span class="seal-status" data-birth-preview-status>WAITING</span>
-          <div class="birth-zodiac-preview" data-birth-zodiac hidden>
-            <span class="birth-zodiac-symbol" data-zodiac-symbol aria-hidden="true">✦</span>
-            <span class="birth-zodiac-copy">
-              <small>あなたを照らす太陽星座</small>
-              <b data-zodiac-name>星の位置を確かめています</b>
-              <em data-zodiac-english>CELESTIAL SIGN</em>
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="hint">あなたの誕生日と今日の正午（日本時間）を基準に、太陽・月・水星・金星・火星・木星・土星の位置を読み解きます。</div>
-      <div class="oracle-invocation" aria-hidden="true"><span>☾</span><i></i><b>誕生の星図 × 今日の天体 × 数字の記憶</b><i></i><span>☉</span></div>
-      <div class="privacy-note">お預かりした生年月日は保存せず、この一度の星読みにだけ大切に使います。</div>
-    </div>
-  </div>
-
-  <div id="mode-panel" class="field">
-    <div class="label-row"><span class="field-label">数字の受け取り方</span><span>まずは「星読み」がおすすめです</span></div>
-    <div class="mode-grid app-mode-grid">
-      {% for mode_id, title, badge, desc in mode_choices %}
-      <label class="mode-card mode-{{ mode_id }}">
-        <input type="radio" name="mode" value="{{ mode_id }}" {% if current_mode == mode_id %}checked{% endif %}>
-        <span class="mode-badge">{{ badge }}</span>
-        <strong>{{ title }}</strong>
-        <em>{{ desc }}</em>
+  <div id="product-panel" class="field">
+    <div class="label-row"><span class="field-label">どの星の儀式をひらきますか？</span><span>選ぶ券種ごとに演出が変わります</span></div>
+    <div class="mode-grid app-mode-grid product-grid">
+      {% for item in product_choices %}
+      <label class="mode-card product-card product-{{ item.product_id }}">
+        <input type="radio" name="product" value="{{ item.product_id }}" data-product-name="{{ item.name }}" data-product-rule="{{ item.badge }}" data-button-label="{{ item.button_label }}" data-product-kind="{{ item.kind }}" data-product-count="{{ item.get('pick_count', item.get('digit_count')) }}" data-ritual-name="{{ item.ritual_name }}" data-ritual-symbol="{{ item.ritual_symbol }}" data-ritual-description="{{ item.ritual_description }}" data-ritual-duration="{{ item.ritual_duration }}" {% if current_product == item.product_id %}checked{% endif %}>
+        <span class="product-emblem-stage product-emblem-{{ item.product_id }}" aria-hidden="true">
+          {% if item.product_id == 'miniloto' %}
+          <svg class="product-emblem-svg" viewBox="0 0 240 112" role="img">
+            <defs><mask id="mini-crescent-mask"><rect width="240" height="112" fill="black"/><circle cx="88" cy="57" r="34" fill="white"/><circle cx="101" cy="45" r="31" fill="black"/></mask></defs>
+            <ellipse class="emblem-orbit" cx="128" cy="57" rx="96" ry="42"/>
+            <rect x="45" y="17" width="88" height="82" class="emblem-solid" mask="url(#mini-crescent-mask)"/>
+            <g class="emblem-nodes emblem-five-nodes"><circle cx="145" cy="23" r="4"/><circle cx="178" cy="38" r="4"/><circle cx="190" cy="67" r="4"/><circle cx="166" cy="91" r="4"/><circle cx="132" cy="82" r="4"/></g>
+            <path class="emblem-constellation" d="M145 23L178 38L190 67L166 91L132 82L145 23"/>
+            <path class="emblem-spark" d="M121 38l3.4 7.4 7.6 3.3-7.6 3.3-3.4 7.5-3.4-7.5-7.6-3.3 7.6-3.3z"/>
+          </svg>
+          {% elif item.product_id == 'loto6' %}
+          <svg class="product-emblem-svg" viewBox="0 0 240 112" role="img">
+            <circle class="emblem-orbit" cx="120" cy="56" r="46"/>
+            <polygon class="emblem-line emblem-hex" points="120,12 158,78 82,78"/>
+            <polygon class="emblem-line emblem-hex emblem-hex-reverse" points="120,100 158,34 82,34"/>
+            <g class="emblem-nodes emblem-six-nodes"><circle cx="120" cy="12" r="4"/><circle cx="158" cy="34" r="4"/><circle cx="158" cy="78" r="4"/><circle cx="120" cy="100" r="4"/><circle cx="82" cy="78" r="4"/><circle cx="82" cy="34" r="4"/></g>
+            <circle class="emblem-core" cx="120" cy="56" r="12"/><path class="emblem-spark" d="M120 43l3.5 8 8 3.5-8 3.5-3.5 8-3.5-8-8-3.5 8-3.5z"/>
+          </svg>
+          {% elif item.product_id == 'loto7' %}
+          <svg class="product-emblem-svg" viewBox="0 0 240 112" role="img">
+            <ellipse class="emblem-orbit" cx="120" cy="56" rx="84" ry="27" transform="rotate(-13 120 56)"/>
+            <ellipse class="emblem-orbit emblem-orbit-secondary" cx="120" cy="56" rx="73" ry="38" transform="rotate(22 120 56)"/>
+            <ellipse class="emblem-orbit emblem-orbit-faint" cx="120" cy="56" rx="45" ry="47" transform="rotate(-38 120 56)"/>
+            <g class="emblem-nodes emblem-seven-nodes"><circle cx="39" cy="64" r="4"/><circle cx="68" cy="27" r="4"/><circle cx="111" cy="18" r="4"/><circle cx="158" cy="25" r="4"/><circle cx="199" cy="48" r="4"/><circle cx="174" cy="88" r="4"/><circle cx="104" cy="96" r="4"/></g>
+            <circle class="emblem-core" cx="120" cy="56" r="13"/><path class="emblem-spark emblem-spark-large" d="M120 37l5 12 12 5-12 5-5 12-5-12-12-5 12-5z"/>
+          </svg>
+          {% elif item.product_id == 'numbers3' %}
+          <svg class="product-emblem-svg" viewBox="0 0 240 112" role="img">
+            <path class="emblem-constellation" d="M63 56H177"/>
+            <g class="emblem-dials emblem-three-dials">
+              <circle class="emblem-dial" cx="72" cy="56" r="27"/><circle class="emblem-dial" cx="120" cy="56" r="31"/><circle class="emblem-dial" cx="168" cy="56" r="27"/>
+              <circle class="emblem-core" cx="72" cy="56" r="8"/><circle class="emblem-core" cx="120" cy="56" r="9"/><circle class="emblem-core" cx="168" cy="56" r="8"/>
+              <path class="emblem-spark" d="M72 43l3.2 7.3 7.3 3.2-7.3 3.2-3.2 7.3-3.2-7.3-7.3-3.2 7.3-3.2z"/>
+              <path class="emblem-spark" d="M120 42l3.5 8 8 3.5-8 3.5-3.5 8-3.5-8-8-3.5 8-3.5z"/>
+              <path class="emblem-spark" d="M168 43l3.2 7.3 7.3 3.2-7.3 3.2-3.2 7.3-3.2-7.3-7.3-3.2 7.3-3.2z"/>
+            </g>
+          </svg>
+          {% else %}
+          <svg class="product-emblem-svg" viewBox="0 0 240 112" role="img">
+            <path class="emblem-constellation" d="M47 56H193"/>
+            <g class="emblem-gates emblem-four-gates">
+              <rect class="emblem-gate" x="43" y="27" width="34" height="58" rx="7"/><rect class="emblem-gate" x="83" y="22" width="34" height="68" rx="7"/><rect class="emblem-gate" x="123" y="22" width="34" height="68" rx="7"/><rect class="emblem-gate" x="163" y="27" width="34" height="58" rx="7"/>
+              <path class="emblem-spark" d="M60 43l3 6.8 6.8 3-6.8 3-3 6.8-3-6.8-6.8-3 6.8-3z"/><path class="emblem-spark" d="M100 40l3.3 7.5 7.5 3.3-7.5 3.3-3.3 7.5-3.3-7.5-7.5-3.3 7.5-3.3z"/><path class="emblem-spark" d="M140 40l3.3 7.5 7.5 3.3-7.5 3.3-3.3 7.5-3.3-7.5-7.5-3.3 7.5-3.3z"/><path class="emblem-spark" d="M180 43l3 6.8 6.8 3-6.8 3-3 6.8-3-6.8-6.8-3 6.8-3z"/>
+            </g>
+          </svg>
+          {% endif %}
+        </span>
+        <span class="mode-badge">{{ item.badge }}</span>
+        <strong>{{ item.name }}</strong>
+        <span class="product-ritual-name">{{ item.ritual_name }}</span>
+        <em>{{ item.ritual_description }}</em>
       </label>
       {% endfor %}
     </div>
   </div>
 
-  <div class="row app-compact-row">
-    <div class="field">
-      <label for="count">それぞれの導きから受け取る口数</label>
-      <input id="count" name="count" type="number" inputmode="numeric" min="1" max="{{ max_ticket_count }}" value="{{ current_count }}">
-      <div id="count-help" class="hint">選んだ導きから、この口数の候補を受け取ります。「五つの導きをすべて試す」では、五種類それぞれから同じ口数を生成します。</div>
-    </div>
-    <div class="field">
-      <span class="field-label">受け取る候補の合計</span>
-      <div class="tip app-tip-card">
-        <strong id="planned-total-detail">計算中</strong>
-        <span class="tiny">初めての方は「星読み・2口」がおすすめです。まずは数字を受け取り、気になるときだけ別の導きも試してみてください。</span>
+
+  <div class="panel-head app-panel-head form-substep-head"><div><span>Step 2</span><h2>次に、あなたの誕生日を教えてください</h2></div><p>選んだくじの世界へ、あなたが生まれた日の星を重ねます。</p></div>
+
+  <div id="birth-panel" class="astrology-entry is-oracle-active" data-astrology-entry>
+    <div class="astrology-entry-head"><div><span class="section-kicker">BIRTH CHART × TODAY</span><span class="oracle-default-badge">✦ CELESTIAL ORACLE</span><h3>選んだくじに、あなたの誕生星を重ねましょう</h3><p>生年月日をお預かりすると、誕生の日の星と今日の七天体を読み合わせ、先ほど選んだ宝くじの数字へ光を映します。</p></div><div class="oracle-always-on" aria-label="星読みは標準で有効です"><span aria-hidden="true">✦</span><b>すべて星読みで導きます</b></div></div>
+    <div class="astrology-date-field" data-astrology-fields>
+      <input id="birth_date" name="birth_date" type="hidden" value="{{ birth_iso }}">
+      <div class="fortune-date-card">
+        <div class="fortune-date-heading"><div class="fortune-date-emblem" aria-hidden="true"><span>☾</span><b>✦</b><span>☉</span></div><div><span class="fortune-question">YOUR BIRTH DATE</span><label id="birth-date-label" for="birth_year">あなたが生まれた日を選んでください</label><p>その日は、あなたの物語が星空に刻まれた大切な日です。</p></div></div>
+        <div class="date-select-grid" role="group" aria-labelledby="birth-date-label">
+          <label class="date-select-field" for="birth_year"><span>西暦</span><span class="select-shell"><select id="birth_year" class="birth-select birth-select-year" data-birth-part="year" autocomplete="bday-year" aria-label="生まれた年"><option value="">年を選択</option>{% for year in range(current_year, 1899, -1) %}<option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}年</option>{% endfor %}</select></span></label>
+          <label class="date-select-field" for="birth_month"><span>月</span><span class="select-shell"><select id="birth_month" class="birth-select birth-select-month" data-birth-part="month" autocomplete="bday-month" aria-label="生まれた月"><option value="">月</option>{% for month in range(1, 13) %}<option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ month }}月</option>{% endfor %}</select></span></label>
+          <label class="date-select-field" for="birth_day"><span>日</span><span class="select-shell"><select id="birth_day" class="birth-select birth-select-day" data-birth-part="day" autocomplete="bday-day" aria-label="生まれた日"><option value="">日</option>{% for day in range(1, 32) %}<option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ day }}日</option>{% endfor %}</select></span></label>
+        </div>
+        <div class="birth-date-seal" data-birth-preview aria-live="polite"><span class="seal-symbol" aria-hidden="true">✦</span><div class="seal-copy"><small>星図に刻まれた誕生日</small><strong data-birth-preview-date>年月日を選ぶと、あなたの星が目を覚まします</strong></div><span class="seal-status" data-birth-preview-status>WAITING</span><div class="birth-zodiac-preview" data-birth-zodiac hidden><span class="birth-zodiac-symbol" data-zodiac-symbol aria-hidden="true">✦</span><span class="birth-zodiac-copy"><small>あなたを照らす太陽星座</small><b data-zodiac-name>星の位置を確かめています</b><em data-zodiac-english>CELESTIAL SIGN</em></span></div></div>
       </div>
+      <div class="hint">あなたの誕生日と今日の正午（日本時間）を基準に、太陽・月・水星・金星・火星・木星・土星の位置を読み解きます。</div>
+      <div class="oracle-invocation" aria-hidden="true"><span>☾</span><i></i><b>誕生の星図 × 今日の天体 × 選んだ数字の世界</b><i></i><span>☉</span></div>
+      <div class="privacy-note">お預かりした生年月日は保存せず、この一度の星読みにだけ大切に使います。</div>
     </div>
   </div>
 
-  <details class="advanced app-advanced">
-    <summary><span data-toggle-label data-open-label="閉じる" data-closed-label="同じ星読みをもう一度呼び出す">同じ星読みをもう一度呼び出す</span></summary>
-    <div class="field advanced-inner">
-      <label for="seed">星読みの合言葉（任意）</label>
-      <input id="seed" name="seed" maxlength="80" autocomplete="off" value="{{ values.get('seed', '') }}">
-      <div class="hint">同じ生年月日・条件・合言葉を使うと、同じ数字をもう一度呼び出せます。普段は空欄のままで構いません。氏名や連絡先などは入力しないでください。</div>
+  <div class="row app-compact-row">
+    <div class="field"><label for="count">受け取る口数</label><input id="count" name="count" type="number" inputmode="numeric" min="1" max="{{ max_ticket_count }}" value="{{ current_count }}"><div class="hint">選んだ宝くじについて、この口数だけ別々の候補を導きます。</div></div>
+    <div class="field"><span class="field-label">今回ひらく星の儀式</span><div class="tip app-tip-card ritual-preview-card"><span class="ritual-preview-symbol" id="selected-ritual-symbol" aria-hidden="true">✡</span><div><strong id="planned-total-detail">計算中</strong><span class="tiny" id="selected-ritual-description">二つの三角形が重なり、六つの天体印から数字が姿を現します。</span></div></div></div>
+  </div>
+
+  <details class="advanced app-advanced"><summary><span data-toggle-label data-open-label="閉じる" data-closed-label="同じ星読みをもう一度呼び出す">同じ星読みをもう一度呼び出す</span></summary><div class="field advanced-inner"><label for="seed">星読みの合言葉（任意）</label><input id="seed" name="seed" maxlength="80" autocomplete="off" value="{{ values.get('seed', '') }}"><div class="hint">同じ生年月日・券種・口数・合言葉を使うと、同じ数字をもう一度呼び出せます。氏名や連絡先などは入力しないでください。</div></div></details>
+
+  <div class="form-disclaimer">星が示すのは、数字と向き合うための小さなきっかけです。最後にどの数字を選ぶかは、あなたの心の響きを大切にしてください。</div>
+
+  <section class="selection-confirmation" aria-labelledby="selection-confirmation-title">
+    <div class="selection-confirmation-head">
+      <span>FINAL CONFIRMATION</span>
+      <h3 id="selection-confirmation-title">星読みの内容を確認してください</h3>
+      <p>選んだ宝くじと口数が、ここに反映されます。</p>
     </div>
-  </details>
+    <div class="app-summary-strip four-summary-pills" aria-label="選択内容">
+      <div class="summary-pill"><strong id="selected-product-name">ロト6</strong><span>選んだ宝くじ</span></div>
+      <div class="summary-pill"><strong id="selected-product-rule">1〜43から6個</strong><span>数字の形式</span></div>
+      <div class="summary-pill"><strong id="selected-ritual-name">六星印の儀</strong><span>今夜の星の儀式</span></div>
+      <div class="summary-pill"><strong id="planned-total">—</strong><span>生成する口数</span></div>
+    </div>
+  </section>
 
-  <div class="form-disclaimer">
-    星が示すのは、数字と向き合うための小さなきっかけです。最後にどの数字を選ぶかは、あなたの心の響きを大切にしてください。
-  </div>
-
-  <div class="sticky-submit">
-    <button type="submit"><span aria-hidden="true">✦</span> 星からの数字を受け取る</button>
-  </div>
+  <div class="sticky-submit"><button type="submit" data-generate-button><span aria-hidden="true">✡</span> 六つの星印をひらく</button></div>
 </form>
 
 <section id="guide-panel" class="panel guide-panel app-guide-panel">
-  <div class="panel-head app-panel-head">
-    <div>
-      <span>Step 2</span>
-      <h2>星読みの流れ</h2>
-    </div>
-    <p>難しいことはありません。星の案内に沿って、ゆっくり進んでください。</p>
-  </div>
-  <div class="quick-grid app-quick-grid">
-    <div class="quick-card"><strong>あなたの星</strong><span>誕生日と今日の七天体を重ね、今響く数字を探します。</span></div>
-    <div class="quick-card"><strong>数字の記憶</strong><span>これまで数字が見せてきた流れにも、静かに耳を澄ませます。</span></div>
-    <div class="quick-card"><strong>選べる導き</strong><span>基本の星読みから、バランスや過去データなどへ切り替えられます。</span></div>
-    <div class="quick-card"><strong>答え合わせ</strong><span>抽せんのあとには、選んだ数字との重なりを確かめられます。</span></div>
-  </div>
-  <ol class="steps">
-    <li><b>1</b><div><strong>あなたの誕生日を星図へ預ける</strong><div class="tiny">西暦・月・日を選ぶと、太陽星座が姿を現します。</div></div></li>
-    <li><b>2</b><div><strong>数字の受け取り方を選ぶ</strong><div class="tiny">最初は一番上の「星読み」が選ばれています。必要に応じて別の方法へ切り替えられます。</div></div></li>
-    <li><b>3</b><div><strong>星から届いた数字を眺める</strong><div class="tiny">生成後は、最初に大きく表示される六つの数字を確かめましょう。</div></div></li>
-    <li><b>4</b><div><strong>選んだ数字と答え合わせをする</strong><div class="tiny">答え合わせは結果ページの下部にあり、抽せん後にゆっくり確認できます。</div></div></li>
-  </ol>
+  <div class="panel-head app-panel-head"><div><span>Step 3</span><h2>星の儀式の流れ</h2></div><p>券種を選び、誕生日を預けると、その宝くじだけの星の儀式が始まります。</p></div>
+  <div class="quick-grid app-quick-grid"><div class="quick-card"><strong>くじを選ぶ</strong><span>月輪・六星印・七惑星・三連星盤・四星門。選んだ券種で儀式が決まります。</span></div><div class="quick-card"><strong>あなたの星</strong><span>誕生日と今日の七天体を重ね、今響く数字を探します。</span></div><div class="quick-card"><strong>券種別の数字</strong><span>ロトは重複なし、ナンバーズは並び順と先頭の0をそのまま扱います。</span></div></div>
+  <ol class="steps"><li><b>1</b><div><strong>今夜ひらく星の儀式を選ぶ</strong><div class="tiny">券種によって、数字の範囲・個数・並び方を自動で切り替えます。</div></div></li><li><b>2</b><div><strong>あなたの誕生日を星図へ預ける</strong><div class="tiny">西暦・月・日を選ぶと、太陽星座が姿を現します。</div></div></li><li><b>3</b><div><strong>星から届いた数字を眺める</strong><div class="tiny">ナンバーズも、結果が決まるまで実際の数字は表示しません。</div></div></li></ol>
 </section>
 {% endblock %}

@@ -1,201 +1,83 @@
 {% extends "base.html" %}
-{% block title %}LOTOSCOPE 6 | 生成結果{% endblock %}
+{% block title %}ロトナンバーズ・スコープ | {{ product.name }}の星読み結果{% endblock %}
+{% block body_class %}app-mobile page-result ritual-theme-{{ product_id }}{% endblock %}
 {% block content %}
-{% macro ball(n, astrology_numbers='') -%}
+{% macro ball(n, astrology_numbers=[]) -%}
   {%- set ni = n|int -%}
-  {%- set ns = ni|string -%}
-  {%- set astros = astrology_numbers.split(',') if astrology_numbers else [] -%}
-  {%- if ni <= 10 -%}{%- set band = 'num-band-1' -%}
-  {%- elif ni <= 20 -%}{%- set band = 'num-band-2' -%}
-  {%- elif ni <= 31 -%}{%- set band = 'num-band-3' -%}
-  {%- else -%}{%- set band = 'num-band-4' -%}{%- endif -%}
-  <span class="num {{ band }} {% if ns in astros %}astrology-number{% endif %} {% if ni >= 32 %}over31{% endif %}" aria-label="{{ ni }}{% if ns in astros %}、星読みラッキーナンバー{% endif %}">{% if ns in astros %}<i class="astro-mark" aria-hidden="true">✦</i>{% endif %}{{ '%02d'|format(ni) }}</span>
+  {%- if ni <= 10 -%}{%- set band = 'num-band-1' -%}{%- elif ni <= 20 -%}{%- set band = 'num-band-2' -%}{%- elif ni <= 31 -%}{%- set band = 'num-band-3' -%}{%- else -%}{%- set band = 'num-band-4' -%}{%- endif -%}
+  <span class="num {{ band }} {% if ni in astrology_numbers %}astrology-number{% endif %}" aria-label="{{ ni }}{% if ni in astrology_numbers %}、星読みの中心数字{% endif %}">{% if ni in astrology_numbers %}<i class="astro-mark" aria-hidden="true">✦</i>{% endif %}{{ '%02d'|format(ni) }}</span>
+{%- endmacro %}
+{% macro digits(values, astrology_numbers=[], large=false) -%}
+  <span class="digit-number {% if large %}digit-number-large{% endif %}" aria-label="{{ values|join('') }}">
+    {% for digit in values %}<span class="digit-tile {% if loop.index0 < astrology_numbers|length and digit == astrology_numbers[loop.index0] %}astrology-digit{% endif %}">{% if loop.index0 < astrology_numbers|length and digit == astrology_numbers[loop.index0] %}<i aria-hidden="true">✦</i>{% endif %}{{ digit }}</span>{% endfor %}
+  </span>
 {%- endmacro %}
 
 {% set best = rows|sort(attribute='ticket_score')|last %}
-{% if best %}
-<section id="best-pick" class="hero compact result-hero primary-result-hero">
+<section id="best-pick" class="hero compact result-hero primary-result-hero result-product-{{ product_id }}" data-result-product="{{ product_id }}">
   <div class="primary-result-copy">
-    <div class="hero-kicker">YOUR CELESTIAL NUMBERS</div>
-    <h1>今回、星が導いた六つの数字</h1>
-    <p class="primary-result-intro">
-      {% if astrology_profile %}{{ astrology_profile.birth_date_ja }}の星と、今日の天体を重ねて選びました。{% else %}今回の条件から、もっとも調和した組み合わせを選びました。{% endif %}
-    </p>
-    <div class="numbers primary-result-numbers number-reveal-group" aria-label="今回の六つの数字">
-      {% for n in [best.n1,best.n2,best.n3,best.n4,best.n5,best.n6] %}
-        {{ ball(n, best.astrology_numbers) }}
-      {% endfor %}
+    <div class="hero-kicker">{{ product.english }} × {{ product.ritual_name }}</div>
+    <div class="result-ritual-crest" aria-hidden="true"><span>{{ product.ritual_symbol }}</span><i></i><b>{{ product.ritual_name }}</b></div>
+    <h1>{{ product.result_title }}</h1>
+    <p class="primary-result-intro">{{ astrology_profile.birth_date_ja }}の星と、今日の天体を{{ product.name }}の数字へ重ねました。</p>
+    <div class="primary-result-numbers number-reveal-group reveal-{{ product_id }} {% if product.kind == 'numbers' %}numbers-digit-result{% endif %}" data-reveal-product="{{ product_id }}" aria-label="今回の数字">
+      {% if product.kind == 'loto' %}{% for n in best.numbers %}{{ ball(n, best.astrology_numbers) }}{% endfor %}{% else %}{{ digits(best.numbers, best.astrology_numbers, true) }}{% endif %}
     </div>
-    <div class="primary-result-meta">
-      <span><small>導き方</small><strong>{{ best.mode_name_ja or best.mode_name }}</strong></span>
-      <span><small>調和の目安</small><strong>{{ best.ticket_score }} / 100</strong></span>
-      <span><small>生成した候補</small><strong>{{ rows|length }}口</strong></span>
-    </div>
+    <div class="primary-result-meta"><span><small>宝くじ</small><strong>{{ product.name }}</strong></span><span><small>星との響き</small><strong>{{ best.ticket_score }} / 100</strong></span><span><small>生成した候補</small><strong>{{ rows|length }}口</strong></span></div>
     <p class="primary-result-reason">{{ best.reason }}</p>
-    <div class="primary-result-action">
-      <a class="ghost-button primary-retry-button" href="{{ edit_url }}">もう一度、星を読む</a>
-      <span>誕生日や導き方を変えて、すぐに読み直せます。</span>
+    <div class="primary-result-action result-action-panel">
+      <form class="result-repeat-form" method="post" action="{{ url_for('generate') }}" data-result-repeat-form data-product-id="{{ product_id }}" data-product-name="{{ product.name }}" data-ritual-name="{{ product.ritual_name }}" data-ritual-symbol="{{ product.ritual_symbol }}" data-ritual-duration="{{ product.ritual_duration }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="product" value="{{ product_id }}">
+        <input type="hidden" name="count" value="{{ count }}">
+        <input type="hidden" name="birth_date" value="{{ astrology_profile.birth_date }}">
+        <input type="hidden" name="seed" value="{{ seed }}">
+        <button class="result-repeat-button" type="submit">
+          <span class="result-action-icon" aria-hidden="true">↻</span>
+          <span class="result-action-copy"><strong>同じ条件でもう一度</strong><small>{% if seed %}合言葉を使って同じ数字を呼び戻す{% else %}星を読み直して、新しい数字を導く{% endif %}</small></span>
+          <span class="result-action-arrow" aria-hidden="true">›</span>
+        </button>
+      </form>
+      <a class="result-reset-button" href="{{ url_for('index') }}">
+        <span class="result-action-icon result-home-icon" aria-hidden="true">⌂</span>
+        <span class="result-action-copy"><strong>最初から選び直す</strong><small>トップ画面へ戻り、くじと誕生日を選ぶ</small></span>
+        <span class="result-action-arrow" aria-hidden="true">›</span>
+      </a>
+      <p class="result-action-note">「もう一度」は同じ条件のまま再生成します。「最初から選び直す」は入力を空にしてトップへ戻ります。</p>
     </div>
   </div>
 </section>
-{% endif %}
 
-<nav class="sticky-mobile-nav result-section-nav" aria-label="結果内メニュー">
-  <a href="#best-pick">今回の数字</a>
-  {% if astrology_profile %}<a href="#astrology-reading">星読みの理由</a>{% endif %}
-  <a href="#mode-results">ほかの候補</a>
-  <a href="#answer-check">答え合わせ</a>
-</nav>
+<nav class="sticky-mobile-nav result-section-nav" aria-label="結果内メニュー"><a href="#best-pick">今回の数字</a><a href="#astrology-reading">星読みの理由</a>{% if rows|length > 1 %}<a href="#all-results">ほかの候補</a>{% else %}<a href="#reading-details">選定理由</a>{% endif %}</nav>
 
-{% if astrology_profile %}
 <section id="astrology-reading" class="panel compact-panel astrology-report">
-  <div class="panel-head compact-head">
-    <div><div class="section-kicker">CELESTIAL READING</div><h2>この数字へつながった星読み</h2></div>
-    <p>{{ astrology_profile.birth_date_ja }} × {{ astrology_profile.target_date_ja }}</p>
-  </div>
-  <div class="astrology-summary-grid">
-    <div><span>太陽星座</span><strong>{{ astrology_profile.sun_sign }}</strong></div>
-    <div><span>月星座</span><strong>{{ astrology_profile.moon_sign }}</strong></div>
-    <div><span>生成日の太陽</span><strong>{{ astrology_profile.current_sun_sign }}</strong></div>
-  </div>
-  <div class="reference-number-heading">
-    <strong>星読みで参考にした中心数字</strong>
-    <span>下の六つは買い目そのものではなく、組み合わせを選ぶための手がかりです。</span>
-  </div>
-  <div class="numbers astrology-core-numbers">
-    {% for n in astrology_profile.core_numbers %}{{ ball(n, astrology_profile.core_numbers|join(',')) }}{% endfor %}
-  </div>
-  <p class="note">実際の買い目は、ページ最上部に大きく表示した六つの数字です。候補内で中心数字と重なったものには✦を添えています。</p>
-  <details class="advanced astrology-details">
-    <summary><span data-toggle-label data-open-label="天体位置を閉じる" data-closed-label="星が重なった位置を詳しく見る">星が重なった位置を詳しく見る</span></summary>
-    <div class="planet-table">
-      {% for planet in astrology_profile.planet_rows %}
-      <div class="planet-row">
-        <strong>{{ planet.symbol }} {{ planet.planet_name }}</strong>
-        <span>出生時 {{ planet.birth_sign }} {{ planet.birth_degree }}°</span>
-        <span>生成日 {{ planet.current_sign }} {{ planet.current_degree }}°</span>
-        <span>{{ planet.aspect_name }} {{ planet.aspect_degree }}°への誤差 {{ planet.orb }}°</span>
-      </div>
-      {% endfor %}
-    </div>
-    <p class="tiny">{{ astrology_profile.method_note }}</p>
-  </details>
+  <div class="panel-head compact-head"><div><div class="section-kicker">CELESTIAL READING</div><h2>この数字へつながった星読み</h2></div><p>{{ astrology_profile.birth_date_ja }} × {{ astrology_profile.target_date_ja }}</p></div>
+  <div class="astrology-summary-grid"><div><span>太陽星座</span><strong>{{ astrology_profile.sun_sign }}</strong></div><div><span>月星座</span><strong>{{ astrology_profile.moon_sign }}</strong></div><div><span>生成日の太陽</span><strong>{{ astrology_profile.current_sun_sign }}</strong></div></div>
+  <div class="reference-number-heading"><strong>{% if product.kind == 'loto' %}{{ product.name }}で参考にした中心数字{% else %}各桁で参考にした中心数字{% endif %}</strong><span>{% if product.kind == 'loto' %}下の数字は買い目そのものではなく、組み合わせを選ぶための手がかりです。{% else %}左から順に、それぞれの桁へ強く響いた数字です。{% endif %}</span></div>
+  <div class="numbers astrology-core-numbers {% if product.kind == 'numbers' %}numbers-digit-result{% endif %}">{% if product.kind == 'loto' %}{% for n in best.astrology_numbers %}{{ ball(n, best.astrology_numbers) }}{% endfor %}{% else %}{{ digits(best.astrology_numbers, best.astrology_numbers) }}{% endif %}</div>
+  <p class="note">実際に受け取った数字は、ページ最上部に大きく表示しています。{% if product.kind == 'loto' %}中心数字と重なったものには✦を添えています。{% else %}同じ位置で中心数字と重なった桁には✦を添えています。{% endif %}</p>
+  <details class="advanced astrology-details"><summary><span data-toggle-label data-open-label="天体位置を閉じる" data-closed-label="星が重なった位置を詳しく見る">星が重なった位置を詳しく見る</span></summary><div class="planet-table">{% for planet in astrology_profile.planet_rows %}<div class="planet-row"><strong>{{ planet.symbol }} {{ planet.planet_name }}</strong><span>出生時 {{ planet.birth_sign }} {{ planet.birth_degree }}°</span><span>生成日 {{ planet.current_sign }} {{ planet.current_degree }}°</span><span>{{ planet.aspect_name }} {{ planet.aspect_degree }}°への誤差 {{ planet.orb }}°</span></div>{% endfor %}</div><p class="tiny">出生時刻・出生地を使わない簡易星読みです。七天体の位置と主要アスペクトを、選択した券種の数字範囲または各桁へ変換しています。</p></details>
 </section>
-{% endif %}
 
-{% if best %}
 <section id="reading-details" class="panel compact-panel result-detail-panel">
-  <div class="panel-head compact-head">
-    <div><div class="section-kicker">WHY THESE NUMBERS</div><h2>この組み合わせを選んだ理由</h2></div>
-    <p>数字の見え方を確かめたい方だけ、ここから先をご覧ください。</p>
-  </div>
-  <div class="score-breakdown {% if astrology_profile %}with-astrology{% endif %}" aria-label="総合スコアの内訳">
-    <div><span>過去データ評価</span><strong>{{ best.data_score_avg }}</strong><small>{% if astrology_profile %}35%{% else %}45%{% endif %}</small></div>
-    <div><span>数字構成評価</span><strong>{{ best.balance_fit_score }}</strong><small>{% if astrology_profile %}25%{% else %}35%{% endif %}</small></div>
-    <div><span>32〜43の配分</span><strong>{{ best.uniqueness_score }}</strong><small>{% if astrology_profile %}15%{% else %}20%{% endif %}</small></div>
-    {% if astrology_profile %}<div><span>星読み数字との適合</span><strong>{{ best.astrology_fit_score }}</strong><small>25%</small></div>{% endif %}
-  </div>
-  <p class="score-note">この数値は、星読み・数字の流れ・組み合わせの調和を比べるための独自の目安です。当せん確率を示すものではありません。</p>
+  <div class="panel-head compact-head"><div><div class="section-kicker">WHY THESE NUMBERS</div><h2>この組み合わせを選んだ理由</h2></div><p>表示される点数は候補同士を比べるための独自の目安です。</p></div>
+  <div class="score-breakdown with-astrology"><div><span>星読みとの適合</span><strong>{{ best.astrology_fit_score }}</strong><small>{% if product.kind == 'loto' %}78%{% else %}90%{% endif %}</small></div><div><span>{% if product.kind == 'loto' %}数字の広がり{% else %}桁のまとまり{% endif %}</span><strong>{{ best.composition_score }}</strong><small>{% if product.kind == 'loto' %}22%{% else %}10%{% endif %}</small></div></div>
+  <p class="score-note">当せん確率を示す数値ではありません。生年月日と今日の星から生まれた候補の中で、どれがより強く響いたかを表します。</p>
 </section>
-{% endif %}
 
 {% if rows|length > 1 %}
-<section id="top3" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">OTHER PICKS</div><h2>ほかに心に留めておきたい組み合わせ</h2></div><p>最初の数字とは別に、気になる候補がないか見比べられます。</p></div>
+<section id="all-results" class="panel compact-panel">
+  <div class="panel-head compact-head"><div><div class="section-kicker">OTHER PICKS</div><h2>ほかに届いた{{ product.name }}の候補</h2></div><p>最初の数字とは別に、心に残る候補がないか見比べられます。</p></div>
   <div class="ticket-list compact-list">
     {% for row in rows|sort(attribute='ticket_score', reverse=true) %}
-    {% if loop.index <= 3 %}
-    <article class="mini-ticket {% if loop.index == 1 %}is-primary-ticket{% endif %}">
-      <div class="ticket-summary-row">
-        <div>
-          <div class="ticket-kicker">{{ row.mode_name_ja or row.mode_name }} <span>#{{ loop.index }}</span></div>
-          <div class="numbers">
-            {% for n in [row.n1,row.n2,row.n3,row.n4,row.n5,row.n6] %}
-              {{ ball(n, row.astrology_numbers) }}
-            {% endfor %}
-          </div>
-        </div>
-        <div class="score-pill"><span>調和</span>{{ row.ticket_score }}</div>
-      </div>
-    </article>
-    {% endif %}
+    <details class="ticket-card compact-ticket" {% if loop.first %}open{% endif %}>
+      <summary class="ticket-card-summary"><div><div class="ticket-kicker">{{ product.name }} <span>#{{ loop.index }}</span></div><div class="numbers {% if product.kind == 'numbers' %}numbers-digit-result{% endif %}">{% if product.kind == 'loto' %}{% for n in row.numbers %}{{ ball(n, row.astrology_numbers) }}{% endfor %}{% else %}{{ digits(row.numbers, row.astrology_numbers) }}{% endif %}</div></div><div class="score-pill"><span>星の響き</span>{{ row.ticket_score }}</div></summary>
+      <div class="ticket-extra"><div class="score-bar" aria-label="星の響き {{ row.ticket_score }}点"><span style="width:{{ row.ticket_score }}%"></span></div><div class="metrics">{% if product.kind == 'loto' %}<div><span>合計値</span><strong>{{ row.set_sum }}</strong></div><div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div><div><span>範囲の広がり</span><strong>{{ row.spread }}</strong></div><div><span>連続数字</span><strong>{{ row.consecutive_count }}組</strong></div>{% else %}<div><span>数字</span><strong>{{ row.display_number }}</strong></div><div><span>各桁の合計</span><strong>{{ row.set_sum }}</strong></div><div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div><div><span>同じ数字の重なり</span><strong>{{ row.repeated_digit_count }}</strong></div>{% endif %}</div><div class="score-mini-breakdown"><span>星読み {{ row.astrology_fit_score }}</span><span>{% if product.kind == 'loto' %}数字の広がり{% else %}桁のまとまり{% endif %} {{ row.composition_score }}</span></div><p class="reason">{{ row.reason }}</p></div>
+    </details>
     {% endfor %}
   </div>
 </section>
 {% endif %}
-
-<section id="mode-results" class="panel compact-panel">
-  <div class="panel-head compact-head">
-    <div><div class="section-kicker">ALL CANDIDATES</div><h2>{% if mode == 'all' %}五つの導きから届いた数字{% else %}今回届いたすべての候補{% endif %}</h2></div>
-    <p>扉を開くと、数字が結ばれた理由や構成を確認できます。</p>
-  </div>
-
-  <div class="accordion-group">
-    {% for mode_id, title, badge, desc in mode_choices %}
-      {% if mode_id != 'all' %}
-        {% set mode_rows = rows|selectattr('mode_id','equalto',mode_id)|list %}
-        {% if mode_rows %}
-        <details class="accordion mode-{{ mode_id }}" {% if mode != 'all' %}open{% endif %}>
-          <summary>
-            <span><b>{{ title }}</b><small>{{ desc }}</small></span>
-            <em>{{ mode_rows|length }}口</em>
-          </summary>
-          <div class="ticket-list">
-            {% for row in mode_rows %}
-            <details class="ticket-card compact-ticket">
-              <summary class="ticket-card-summary">
-                <div>
-                  <div class="ticket-kicker">{{ row.mode_name_ja or row.mode_name }} <span>#{{ loop.index }}</span></div>
-                  <div class="numbers">
-                    {% for n in [row.n1,row.n2,row.n3,row.n4,row.n5,row.n6] %}
-                      {{ ball(n, row.astrology_numbers) }}
-                    {% endfor %}
-                  </div>
-                </div>
-                <div class="score-pill"><span>調和</span>{{ row.ticket_score }}</div>
-              </summary>
-              <div class="ticket-extra">
-                {% if row.astrology_hit_count|int > 0 %}<div class="astrology-hit-note">✦ あなたの星に響いた数字が{{ row.astrology_hit_count }}個重なっています</div>{% endif %}
-                <div class="score-bar" aria-label="総合スコア {{ row.ticket_score }}点"><span style="width:{{ row.ticket_score }}%"></span></div>
-                <div class="metrics">
-                  <div><span>合計値</span><strong>{{ row.set_sum }}</strong></div>
-                  <div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div>
-                  <div><span>範囲別</span><strong>1〜14: {{ row.low_count }}／15〜29: {{ row.mid_count }}／30〜43: {{ row.high_count }}</strong></div>
-                  <div><span>32〜43</span><strong>{{ row.over31_count }}個</strong></div>
-                  {% if astrology_profile %}<div><span>星読み数字</span><strong>{{ row.astrology_hit_count }}個</strong></div>{% endif %}
-                  <div><span>連続数字の組</span><strong>{{ row.consecutive_count }}組</strong></div>
-                </div>
-                <div class="score-mini-breakdown">
-                  <span>過去データ {{ row.data_score_avg }}</span>
-                  <span>数字構成 {{ row.balance_fit_score }}</span>
-                  {% if astrology_profile %}<span>星読み {{ row.astrology_fit_score }}</span>{% endif %}
-                  <span>32〜43配分 {{ row.uniqueness_score }}</span>
-                </div>
-                <p class="reason">{{ row.reason }}</p>
-              </div>
-            </details>
-            {% endfor %}
-          </div>
-        </details>
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  </div>
-</section>
-
-<section id="answer-check" class="panel compact-panel answer-check-panel">
-  <div class="answer-check-icon" aria-hidden="true">✓</div>
-  <div class="answer-check-copy">
-    <div class="section-kicker">AFTER THE DRAW</div>
-    <h2>抽せん後に、ここで答え合わせ</h2>
-    <p>いまは数字をゆっくり確かめてください。抽せん結果が出たあと、このページの下まで戻れば照合できます。</p>
-  </div>
-  <form method="post" action="{{ url_for('check_form') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input type="hidden" name="ticket_token" value="{{ token }}">
-    <button type="submit">抽せん結果と答え合わせ</button>
-  </form>
-</section>
 
 <button class="float-top" type="button" data-scroll-top aria-label="ページ上部へ戻る">↑</button>
 {% endblock %}

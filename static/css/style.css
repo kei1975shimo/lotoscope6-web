@@ -1881,16 +1881,726 @@ button,.small-button,.bottom-action-bar button,.bottom-action-bar a{font-size:18
 .reference-number-heading span{color:var(--muted-strong);font-size:13px;line-height:1.6}
 .result-detail-panel{scroll-margin-top:84px}
 .mini-ticket.is-primary-ticket{border-color:rgba(243,207,135,.34);background:rgba(243,207,135,.045)}
-.answer-check-panel{display:grid;gap:14px;scroll-margin-top:84px;margin-bottom:72px;text-align:center}
-.answer-check-icon{width:50px;height:50px;margin:0 auto;display:grid;place-items:center;border:1px solid rgba(82,211,164,.35);border-radius:50%;color:var(--jade);background:rgba(82,211,164,.08);font-size:24px;font-weight:900}
-.answer-check-copy h2{margin:5px 0 8px;font-size:23px}
-.answer-check-copy p{max-width:620px;margin:0 auto;color:var(--muted-strong);font-size:14px;line-height:1.7}
-.answer-check-panel form{display:flex;justify-content:center;margin:0}
-.answer-check-panel button{width:min(100%,440px);min-height:58px;font-size:18px}
 
 @media (min-width:560px){
   .oracle-always-on{align-self:center}
   .primary-result-hero{padding:34px 30px 30px}
   .primary-result-meta strong{font-size:15px}
-  .answer-check-panel{padding:28px}
+}
+
+/* v1.6.1: multi-lottery generation without answer-check UI */
+.product-grid{align-items:stretch}
+.product-card{min-height:154px}
+.product-card strong{font-size:20px}
+.product-card .mode-badge{display:inline-flex;align-items:center;min-height:28px}
+.product-numbers3,.product-numbers4{background-image:radial-gradient(circle at 85% 18%,rgba(133,99,225,.14),transparent 38%)}
+.numbers-digit-result{justify-content:center;width:100%}
+.digit-number{display:inline-flex;align-items:center;justify-content:center;gap:7px;letter-spacing:0}
+.digit-tile{position:relative;display:grid;place-items:center;width:48px;height:58px;border:1px solid rgba(243,207,135,.35);border-radius:14px;background:linear-gradient(180deg,rgba(52,38,84,.96),rgba(13,10,31,.98));box-shadow:inset 0 1px rgba(255,255,255,.11),0 8px 22px rgba(0,0,0,.28);color:#fff2c4;font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;text-shadow:0 0 14px rgba(242,207,135,.28)}
+.digit-number-large{gap:9px}
+.digit-number-large .digit-tile{width:clamp(58px,17vw,86px);height:clamp(72px,21vw,102px);border-radius:20px;font-size:clamp(38px,12vw,62px)}
+.digit-tile i{position:absolute;right:-3px;top:-7px;color:#fff0a8;font-size:11px;font-style:normal;text-shadow:0 0 9px rgba(255,225,137,.9)}
+.digit-tile.astrology-digit{border-color:rgba(255,226,148,.72);box-shadow:inset 0 1px rgba(255,255,255,.14),0 0 18px rgba(255,215,122,.16),0 8px 22px rgba(0,0,0,.28)}
+.digit-tile.digit-hit{border-color:rgba(82,211,164,.82);box-shadow:0 0 0 3px rgba(82,211,164,.12),0 8px 22px rgba(0,0,0,.28);color:#caffea}
+.number-reveal-group.is-revealing .digit-tile{opacity:0;transform:translateY(13px) scale(.86)}
+.number-reveal-group.is-revealing.reveal-start .digit-tile{animation:numberReveal .65s cubic-bezier(.2,.75,.25,1) forwards;animation-delay:var(--reveal-delay,0s)}
+.dynamic-number-grid{grid-template-columns:repeat(auto-fit,minmax(54px,1fr))}
+.dynamic-number-grid input{min-width:0;text-align:center;padding-left:4px;padding-right:4px}
+.bonus-input-grid{max-width:220px}
+.numbers-winning-field input{font-size:34px;font-weight:900;letter-spacing:.28em;text-align:center;font-variant-numeric:tabular-nums}
+.rank small{display:block;margin-top:2px;font-size:10px}
+.primary-result-numbers.numbers-digit-result{margin-top:22px;margin-bottom:22px}
+@media(min-width:760px){.product-grid{grid-template-columns:repeat(3,1fr)}.product-card{min-height:174px}.digit-tile{width:56px;height:68px;font-size:34px}}
+@media(max-width:390px){.digit-number{gap:5px}.digit-tile{width:43px;height:54px;font-size:25px}.digit-number-large .digit-tile{width:clamp(54px,18vw,68px);height:clamp(68px,22vw,86px)}}
+
+/* ========================================================================== 
+   ロトナンバーズ・スコープ v1.7.0 — Five Celestial Rituals
+   ========================================================================== */
+
+:root{
+  --ritual-primary:#f3cf87;
+  --ritual-secondary:#9b88ed;
+  --ritual-deep:#130b2d;
+  --ritual-glow:rgba(243,207,135,.34);
+}
+body.ritual-theme-miniloto{--ritual-primary:#d8ecff;--ritual-secondary:#87b7ee;--ritual-deep:#061a35;--ritual-glow:rgba(156,211,255,.38)}
+body.ritual-theme-loto6{--ritual-primary:#ffe0a0;--ritual-secondary:#b590ff;--ritual-deep:#1c0b35;--ritual-glow:rgba(240,202,116,.38)}
+body.ritual-theme-loto7{--ritual-primary:#bfeaff;--ritual-secondary:#6b8fff;--ritual-deep:#061838;--ritual-glow:rgba(96,170,255,.42)}
+body.ritual-theme-numbers3{--ritual-primary:#e9c8ff;--ritual-secondary:#b56dff;--ritual-deep:#210835;--ritual-glow:rgba(202,119,255,.42)}
+body.ritual-theme-numbers4{--ritual-primary:#ffd4e9;--ritual-secondary:#e770b7;--ritual-deep:#30091f;--ritual-glow:rgba(239,104,177,.42)}
+
+body.page-home::after,body.page-result::after{
+  background:radial-gradient(ellipse,var(--ritual-glow),transparent 67%);
+  transition:background .5s ease;
+}
+.app-brand-copy strong{font-size:14px;letter-spacing:.01em}
+.app-brand-copy small{font-size:10px;letter-spacing:.08em}
+@media(min-width:390px){.app-brand-copy strong{font-size:15px}.app-brand-copy small{font-size:11px}}
+@media(min-width:560px){.app-brand-copy strong{font-size:17px}.app-brand-copy small{font-size:12px}}
+
+.four-summary-pills{grid-template-columns:repeat(2,minmax(0,1fr))}
+.four-summary-pills .summary-pill{min-width:0}
+.four-summary-pills .summary-pill strong{overflow-wrap:anywhere}
+@media(min-width:760px){.four-summary-pills{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Product ritual cards */
+.product-card{
+  isolation:isolate;
+  overflow:hidden;
+  grid-template-columns:58px 1fr;
+  grid-template-rows:auto auto auto 1fr;
+  column-gap:13px;
+  padding:17px;
+  background:linear-gradient(145deg,rgba(24,35,71,.88),rgba(6,10,25,.94));
+}
+.product-card::before{
+  content:"";
+  position:absolute;
+  inset:auto -25% -50% 30%;
+  height:150px;
+  z-index:-1;
+  border-radius:50%;
+  opacity:.34;
+  filter:blur(12px);
+  background:radial-gradient(circle,var(--card-glow),transparent 66%);
+  transition:.35s ease;
+}
+.product-card:has(input:checked)::before{opacity:.76;transform:scale(1.18)}
+.product-card .product-ritual-icon{
+  grid-row:1/5;
+  align-self:center;
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  border:1px solid color-mix(in srgb,var(--card-accent) 55%,transparent);
+  border-radius:50%;
+  color:var(--card-accent);
+  background:radial-gradient(circle,color-mix(in srgb,var(--card-accent) 18%,transparent),rgba(5,7,22,.86) 68%);
+  box-shadow:0 0 22px color-mix(in srgb,var(--card-accent) 18%,transparent),inset 0 0 14px color-mix(in srgb,var(--card-accent) 10%,transparent);
+  font-family:"Yu Mincho",Georgia,serif;
+  font-size:25px;
+  text-shadow:0 0 13px color-mix(in srgb,var(--card-accent) 75%,transparent);
+  transition:.35s var(--ease);
+}
+.product-card:has(input:checked) .product-ritual-icon{transform:scale(1.08) rotate(6deg);box-shadow:0 0 32px color-mix(in srgb,var(--card-accent) 34%,transparent),inset 0 0 18px color-mix(in srgb,var(--card-accent) 16%,transparent)}
+.product-card .mode-badge{justify-self:start;margin:0;min-height:25px;padding:2px 8px;font-size:12px}
+.product-card strong{margin-top:5px}
+.product-card .product-ritual-name{display:block;color:var(--card-accent);font-family:"Yu Mincho",Georgia,serif;font-size:14px;font-weight:800;letter-spacing:.04em}
+.product-card em{margin-top:5px}
+.product-miniloto{--card-accent:#bfe4ff;--card-glow:rgba(101,173,235,.55)}
+.product-loto6{--card-accent:#ffe0a0;--card-glow:rgba(183,117,255,.56)}
+.product-loto7{--card-accent:#a8dfff;--card-glow:rgba(65,113,255,.62)}
+.product-numbers3{--card-accent:#e4b7ff;--card-glow:rgba(176,73,255,.58)}
+.product-numbers4{--card-accent:#ffc3df;--card-glow:rgba(231,73,158,.58)}
+.product-card:has(input:checked){border-color:color-mix(in srgb,var(--card-accent) 72%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--card-accent) 12%,transparent),0 18px 38px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.07)}
+
+.ritual-preview-card{display:grid;grid-template-columns:54px 1fr;align-items:center;gap:12px}
+.ritual-preview-symbol{
+  width:54px;height:54px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--ritual-primary) 55%,transparent);border-radius:50%;
+  color:var(--ritual-primary);background:radial-gradient(circle,var(--ritual-glow),transparent 70%);font-family:"Yu Mincho",Georgia,serif;font-size:25px;text-shadow:0 0 14px var(--ritual-glow);transition:.35s ease
+}
+.sticky-submit button{background:linear-gradient(180deg,color-mix(in srgb,var(--ritual-primary) 94%,white),var(--ritual-primary) 56%,color-mix(in srgb,var(--ritual-secondary) 42%,#9b651e));box-shadow:0 14px 30px var(--ritual-glow),inset 0 1px rgba(255,255,255,.75);transition:.35s ease}
+
+/* Full-screen celestial ritual */
+.draw-loader{
+  overflow:hidden;
+  padding:12px;
+  background:rgba(1,2,10,.96);
+  backdrop-filter:blur(22px) saturate(1.2);
+}
+.draw-loader::before,.draw-loader::after{content:"";position:absolute;pointer-events:none;border-radius:50%}
+.draw-loader::before{width:80vmax;height:80vmax;background:conic-gradient(from 0deg,transparent,rgba(255,255,255,.022),transparent 18%,rgba(255,255,255,.018),transparent 38%);animation:ritualUniverseSpin 24s linear infinite}
+.draw-loader::after{width:46vmax;height:46vmax;border:1px solid rgba(255,255,255,.04);box-shadow:0 0 110px var(--loader-glow),inset 0 0 90px color-mix(in srgb,var(--loader-accent) 7%,transparent);animation:ritualUniverseBreathe 3.2s ease-in-out infinite alternate}
+.draw-loader.ritual-miniloto{--loader-accent:#c6e8ff;--loader-secondary:#659fe0;--loader-glow:rgba(105,178,238,.32);--loader-deep:#06152b}
+.draw-loader.ritual-loto6{--loader-accent:#ffe3a6;--loader-secondary:#a675ef;--loader-glow:rgba(197,137,255,.31);--loader-deep:#17082c}
+.draw-loader.ritual-loto7{--loader-accent:#bceaff;--loader-secondary:#5279ff;--loader-glow:rgba(67,121,255,.37);--loader-deep:#04132f}
+.draw-loader.ritual-numbers3{--loader-accent:#e8c4ff;--loader-secondary:#a34fe8;--loader-glow:rgba(185,77,255,.36);--loader-deep:#1d0731}
+.draw-loader.ritual-numbers4{--loader-accent:#ffd0e7;--loader-secondary:#df5eab;--loader-glow:rgba(235,78,165,.34);--loader-deep:#2b071c}
+.ritual-veil{position:absolute;inset:-20%;background:radial-gradient(circle at 50% 42%,var(--loader-glow),transparent 31%),radial-gradient(circle at 20% 20%,color-mix(in srgb,var(--loader-secondary) 14%,transparent),transparent 26%),radial-gradient(circle at 80% 78%,color-mix(in srgb,var(--loader-accent) 9%,transparent),transparent 28%);animation:ritualVeilDrift 8s ease-in-out infinite alternate}
+.ritual-sky{position:absolute;inset:0;pointer-events:none}
+.ritual-sky i{position:absolute;left:calc(var(--star) * 5.15%);top:calc(7% + var(--star) * 4.15%);width:2px;height:2px;border-radius:50%;background:var(--loader-accent);box-shadow:0 0 9px var(--loader-accent);opacity:.22;animation:ritualSkyTwinkle calc(1.2s + var(--star) * .08s) ease-in-out infinite alternate}
+.ritual-sky i:nth-child(even){top:calc(88% - var(--star) * 3.7%)}.ritual-sky i:nth-child(3n){left:calc(98% - var(--star) * 4.8%);width:3px;height:3px}
+
+.ritual-loader-card{
+  position:relative;
+  overflow:hidden;
+  width:min(94vw,430px);
+  max-height:calc(100vh - 24px);
+  padding:20px 18px 18px;
+  border:1px solid color-mix(in srgb,var(--loader-accent) 35%,transparent);
+  border-radius:30px;
+  background:radial-gradient(circle at 50% 15%,color-mix(in srgb,var(--loader-secondary) 19%,transparent),transparent 38%),linear-gradient(180deg,color-mix(in srgb,var(--loader-deep) 86%,#060716),rgba(2,3,13,.985));
+  box-shadow:0 34px 100px rgba(0,0,0,.72),0 0 70px var(--loader-glow),inset 0 1px rgba(255,255,255,.07);
+  text-align:center;
+  transition:border-color .45s ease,box-shadow .45s ease,background .45s ease;
+}
+.ritual-loader-card::before,.ritual-loader-card::after{content:none}
+.ritual-card-border{position:absolute;inset:8px;border:1px solid color-mix(in srgb,var(--loader-accent) 10%,transparent);border-radius:23px;pointer-events:none}
+.ritual-card-border::before,.ritual-card-border::after{content:"✦";position:absolute;color:color-mix(in srgb,var(--loader-accent) 38%,transparent);font-size:9px}
+.ritual-card-border::before{left:10px;top:7px}.ritual-card-border::after{right:10px;bottom:7px}
+.ritual-kicker{position:relative;z-index:4;margin:0 0 5px;color:color-mix(in srgb,var(--loader-accent) 78%,white);font-size:9px;font-weight:900;letter-spacing:.16em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-ritual-stage{position:relative;z-index:2;width:min(64vw,238px);height:min(64vw,238px);margin:2px auto 4px}
+.ritual-scene{position:absolute;inset:0;display:none;place-items:center;border-radius:50%}
+.ritual-scene>b{position:absolute;left:0;right:0;bottom:7px;color:color-mix(in srgb,var(--loader-accent) 78%,white);font-size:8px;letter-spacing:.2em;text-shadow:0 0 12px var(--loader-glow)}
+.draw-loader.ritual-miniloto .ritual-scene-miniloto,.draw-loader.ritual-loto6 .ritual-scene-loto6,.draw-loader.ritual-loto7 .ritual-scene-loto7,.draw-loader.ritual-numbers3 .ritual-scene-numbers3,.draw-loader.ritual-numbers4 .ritual-scene-numbers4{display:grid}
+
+/* Mini Loto: lunar five-light ritual */
+.ritual-scene-miniloto{background:radial-gradient(circle,rgba(99,168,230,.12),transparent 64%)}
+.mini-moon{position:absolute;left:50%;top:47%;width:96px;height:96px;display:grid;place-items:center;border:1px solid rgba(197,232,255,.35);border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.22),rgba(69,122,180,.12) 48%,rgba(4,15,35,.9) 72%);box-shadow:0 0 35px rgba(137,202,255,.28),inset 0 0 24px rgba(184,226,255,.12)}
+.mini-moon span{color:#e6f5ff;font-family:Georgia,serif;font-size:57px;line-height:1;text-shadow:0 0 22px rgba(189,231,255,.8);animation:miniMoonPulse 2s ease-in-out infinite alternate}
+.mini-orbit{position:absolute;inset:25px;border:1px dotted rgba(183,226,255,.35);border-radius:50%;animation:ritualRotate 9s linear infinite}
+.mini-orbit::before{content:"";position:absolute;left:50%;top:-4px;width:8px;height:8px;border-radius:50%;background:#e7f6ff;box-shadow:0 0 18px #a5d8ff}
+.mini-star-crown{position:absolute;inset:0;animation:ritualRotate 13s linear infinite}
+.mini-star-crown i{position:absolute;left:50%;top:50%;color:#d9efff;font-style:normal;font-size:18px;transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-91px) rotate(calc(var(--i) * -72deg));text-shadow:0 0 14px #8bc8ff;animation:miniStarWake 1.15s ease-in-out infinite alternate;animation-delay:calc(var(--i) * .15s)}
+.mini-lotus{position:absolute;left:50%;top:49%;width:130px;height:130px;transform:translate(-50%,-50%);animation:ritualRotateReverse 18s linear infinite}
+.mini-lotus i{position:absolute;left:50%;top:50%;width:30px;height:64px;border:1px solid rgba(178,222,255,.16);border-radius:50% 50% 42% 42%;transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(calc(var(--i) * 72deg));background:linear-gradient(180deg,rgba(172,218,255,.1),transparent)}
+.draw-loader.ritual-miniloto.is-final-phase .mini-star-crown i{color:#fff;filter:brightness(1.35);animation-duration:.45s}
+
+/* Loto 6: six celestial seals */
+.ritual-scene-loto6{background:radial-gradient(circle,rgba(160,102,226,.14),transparent 64%)}
+.hex-halo{position:absolute;inset:18px;border:1px dotted rgba(255,225,161,.31);border-radius:50%;animation:ritualRotate 14s linear infinite}
+.hexagram{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);overflow:visible;filter:drop-shadow(0 0 9px rgba(200,149,255,.35));animation:hexagramBreathe 2.8s ease-in-out infinite alternate}
+.hexagram polygon,.hexagram circle{fill:none;stroke:rgba(255,225,161,.55);stroke-width:1;stroke-dasharray:8 5;transform-origin:center;animation:hexTrace 4.7s linear infinite}
+.hexagram polygon:nth-child(2){stroke:rgba(195,150,255,.54);animation-direction:reverse}
+.hexagram circle:nth-child(3){stroke-dasharray:2 7;animation-duration:7s}
+.hex-seals{position:absolute;inset:0;animation:ritualRotate 10s linear infinite}
+.hex-seals i{position:absolute;left:50%;top:50%;width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(255,224,157,.35);border-radius:50%;color:#ffe6ae;background:#110724;font-family:Georgia,serif;font-size:14px;font-style:normal;transform:translate(-50%,-50%) rotate(calc(var(--i) * 60deg)) translateY(-91px) rotate(calc(var(--i) * -60deg));box-shadow:0 0 14px rgba(197,137,255,.22);animation:sealPulse 1.5s ease-in-out infinite alternate;animation-delay:calc(var(--i) * .12s)}
+.hex-core{position:absolute;left:50%;top:50%;width:66px;height:66px;display:grid;place-items:center;border:1px solid rgba(255,225,161,.45);border-radius:50%;transform:translate(-50%,-50%);color:#ffe7ad;background:radial-gradient(circle,rgba(166,103,237,.35),rgba(8,3,20,.96) 70%);font-family:Georgia,serif;font-size:30px;text-shadow:0 0 20px #e1b7ff;box-shadow:0 0 30px rgba(181,113,239,.22),inset 0 0 16px rgba(255,226,166,.08);animation:coreOraclePulse 1.25s ease-in-out infinite alternate}
+.draw-loader.ritual-loto6.is-final-phase .hexagram{filter:drop-shadow(0 0 18px rgba(255,224,157,.67))}.draw-loader.ritual-loto6.is-final-phase .hex-core{box-shadow:0 0 52px rgba(255,215,132,.44),inset 0 0 22px rgba(255,226,166,.13)}
+
+/* Loto 7: seven planetary orbits */
+.ritual-scene-loto7{background:radial-gradient(circle,rgba(55,107,231,.2),transparent 66%)}
+.seven-ring{position:absolute;left:50%;top:47%;border:1px solid rgba(156,218,255,.24);border-radius:50%;transform:translate(-50%,-50%) rotate(18deg)}
+.seven-ring.ring-a{width:205px;height:82px;animation:sevenOrbitA 6s linear infinite}.seven-ring.ring-b{width:165px;height:152px;animation:sevenOrbitB 8s linear infinite}.seven-ring.ring-c{width:96px;height:195px;animation:sevenOrbitA 11s linear infinite reverse}
+.seven-planets{position:absolute;inset:0;animation:ritualRotate 16s linear infinite}
+.seven-planets i{position:absolute;left:50%;top:47%;width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(179,229,255,.38);border-radius:50%;color:#d9f2ff;background:#071432;font-family:Georgia,serif;font-size:13px;font-style:normal;transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-91px) rotate(calc(var(--i) * -51.428deg));box-shadow:0 0 16px rgba(81,137,255,.35);animation:planetWake 1.6s ease-in-out infinite alternate;animation-delay:calc(var(--i) * .13s)}
+.seven-core{position:absolute;left:50%;top:47%;width:75px;height:75px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(180,229,255,.42);border-radius:50%;transform:translate(-50%,-50%);color:#dff5ff;background:radial-gradient(circle,rgba(74,119,255,.42),rgba(2,8,25,.97) 70%);box-shadow:0 0 36px rgba(76,123,255,.36),inset 0 0 18px rgba(190,235,255,.08)}
+.seven-core span{font-family:Georgia,serif;font-size:28px;line-height:1;text-shadow:0 0 16px #8cc7ff}.seven-core small{margin-top:4px;font-size:7px;letter-spacing:.2em}
+.seven-rays{position:absolute;inset:15px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(167,222,255,.11) 0deg 1deg,transparent 1deg 25.7deg);animation:ritualRotateReverse 20s linear infinite}
+.draw-loader.ritual-loto7.is-final-phase .seven-planets i{box-shadow:0 0 25px rgba(170,226,255,.68)}.draw-loader.ritual-loto7.is-final-phase .seven-core{box-shadow:0 0 58px rgba(76,123,255,.58),inset 0 0 24px rgba(190,235,255,.14)}
+
+/* Numbers 3: astral dials */
+.ritual-scene-numbers3{background:radial-gradient(circle,rgba(172,74,239,.18),transparent 67%)}
+.number-dials{position:relative;display:flex;align-items:center;justify-content:center;gap:9px;perspective:700px}
+.celestial-dial{position:relative;width:58px;height:84px;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(231,192,255,.39);border-radius:18px;background:linear-gradient(180deg,rgba(91,41,125,.56),rgba(13,4,29,.97));box-shadow:0 0 20px rgba(174,73,239,.22),inset 0 1px rgba(255,255,255,.12);animation:dialFloat 1.7s ease-in-out infinite alternate}
+.celestial-dial:nth-child(2){animation-delay:.18s}.celestial-dial:nth-child(3){animation-delay:.36s}
+.celestial-dial::before,.celestial-dial::after{content:"✦";position:absolute;left:0;right:0;color:rgba(231,192,255,.25);font-size:9px}.celestial-dial::before{top:5px}.celestial-dial::after{bottom:5px}
+.celestial-dial span{color:#f3d9ff;font-family:Georgia,serif;font-size:42px;font-weight:800;line-height:1;text-shadow:0 0 18px rgba(223,154,255,.6);font-variant-numeric:tabular-nums}
+.celestial-dial i{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.24),transparent);box-shadow:0 -16px rgba(255,255,255,.05),0 16px rgba(255,255,255,.05)}
+.dial-constellation{position:absolute;inset:23px;border:1px dotted rgba(221,179,255,.22);border-radius:50%;animation:ritualRotate 10s linear infinite}.dial-constellation i{position:absolute;width:5px;height:5px;border-radius:50%;background:#f0d2ff;box-shadow:0 0 14px #cc83ff}.dial-constellation i:nth-child(1){left:10%;top:38%}.dial-constellation i:nth-child(2){right:12%;top:25%}.dial-constellation i:nth-child(3){right:24%;bottom:10%}
+.draw-loader.ritual-numbers3.is-final-phase .celestial-dial{border-color:rgba(246,218,255,.8);box-shadow:0 0 30px rgba(207,111,255,.48),inset 0 1px rgba(255,255,255,.16)}
+
+/* Numbers 4: four celestial gates */
+.ritual-scene-numbers4{background:radial-gradient(circle,rgba(224,69,155,.18),transparent 67%);perspective:800px}
+.star-gates{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;transform-style:preserve-3d}
+.star-gate{position:relative;width:47px;height:99px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(255,195,224,.38);border-radius:22px 22px 10px 10px;background:linear-gradient(180deg,rgba(118,31,77,.58),rgba(25,3,18,.98));box-shadow:0 0 18px rgba(223,73,158,.22),inset 0 1px rgba(255,255,255,.1);transform-origin:left center;animation:gateOpen 2.4s ease-in-out infinite alternate;animation-delay:calc(var(--gate-index,0) * .15s)}
+.star-gate:nth-child(1){--gate-index:0}.star-gate:nth-child(2){--gate-index:1}.star-gate:nth-child(3){--gate-index:2}.star-gate:nth-child(4){--gate-index:3}
+.star-gate i{position:absolute;top:8px;color:#ffd5e8;font-size:10px;font-style:normal;text-shadow:0 0 9px #ff86be}.star-gate span{color:#ffe0ef;font-family:Georgia,serif;font-size:32px;font-weight:800;text-shadow:0 0 17px rgba(255,119,184,.6);font-variant-numeric:tabular-nums}.star-gate em{position:absolute;left:8px;right:8px;bottom:8px;height:2px;background:linear-gradient(90deg,transparent,#ffc7e2,transparent);box-shadow:0 0 8px #ff6daf}
+.gate-floor{position:absolute;left:17%;right:17%;bottom:37px;height:26px;border:1px solid rgba(255,183,218,.16);border-radius:50%;transform:rotateX(72deg);background:radial-gradient(ellipse,rgba(232,79,166,.22),transparent 66%);box-shadow:0 0 24px rgba(224,67,157,.24)}
+.draw-loader.ritual-numbers4.is-final-phase .star-gate{animation:gateFinal .7s var(--ease) forwards;animation-delay:calc(var(--gate-index) * .11s)}
+
+.ritual-product-name{position:relative;z-index:4;margin:0 auto 4px;color:var(--loader-accent);font-family:"Yu Mincho",Georgia,serif;font-size:13px;font-weight:800;letter-spacing:.08em;text-shadow:0 0 14px var(--loader-glow)}
+.ritual-loader-card .loader-title{position:relative;z-index:4;color:#fff8e8;font-size:20px;line-height:1.45;text-shadow:0 0 14px var(--loader-glow)}
+.ritual-loader-card .loader-text{position:relative;z-index:4;min-height:47px;margin-top:5px;padding:0 4px;color:#d5d7e5;font-size:13px;line-height:1.65}
+.ritual-loader-card .loader-stage{position:relative;z-index:4;margin-top:6px;color:var(--loader-accent);font-size:9px;font-weight:900;letter-spacing:.22em}
+.ritual-progress{position:relative;z-index:4;width:82%;height:3px;margin:10px auto 0;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
+.ritual-progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--loader-secondary),var(--loader-accent),#fff);box-shadow:0 0 14px var(--loader-accent);transition-property:width;transition-timing-function:linear}
+.ritual-step-dots{position:relative;z-index:4;display:flex;justify-content:center;gap:11px;margin-top:10px}
+.ritual-step-dots i{width:7px;height:7px;border:1px solid color-mix(in srgb,var(--loader-accent) 42%,transparent);border-radius:50%;background:transparent;transition:.35s ease}
+.ritual-step-dots i.is-active{background:var(--loader-accent);box-shadow:0 0 13px var(--loader-accent);transform:scale(1.32)}
+.ritual-step-dots i.is-complete{background:color-mix(in srgb,var(--loader-secondary) 72%,white);border-color:transparent;opacity:.75}
+.draw-loader.is-final-phase .ritual-loader-card{border-color:color-mix(in srgb,var(--loader-accent) 68%,transparent);box-shadow:0 34px 100px rgba(0,0,0,.72),0 0 95px var(--loader-glow),inset 0 1px rgba(255,255,255,.1)}
+.draw-loader.is-final-phase .loader-title{color:var(--loader-accent);text-shadow:0 0 22px var(--loader-glow)}
+
+/* Product-specific result altar and reveals */
+.primary-result-hero{position:relative;overflow:hidden;border-color:color-mix(in srgb,var(--ritual-primary) 34%,transparent);background:radial-gradient(circle at 50% 13%,var(--ritual-glow),transparent 39%),linear-gradient(180deg,color-mix(in srgb,var(--ritual-deep) 70%,#111936),rgba(6,9,24,.99))}
+.primary-result-hero::before{content:"";position:absolute;inset:-30%;pointer-events:none;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--ritual-primary) 5%,transparent) 0deg 1deg,transparent 1deg 20deg);animation:ritualRotate 30s linear infinite}
+.primary-result-copy{position:relative;z-index:2}
+.result-ritual-crest{position:relative;width:92px;height:92px;margin:8px auto 9px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid color-mix(in srgb,var(--ritual-primary) 48%,transparent);border-radius:50%;color:var(--ritual-primary);background:radial-gradient(circle,var(--ritual-glow),rgba(5,6,20,.93) 70%);box-shadow:0 0 31px var(--ritual-glow),inset 0 0 18px color-mix(in srgb,var(--ritual-primary) 8%,transparent)}
+.result-ritual-crest::before,.result-ritual-crest::after{content:"";position:absolute;inset:-8px;border:1px dotted color-mix(in srgb,var(--ritual-primary) 32%,transparent);border-radius:50%;animation:ritualRotate 9s linear infinite}.result-ritual-crest::after{inset:12px;border-style:solid;animation-direction:reverse;animation-duration:6s}
+.result-ritual-crest span{position:relative;z-index:2;font-family:Georgia,"Yu Mincho",serif;font-size:34px;line-height:1;text-shadow:0 0 18px var(--ritual-glow)}
+.result-ritual-crest i{width:26px;height:1px;margin:5px 0 3px;background:linear-gradient(90deg,transparent,var(--ritual-primary),transparent)}
+.result-ritual-crest b{position:relative;z-index:2;font-size:7px;letter-spacing:.08em}
+.result-product-miniloto .primary-result-numbers{grid-template-columns:repeat(5,minmax(0,1fr));max-width:390px}
+.result-product-loto6 .primary-result-numbers{grid-template-columns:repeat(6,minmax(0,1fr))}
+.result-product-loto7 .primary-result-numbers{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;max-width:455px}
+.result-product-loto7 .primary-result-numbers .num{width:clamp(34px,9.5vw,54px);height:clamp(34px,9.5vw,54px);font-size:clamp(12px,3.8vw,18px)}
+.result-product-numbers3 .primary-result-numbers,.result-product-numbers4 .primary-result-numbers{display:flex;justify-content:center;max-width:none}
+
+.number-reveal-group.reveal-miniloto.is-revealing .num{opacity:0;transform:translateY(-42px) rotate(calc((var(--reveal-index) - 2) * 14deg)) scale(.2);filter:blur(7px)}
+.number-reveal-group.reveal-miniloto.is-revealing.reveal-start .num{animation:revealMoonDrop 1s cubic-bezier(.16,.85,.24,1.2) forwards;animation-delay:var(--reveal-delay)}
+.number-reveal-group.reveal-loto6.is-revealing .num{opacity:0;transform:rotate(calc(var(--reveal-index) * 60deg)) translateY(-72px) scale(.15);filter:blur(7px)}
+.number-reveal-group.reveal-loto6.is-revealing.reveal-start .num{animation:revealHexSeal 1.05s cubic-bezier(.17,.84,.24,1.22) forwards;animation-delay:var(--reveal-delay)}
+.number-reveal-group.reveal-loto7.is-revealing .num{opacity:0;transform:rotate(calc(var(--reveal-index) * 51deg)) translateY(-84px) scale(.18);filter:blur(8px)}
+.number-reveal-group.reveal-loto7.is-revealing.reveal-start .num{animation:revealPlanetOrbit 1.18s cubic-bezier(.16,.82,.22,1.18) forwards;animation-delay:var(--reveal-delay)}
+.number-reveal-group.reveal-numbers3.is-revealing .digit-tile{opacity:0;transform:perspective(500px) rotateX(-540deg) scale(.7);filter:blur(3px)}
+.number-reveal-group.reveal-numbers3.is-revealing.reveal-start .digit-tile{animation:revealAstralDial 1.05s cubic-bezier(.2,.78,.2,1.05) forwards;animation-delay:var(--reveal-delay)}
+.number-reveal-group.reveal-numbers4.is-revealing .digit-tile{opacity:0;transform:perspective(600px) rotateY(-100deg) translateZ(-35px);transform-origin:left center;filter:brightness(.25)}
+.number-reveal-group.reveal-numbers4.is-revealing.reveal-start .digit-tile{animation:revealStarGate 1s cubic-bezier(.18,.82,.23,1.08) forwards;animation-delay:var(--reveal-delay)}
+
+@keyframes ritualUniverseSpin{to{transform:rotate(360deg)}}
+@keyframes ritualUniverseBreathe{from{opacity:.4;transform:scale(.94)}to{opacity:1;transform:scale(1.06)}}
+@keyframes ritualVeilDrift{from{transform:translate3d(-2%,-1%,0) scale(.97)}to{transform:translate3d(2%,1%,0) scale(1.04)}}
+@keyframes ritualSkyTwinkle{from{opacity:.08;transform:scale(.5)}to{opacity:.9;transform:scale(1.65)}}
+@keyframes miniMoonPulse{from{opacity:.7;transform:scale(.94)}to{opacity:1;transform:scale(1.06)}}
+@keyframes miniStarWake{from{opacity:.35;transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-91px) rotate(calc(var(--i) * -72deg)) scale(.7)}to{opacity:1;transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-91px) rotate(calc(var(--i) * -72deg)) scale(1.25)}}
+@keyframes hexagramBreathe{from{opacity:.58;transform:scale(.94) rotate(-2deg)}to{opacity:1;transform:scale(1.03) rotate(2deg)}}
+@keyframes hexTrace{to{stroke-dashoffset:-52}}
+@keyframes sealPulse{from{opacity:.45;filter:brightness(.75)}to{opacity:1;filter:brightness(1.35)}}
+@keyframes sevenOrbitA{to{transform:translate(-50%,-50%) rotate(378deg)}}
+@keyframes sevenOrbitB{to{transform:translate(-50%,-50%) rotate(-342deg)}}
+@keyframes planetWake{from{opacity:.45;transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-91px) rotate(calc(var(--i) * -51.428deg)) scale(.76)}to{opacity:1;transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-91px) rotate(calc(var(--i) * -51.428deg)) scale(1.12)}}
+@keyframes dialFloat{from{transform:translateY(5px) rotateX(-3deg)}to{transform:translateY(-5px) rotateX(3deg)}}
+@keyframes gateOpen{from{transform:rotateY(-9deg) translateY(4px)}to{transform:rotateY(9deg) translateY(-4px)}}
+@keyframes gateFinal{0%{transform:rotateY(-65deg);opacity:.35}70%{transform:rotateY(7deg);opacity:1}100%{transform:none;opacity:1;box-shadow:0 0 32px rgba(255,130,190,.55),inset 0 1px rgba(255,255,255,.16)}}
+@keyframes revealMoonDrop{0%{opacity:0;transform:translateY(-42px) rotate(calc((var(--reveal-index) - 2) * 14deg)) scale(.2);filter:blur(7px)}66%{opacity:1;transform:translateY(4px) rotate(-2deg) scale(1.13);filter:blur(0);box-shadow:0 0 31px rgba(164,218,255,.55)}100%{opacity:1;transform:none;filter:none}}
+@keyframes revealHexSeal{0%{opacity:0;transform:rotate(calc(var(--reveal-index) * 60deg)) translateY(-72px) scale(.15);filter:blur(7px)}68%{opacity:1;transform:rotate(-4deg) scale(1.15);filter:blur(0);box-shadow:0 0 34px rgba(234,188,255,.52)}100%{opacity:1;transform:none;filter:none}}
+@keyframes revealPlanetOrbit{0%{opacity:0;transform:rotate(calc(var(--reveal-index) * 51deg)) translateY(-84px) scale(.18);filter:blur(8px)}72%{opacity:1;transform:rotate(3deg) scale(1.14);filter:blur(0);box-shadow:0 0 34px rgba(118,186,255,.56)}100%{opacity:1;transform:none;filter:none}}
+@keyframes revealAstralDial{0%{opacity:0;transform:perspective(500px) rotateX(-540deg) scale(.7);filter:blur(3px)}72%{opacity:1;transform:perspective(500px) rotateX(14deg) scale(1.07);filter:blur(0);box-shadow:0 0 31px rgba(209,127,255,.46)}100%{opacity:1;transform:none;filter:none}}
+@keyframes revealStarGate{0%{opacity:0;transform:perspective(600px) rotateY(-100deg) translateZ(-35px);filter:brightness(.25)}72%{opacity:1;transform:perspective(600px) rotateY(8deg) translateZ(0);filter:brightness(1.3);box-shadow:0 0 31px rgba(244,111,181,.48)}100%{opacity:1;transform:none;filter:none}}
+
+@media(max-height:680px){
+  .ritual-loader-card{padding-top:13px;padding-bottom:12px}
+  .product-ritual-stage{width:190px;height:190px}
+  .ritual-scene>b{bottom:1px}
+  .mini-star-crown i{transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-73px) rotate(calc(var(--i) * -72deg))}
+  .hex-seals i{transform:translate(-50%,-50%) rotate(calc(var(--i) * 60deg)) translateY(-73px) rotate(calc(var(--i) * -60deg))}
+  .seven-planets i{transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-73px) rotate(calc(var(--i) * -51.428deg))}
+  .ritual-loader-card .loader-text{min-height:42px;font-size:12px}
+}
+@media(max-width:370px){
+  .product-ritual-stage{width:205px;height:205px}
+  .ritual-loader-card{padding-left:13px;padding-right:13px}
+  .ritual-loader-card .loader-title{font-size:18px}
+  .ritual-loader-card .loader-text{font-size:12px}
+  .product-card{grid-template-columns:50px 1fr}.product-card .product-ritual-icon{width:50px;height:50px;font-size:21px}
+}
+@media(prefers-reduced-motion:reduce){
+  .draw-loader::before,.draw-loader::after,.ritual-veil,.ritual-sky i,.mini-moon span,.mini-orbit,.mini-star-crown,.mini-star-crown i,.mini-lotus,.hex-halo,.hexagram,.hexagram polygon,.hexagram circle,.hex-seals,.hex-seals i,.hex-core,.seven-ring,.seven-planets,.seven-planets i,.seven-rays,.celestial-dial,.dial-constellation,.star-gate,.primary-result-hero::before,.result-ritual-crest::before,.result-ritual-crest::after{animation:none!important}
+  .number-reveal-group.is-revealing .num,.number-reveal-group.is-revealing .digit-tile{opacity:1!important;transform:none!important;filter:none!important;animation:none!important}
+}
+
+
+/* v1.7.1 — ticket-first flow and number-safe Numbers rituals */
+.form-substep-head{
+  margin-top:30px;
+  padding-top:26px;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+#product-panel{scroll-margin-top:82px}
+#birth-panel{scroll-margin-top:82px}
+.oracle-ritual-glyph{
+  display:inline-grid;
+  place-items:center;
+  color:inherit;
+  filter:drop-shadow(0 0 12px currentColor);
+  animation:oracleGlyphPulse 1.45s ease-in-out infinite alternate;
+}
+.celestial-dial:nth-child(2) .oracle-ritual-glyph,.star-gate:nth-child(2) .oracle-ritual-glyph{animation-delay:.16s}
+.celestial-dial:nth-child(3) .oracle-ritual-glyph,.star-gate:nth-child(3) .oracle-ritual-glyph{animation-delay:.32s}
+.star-gate:nth-child(4) .oracle-ritual-glyph{animation-delay:.48s}
+@keyframes oracleGlyphPulse{
+  from{opacity:.38;transform:scale(.72) rotate(-12deg)}
+  to{opacity:1;transform:scale(1.08) rotate(12deg)}
+}
+@media(max-width:560px){
+  .form-substep-head{margin-top:24px;padding-top:22px}
+}
+@media(prefers-reduced-motion:reduce){.oracle-ritual-glyph{animation:none!important}}
+
+
+/* v1.7.2 — move the live selection confirmation next to generation */
+.selection-confirmation{
+  margin-top:18px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+.selection-confirmation-head{margin-bottom:12px;text-align:center}
+.selection-confirmation-head>span{
+  display:block;
+  color:var(--gold-bright);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.16em;
+}
+.selection-confirmation-head h3{margin:5px 0 4px;font-size:19px;line-height:1.45}
+.selection-confirmation-head p{margin:0;color:var(--muted-strong);font-size:13px;line-height:1.6}
+.selection-confirmation .app-summary-strip{margin-bottom:0}
+.selection-confirmation+.sticky-submit{margin-top:14px}
+.four-summary-pills .summary-pill:last-child{grid-column:auto;min-height:92px}
+@media(max-width:560px){
+  .selection-confirmation{margin-top:16px;padding-top:18px}
+  .selection-confirmation-head h3{font-size:18px}
+}
+
+/* v1.7.3 — 結果画面の再生成・トップ復帰ボタンを明確化 ------------------ */
+.result-action-panel{
+  width:min(100%,520px);
+  margin:22px auto 0;
+  padding:14px;
+  gap:10px;
+  border:1px solid color-mix(in srgb,var(--ritual-primary) 22%,rgba(255,255,255,.12));
+  border-radius:22px;
+  background:linear-gradient(180deg,rgba(8,12,30,.80),rgba(4,7,20,.62));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 34px rgba(0,0,0,.22);
+}
+.result-repeat-form{display:block;width:100%;margin:0}
+.result-repeat-button,.result-reset-button{
+  box-sizing:border-box;
+  position:relative;
+  width:100%;
+  min-height:68px;
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) 22px;
+  align-items:center;
+  gap:11px;
+  padding:10px 14px;
+  border-radius:17px;
+  text-align:left;
+  text-decoration:none;
+  cursor:pointer;
+  transition:transform .16s ease,box-shadow .22s ease,border-color .22s ease,filter .22s ease;
+}
+.result-repeat-button{
+  border:1px solid color-mix(in srgb,var(--ritual-primary) 75%,white 16%);
+  color:#251606;
+  background:linear-gradient(180deg,#fff4cc 0%,color-mix(in srgb,var(--ritual-primary) 58%,#f2c965) 54%,color-mix(in srgb,var(--ritual-secondary) 50%,#a76922) 100%);
+  box-shadow:0 15px 32px var(--ritual-glow),inset 0 1px 0 rgba(255,255,255,.85),inset 0 -5px 12px rgba(63,31,0,.16);
+}
+.result-repeat-button::after{content:"";position:absolute;inset:2px;border:1px solid rgba(255,255,255,.34);border-radius:14px;pointer-events:none}
+.result-reset-button{
+  border:1px solid color-mix(in srgb,var(--ritual-primary) 38%,rgba(255,255,255,.18));
+  color:var(--text);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--ritual-primary) 10%,rgba(255,255,255,.07)),rgba(255,255,255,.025));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.result-repeat-button:hover,.result-reset-button:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.result-repeat-button:active,.result-reset-button:active{transform:scale(.982)}
+.result-action-icon{
+  width:42px;height:42px;display:grid;place-items:center;
+  border-radius:14px;
+  color:#2a1703;
+  background:rgba(255,255,255,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.56),0 5px 15px rgba(58,30,0,.12);
+  font-size:25px;font-weight:900;line-height:1;
+}
+.result-reset-button .result-action-icon{color:var(--ritual-primary);background:color-mix(in srgb,var(--ritual-primary) 12%,rgba(255,255,255,.045));box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.result-home-icon{font-size:23px}
+.result-action-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.result-action-copy strong{font-size:17px;line-height:1.3;letter-spacing:.01em}
+.result-action-copy small{font-size:12px;font-weight:700;line-height:1.45;opacity:.78}
+.result-action-arrow{font-size:29px;font-weight:400;line-height:1;text-align:right;opacity:.72}
+.result-action-note{margin:2px 5px 0!important;color:var(--muted)!important;font-size:11px!important;line-height:1.55!important}
+@media(min-width:680px){
+  .result-action-panel{padding:16px}
+  .result-repeat-button,.result-reset-button{min-height:72px;padding:11px 16px}
+  .result-action-copy strong{font-size:18px}
+  .result-action-copy small{font-size:13px}
+}
+
+
+/* v1.7.4 — official-style logos on product selection cards */
+.product-card{
+  grid-template-columns:1fr;
+  grid-template-rows:auto auto auto auto 1fr;
+  row-gap:6px;
+  padding:16px 18px 18px;
+}
+.product-card .product-logo-stage{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:72px;
+  padding:8px 10px;
+  margin:2px 28px 4px 0;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(245,246,250,.9));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 10px 24px rgba(0,0,0,.18);
+}
+.product-card .product-logo{
+  display:block;
+  width:100%;
+  max-width:210px;
+  max-height:58px;
+  object-fit:contain;
+  object-position:center;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.14));
+}
+.product-card .product-ritual-icon{
+  position:absolute;
+  left:14px;
+  top:14px;
+  grid-row:auto;
+  width:42px;
+  height:42px;
+  font-size:18px;
+  z-index:2;
+}
+.product-card .mode-badge{margin-top:2px;}
+.product-card strong{margin-top:2px;}
+.product-card .product-ritual-name{margin-top:1px;}
+.product-card em{margin-top:4px;}
+.product-card:has(input:checked) .product-logo-stage{
+  border-color:color-mix(in srgb,var(--card-accent) 40%, rgba(255,255,255,.2));
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--card-accent) 18%, transparent),inset 0 1px 0 rgba(255,255,255,.95),0 14px 30px rgba(0,0,0,.22);
+  transform:translateY(-1px);
+}
+.product-miniloto .product-logo-stage{background:linear-gradient(180deg,rgba(255,250,240,.98),rgba(250,244,231,.92));}
+.product-loto6 .product-logo-stage,.product-loto7 .product-logo-stage{background:linear-gradient(180deg,rgba(255,251,238,.98),rgba(251,244,224,.9));}
+.product-numbers3 .product-logo-stage,.product-numbers4 .product-logo-stage{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,245,250,.94));}
+@media(min-width:760px){
+  .product-card .product-logo-stage{min-height:82px;}
+  .product-card .product-logo{max-height:64px;}
+}
+@media(max-width:370px){
+  .product-card{padding:15px 15px 16px;}
+  .product-card .product-logo-stage{min-height:68px;padding:7px 8px;margin-right:24px;}
+  .product-card .product-logo{max-height:52px;}
+  .product-card .product-ritual-icon{width:38px;height:38px;font-size:17px;}
+}
+
+/* v1.7.7 — integrated transparent logos, no white picture frames */
+.product-card{
+  padding:15px 17px 18px;
+  row-gap:5px;
+}
+.product-card .product-logo-stage{
+  position:relative;
+  min-height:104px;
+  padding:10px 18px 8px;
+  margin:0 23px 5px 0;
+  border:0;
+  border-radius:20px;
+  background:
+    radial-gradient(ellipse at 50% 52%,color-mix(in srgb,var(--card-accent) 17%,transparent),transparent 66%),
+    linear-gradient(180deg,rgba(255,255,255,.016),transparent 76%);
+  box-shadow:none;
+  overflow:visible;
+  transition:transform .28s ease,filter .28s ease,background .28s ease;
+}
+.product-card .product-logo-stage::after{
+  content:"";
+  position:absolute;
+  left:12%;right:12%;bottom:2px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--card-accent) 40%,transparent),transparent);
+  box-shadow:0 0 13px color-mix(in srgb,var(--card-accent) 24%,transparent);
+}
+.product-card .product-logo{
+  width:auto;
+  max-width:min(92%,270px);
+  max-height:91px;
+  object-fit:contain;
+  filter:drop-shadow(0 8px 14px rgba(0,0,0,.38)) drop-shadow(0 0 10px color-mix(in srgb,var(--card-accent) 14%,transparent));
+  transform:translateZ(0);
+  transition:transform .3s cubic-bezier(.2,.75,.25,1),filter .3s ease;
+}
+.product-card:has(input:checked) .product-logo-stage{
+  border:0;
+  background:
+    radial-gradient(ellipse at 50% 52%,color-mix(in srgb,var(--card-accent) 28%,transparent),transparent 68%),
+    linear-gradient(180deg,color-mix(in srgb,var(--card-accent) 5%,transparent),transparent 78%);
+  box-shadow:none;
+  transform:none;
+}
+.product-card:has(input:checked) .product-logo{
+  transform:scale(1.055) translateY(-1px);
+  filter:drop-shadow(0 10px 17px rgba(0,0,0,.42)) drop-shadow(0 0 17px color-mix(in srgb,var(--card-accent) 30%,transparent));
+}
+.product-miniloto .product-logo-stage,
+.product-loto6 .product-logo-stage,
+.product-loto7 .product-logo-stage,
+.product-numbers3 .product-logo-stage,
+.product-numbers4 .product-logo-stage{
+  background:
+    radial-gradient(ellipse at 50% 52%,color-mix(in srgb,var(--card-accent) 17%,transparent),transparent 66%),
+    linear-gradient(180deg,rgba(255,255,255,.016),transparent 76%);
+}
+.product-miniloto .product-logo{max-width:250px;max-height:88px;}
+.product-loto6 .product-logo{max-width:246px;max-height:96px;}
+.product-loto7 .product-logo{max-width:242px;max-height:96px;}
+.product-numbers3 .product-logo,.product-numbers4 .product-logo{max-width:282px;max-height:82px;}
+.product-card .product-ritual-icon{
+  left:12px;
+  top:12px;
+  width:39px;
+  height:39px;
+  border-color:color-mix(in srgb,var(--card-accent) 46%,transparent);
+  background:radial-gradient(circle,color-mix(in srgb,var(--card-accent) 19%,transparent),rgba(4,7,20,.88) 70%);
+  font-size:17px;
+  box-shadow:0 0 18px color-mix(in srgb,var(--card-accent) 18%,transparent),inset 0 0 12px rgba(255,255,255,.025);
+}
+.product-card .mode-badge{margin-top:0;}
+.product-card strong{font-size:19px;margin-top:3px;}
+.product-card .product-ritual-name{font-size:13px;}
+.product-card em{font-size:14px;line-height:1.65;}
+@media(min-width:760px){
+  .product-card .product-logo-stage{min-height:112px;padding-top:12px;}
+  .product-card .product-logo{max-height:98px;}
+  .product-numbers3 .product-logo,.product-numbers4 .product-logo{max-height:88px;}
+}
+@media(max-width:370px){
+  .product-card{padding:14px 14px 16px;}
+  .product-card .product-logo-stage{min-height:94px;padding:9px 10px 7px;margin-right:21px;}
+  .product-card .product-logo{max-width:92%;max-height:82px;}
+  .product-numbers3 .product-logo,.product-numbers4 .product-logo{max-height:72px;}
+  .product-card .product-ritual-icon{width:36px;height:36px;font-size:16px;}
+}
+
+
+/* v1.7.8 — original celestial emblems replace external lottery logos */
+.product-card{
+  grid-template-columns:1fr;
+  grid-template-rows:auto auto auto auto 1fr;
+  row-gap:5px;
+  min-height:244px;
+  padding:15px 17px 18px;
+}
+.product-card .product-logo-stage,
+.product-card .product-logo,
+.product-card .product-ritual-icon{display:none!important;}
+.product-emblem-stage{
+  position:relative;
+  display:grid;
+  place-items:center;
+  min-height:116px;
+  margin:0 25px 7px 0;
+  border:1px solid color-mix(in srgb,var(--card-accent) 25%,rgba(255,255,255,.07));
+  border-radius:22px;
+  overflow:hidden;
+  color:var(--card-accent);
+  background:
+    radial-gradient(circle at 50% 49%,color-mix(in srgb,var(--card-accent) 17%,transparent),transparent 52%),
+    radial-gradient(circle at 17% 24%,rgba(255,255,255,.16) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 76% 19%,rgba(255,255,255,.12) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 88% 70%,rgba(255,255,255,.11) 0 1px,transparent 1.7px),
+    linear-gradient(145deg,rgba(8,14,38,.88),rgba(3,6,20,.94));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 12px 28px rgba(0,0,0,.18);
+  transition:border-color .28s ease,box-shadow .28s ease,transform .28s ease,background .28s ease;
+}
+.product-emblem-stage::before{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border:1px solid color-mix(in srgb,var(--card-accent) 11%,transparent);
+  border-radius:17px;
+  pointer-events:none;
+}
+.product-emblem-stage::after{
+  content:"";
+  position:absolute;
+  left:17%;right:17%;bottom:8px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--card-accent) 48%,transparent),transparent);
+  box-shadow:0 0 14px color-mix(in srgb,var(--card-accent) 25%,transparent);
+}
+.product-emblem-svg{
+  position:relative;
+  z-index:1;
+  display:block;
+  width:min(100%,260px);
+  height:112px;
+  overflow:visible;
+  filter:drop-shadow(0 0 13px color-mix(in srgb,var(--card-accent) 22%,transparent));
+  transition:transform .35s cubic-bezier(.2,.78,.23,1),filter .35s ease;
+}
+.product-emblem-svg .emblem-orbit,
+.product-emblem-svg .emblem-line,
+.product-emblem-svg .emblem-dial,
+.product-emblem-svg .emblem-gate,
+.product-emblem-svg .emblem-constellation{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  opacity:.72;
+}
+.product-emblem-svg .emblem-orbit-secondary{opacity:.52;stroke-width:1.4;}
+.product-emblem-svg .emblem-orbit-faint{opacity:.34;stroke-width:1.2;}
+.product-emblem-svg .emblem-constellation{stroke-width:1.15;opacity:.38;stroke-dasharray:2.5 4;}
+.product-emblem-svg .emblem-solid,
+.product-emblem-svg .emblem-core,
+.product-emblem-svg .emblem-spark,
+.product-emblem-svg .emblem-nodes circle{fill:currentColor;}
+.product-emblem-svg .emblem-core{opacity:.22;stroke:currentColor;stroke-width:1.4;}
+.product-emblem-svg .emblem-spark{opacity:.96;}
+.product-emblem-svg .emblem-nodes circle{opacity:.9;}
+.product-emblem-svg .emblem-hex{stroke-width:2;opacity:.88;}
+.product-emblem-svg .emblem-dial{fill:color-mix(in srgb,var(--card-accent) 5%,transparent);stroke-width:1.8;}
+.product-emblem-svg .emblem-gate{fill:color-mix(in srgb,var(--card-accent) 4%,transparent);stroke-width:1.65;}
+.product-card:has(input:checked) .product-emblem-stage{
+  border-color:color-mix(in srgb,var(--card-accent) 68%,transparent);
+  background:
+    radial-gradient(circle at 50% 49%,color-mix(in srgb,var(--card-accent) 27%,transparent),transparent 54%),
+    radial-gradient(circle at 17% 24%,rgba(255,255,255,.22) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 76% 19%,rgba(255,255,255,.18) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 88% 70%,rgba(255,255,255,.16) 0 1px,transparent 1.7px),
+    linear-gradient(145deg,color-mix(in srgb,var(--card-accent) 8%,rgba(8,14,38,.92)),rgba(3,6,20,.96));
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--card-accent) 10%,transparent),0 0 28px color-mix(in srgb,var(--card-accent) 17%,transparent),inset 0 1px 0 rgba(255,255,255,.07),0 14px 30px rgba(0,0,0,.25);
+  transform:translateY(-1px);
+}
+.product-card:has(input:checked) .product-emblem-svg{
+  transform:scale(1.045);
+  filter:drop-shadow(0 0 18px color-mix(in srgb,var(--card-accent) 42%,transparent));
+}
+.product-card:has(input:checked) .emblem-nodes circle,
+.product-card:has(input:checked) .emblem-spark{
+  animation:emblemPulse 2.2s ease-in-out infinite;
+}
+.product-card:has(input:checked) .emblem-orbit,
+.product-card:has(input:checked) .emblem-line{
+  animation:emblemLineGlow 2.8s ease-in-out infinite;
+}
+.product-card .mode-badge{margin-top:0;}
+.product-card strong{font-size:20px;margin-top:3px;}
+.product-card .product-ritual-name{font-size:14px;}
+.product-card em{font-size:14px;line-height:1.66;}
+@keyframes emblemPulse{0%,100%{opacity:.72;filter:drop-shadow(0 0 0 transparent)}50%{opacity:1;filter:drop-shadow(0 0 5px currentColor)}}
+@keyframes emblemLineGlow{0%,100%{opacity:.55}50%{opacity:.95}}
+@media(min-width:760px){
+  .product-card{min-height:258px;}
+  .product-emblem-stage{min-height:126px;}
+  .product-emblem-svg{height:120px;}
+}
+@media(max-width:370px){
+  .product-card{min-height:231px;padding:14px 14px 16px;}
+  .product-emblem-stage{min-height:103px;margin-right:22px;}
+  .product-emblem-svg{height:100px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .product-card:has(input:checked) .emblem-nodes circle,
+  .product-card:has(input:checked) .emblem-spark,
+  .product-card:has(input:checked) .emblem-orbit,
+  .product-card:has(input:checked) .emblem-line{animation:none!important;}
+}
+
+/* v1.7.9 — 「同じ条件でもう一度」ボタンの文字コントラスト修正 */
+.primary-result-action .result-repeat-button,
+.primary-result-action .result-repeat-button span,
+.primary-result-action .result-repeat-button strong,
+.primary-result-action .result-repeat-button small{
+  color:#211204;
+}
+.primary-result-action .result-repeat-button .result-action-copy strong{
+  color:#160b02;
+  font-weight:950;
+  text-shadow:0 1px 0 rgba(255,255,255,.48);
+}
+.primary-result-action .result-repeat-button .result-action-copy small{
+  color:#3b220b;
+  opacity:1;
+  font-weight:800;
+}
+.primary-result-action .result-repeat-button .result-action-arrow{
+  color:#211204;
+  opacity:.9;
+}
+.primary-result-action .result-repeat-button:hover,
+.primary-result-action .result-repeat-button:focus-visible{
+  color:#160b02;
+}
+.primary-result-action .result-repeat-button:focus-visible{
+  outline:3px solid rgba(255,255,255,.88);
+  outline-offset:3px;
 }
