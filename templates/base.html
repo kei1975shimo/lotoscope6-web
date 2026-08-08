@@ -7,19 +7,19 @@
   <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="あなたの誕生星と今日の天体を重ね、ミニロト・ロト6・ロト7・ナンバーズ3・ナンバーズ4の数字を導く、ロトナンバーズ・スコープです。">
-  <title>{% block title %}ロトナンバーズ・スコープ{% endblock %}</title>
+  <meta name="description" content="あなたの誕生星と今日の天体を重ね、ミニロト・ロト6・ロト7の数字を導く、ロト・スコープです。">
+  <title>{% block title %}ロト・スコープ{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ app_version }}">
 </head>
 <body class="{% block body_class %}app-mobile{% endblock %}">
   <a class="skip-link" href="#main-content">本文へ移動</a>
   <main id="main-content" class="wrap app-shell">
     <header class="app-bar">
-      <a class="app-brand" href="{{ url_for('index') }}" aria-label="ロトナンバーズ・スコープ ホーム">
+      <a class="app-brand" href="{{ url_for('index') }}" aria-label="ロト・スコープ ホーム">
         <span class="app-brand-mark" aria-hidden="true"><i>☾</i><b>✦</b></span>
         <span class="app-brand-copy">
-          <strong>ロトナンバーズ・スコープ</strong>
-          <small>LOTO NUMBERS SCOPE</small>
+          <strong>ロト・スコープ</strong>
+          <small>LOTO SCOPE</small>
         </span>
       </a>
       <div class="app-bar-actions"><span class="status-chip app-status">公開中</span></div>
@@ -34,7 +34,7 @@
       </div>
       <div class="draw-loader-card ritual-loader-card">
         <div class="ritual-card-border" aria-hidden="true"></div>
-        <div class="ritual-kicker" data-loader-kicker>LOTO NUMBERS SCOPE · CELESTIAL RITUAL</div>
+        <div class="ritual-kicker" data-loader-kicker>LOTO SCOPE · CELESTIAL RITUAL</div>
 
         <div class="product-ritual-stage" aria-hidden="true">
           <div class="ritual-scene ritual-scene-miniloto" data-ritual-scene="miniloto">
@@ -72,21 +72,6 @@
             <b>SEVEN PLANETARY ORBITS</b>
           </div>
 
-          <div class="ritual-scene ritual-scene-numbers3" data-ritual-scene="numbers3">
-            <div class="number-dials three-dials">
-              {% for symbol in ['☾','✦','☉'] %}<div class="celestial-dial"><span class="oracle-ritual-glyph">{{ symbol }}</span><i></i></div>{% endfor %}
-            </div>
-            <div class="dial-constellation"><i></i><i></i><i></i></div>
-            <b>THREE ASTRAL DIALS</b>
-          </div>
-
-          <div class="ritual-scene ritual-scene-numbers4" data-ritual-scene="numbers4">
-            <div class="star-gates">
-              {% for symbol in ['☾','✦','☉','◇'] %}<div class="star-gate"><i>✦</i><span class="oracle-ritual-glyph">{{ symbol }}</span><em></em></div>{% endfor %}
-            </div>
-            <div class="gate-floor"></div>
-            <b>FOUR CELESTIAL GATES</b>
-          </div>
         </div>
 
         <div class="ritual-product-name" data-loader-product>ロト6</div>
@@ -95,6 +80,7 @@
         <div class="loader-stage" data-loader-stage>誕生の光</div>
         <div class="ritual-progress" aria-hidden="true"><i data-loader-progress></i></div>
         <div class="ritual-step-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <button type="button" class="ritual-skip-btn" data-loader-skip hidden>結果をすぐに見る</button>
       </div>
     </div>
 

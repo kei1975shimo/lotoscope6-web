@@ -9,7 +9,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Deque, Dict, Tuple
 
-from flask import Flask, abort, jsonify, render_template, request, session, url_for
+from flask import Flask, abort, jsonify, render_template, request, session
 
 ROOT_DIR = Path(__file__).resolve().parent
 SRC_DIR = ROOT_DIR / "src"
@@ -29,7 +29,7 @@ from product_numbers import (  # noqa: E402
 )
 from utils import load_json  # noqa: E402
 
-APP_VERSION = "v1.7.9-repeat-button-contrast"
+APP_VERSION = "v1.9.8-celestial-patterns"
 DEFAULT_PRODUCT_ID = "loto6"
 
 
@@ -49,7 +49,7 @@ def create_app() -> Flask:
             "app_version": APP_VERSION,
             "product_choices": product_choices(),
             "csrf_token": get_csrf_token,
-            "default_ticket_count": int(settings.get("default_ticket_count", 2)),
+            "default_ticket_count": int(settings.get("default_ticket_count", 1)),
             "max_ticket_count": int(settings.get("max_ticket_count", 10)),
             "today_date": datetime.now(JST).date().isoformat(),
             "current_year": datetime.now(JST).year,
@@ -98,7 +98,6 @@ def create_app() -> Flask:
             product = get_product(product_id)
             astrology_profile = calculate_astrology_profile(birth_date_value)
             rows = generate_product_rows(product_id, count, astrology_profile, seed=seed)
-            edit_url = build_edit_url(product_id, count, seed, birth_date_value)
             return render_template(
                 "result.html",
                 rows=rows,
@@ -106,7 +105,6 @@ def create_app() -> Flask:
                 product_id=product_id,
                 count=count,
                 seed=seed,
-                edit_url=edit_url,
                 astrology_profile=astrology_profile,
             )
         except (ValueError, RuntimeError) as exc:
@@ -169,17 +167,6 @@ def parse_generate_form(form: Any) -> Tuple[str, int, str, date]:
 
     birth_date_value = parse_birth_date(str(form.get("birth_date", "")).strip())
     return product_id, count, seed, birth_date_value
-
-
-def build_edit_url(product_id: str, count: int, seed: str, birth_date_value: date) -> str:
-    params: Dict[str, Any] = {
-        "product": product_id,
-        "count": count,
-        "birth_date": birth_date_value.isoformat(),
-    }
-    if seed:
-        params["seed"] = seed
-    return url_for("index", **params)
 
 
 def is_production_environment() -> bool:

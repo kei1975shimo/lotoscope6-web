@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from datetime import date, datetime, time, timezone
-from typing import Any, Dict, Iterable, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 from zoneinfo import ZoneInfo
 
 import ephem
@@ -122,6 +122,7 @@ def calculate_birth_sun_sign(birth_date: date) -> Dict[str, Any]:
         "name": ZODIAC_SIGNS[index],
         "symbol": ZODIAC_SYMBOLS[index],
         "english": ZODIAC_ENGLISH[index],
+        "index": index,
         "longitude": round(longitude, 2),
         "degree": round(degree_in_sign(longitude), 2),
     }
@@ -200,9 +201,11 @@ def _build_planet_rows(birth_date: date, target_date: date) -> List[Dict[str, An
                 "symbol": PLANET_SYMBOLS[planet_id],
                 "birth_longitude": round(birth_lon, 2),
                 "birth_sign": zodiac_name(birth_lon),
+                "birth_sign_symbol": ZODIAC_SYMBOLS[int(birth_lon // 30) % 12],
                 "birth_degree": round(degree_in_sign(birth_lon), 2),
                 "current_longitude": round(current_lon, 2),
                 "current_sign": zodiac_name(current_lon),
+                "current_sign_symbol": ZODIAC_SYMBOLS[int(current_lon // 30) % 12],
                 "current_degree": round(degree_in_sign(current_lon), 2),
                 "distance": round(distance, 2),
                 "aspect_degree": aspect_degree,
@@ -275,8 +278,11 @@ def calculate_astrology_profile(birth_date: date, target_date: date | None = Non
         "target_date_ja": f"{current_date.year}年{current_date.month}月{current_date.day}日",
         "calculation_time": "12:00 JST",
         "sun_sign": sun_row["birth_sign"],
+        "sun_sign_symbol": sun_row["birth_sign_symbol"],
         "moon_sign": moon_row["birth_sign"],
+        "moon_sign_symbol": moon_row["birth_sign_symbol"],
         "current_sun_sign": sun_row["current_sign"],
+        "current_sun_sign_symbol": sun_row["current_sign_symbol"],
         "core_numbers": sorted(core_numbers),
         "pool_numbers": pool_numbers,
         "weights": weights,
@@ -286,29 +292,3 @@ def calculate_astrology_profile(birth_date: date, target_date: date | None = Non
             "7天体の黄経、星座、主要アスペクトへの近さを1〜43へ変換しています。"
         ),
     }
-
-
-def astrology_numbers_from_profile(profile: Dict[str, Any] | None) -> List[int]:
-    if not profile:
-        return []
-    return [int(number) for number in profile.get("core_numbers", []) if 1 <= int(number) <= 43]
-
-
-def astrology_pool_from_profile(profile: Dict[str, Any] | None) -> List[int]:
-    if not profile:
-        return []
-    return [int(number) for number in profile.get("pool_numbers", []) if 1 <= int(number) <= 43]
-
-
-def apply_astrology_scores(
-    number_stats: Iterable[Dict[str, Any]],
-    profile: Dict[str, Any] | None,
-) -> List[Dict[str, Any]]:
-    weights = profile.get("weights", {}) if profile else {}
-    enriched: List[Dict[str, Any]] = []
-    for raw_row in number_stats:
-        row = dict(raw_row)
-        number = int(row["number"])
-        row["astrology_score"] = float(weights.get(number, 0.0))
-        enriched.append(row)
-    return enriched

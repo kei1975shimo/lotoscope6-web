@@ -12,7 +12,5 @@ services:
         value: production
       - key: SECRET_KEY
         generateValue: true
-      - key: TICKET_TOKEN_MAX_AGE_SECONDS
-        value: "86400"
       - key: RATE_LIMIT_PER_MINUTE
         value: "30"

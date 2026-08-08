@@ -9,11 +9,11 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("RATE_LIMIT_PER_MINUTE", "0")
 
 from app import app  # noqa: E402
-from astrology_numbers import calculate_astrology_profile
-from product_numbers import generate_product_rows  # noqa: E402
+from astrology_numbers import calculate_astrology_profile  # noqa: E402
+from product_numbers import generate_product_rows, product_choices  # noqa: E402
 
 
-class LotoNumbersScopeSmokeTests(unittest.TestCase):
+class LotoScopeSmokeTests(unittest.TestCase):
     def setUp(self) -> None:
         app.config.update(TESTING=True, SESSION_COOKIE_SECURE=False)
         self.client = app.test_client()
@@ -43,59 +43,50 @@ class LotoNumbersScopeSmokeTests(unittest.TestCase):
             },
         )
 
-    def test_index_lists_all_five_products_and_removes_old_modes(self) -> None:
+    def test_index_is_loto_only_and_compact(self) -> None:
         html, _ = self.get_index()
-        for product in ["ミニロト", "ロト6", "ロト7", "ナンバーズ3", "ナンバーズ4"]:
+        for product in ["ミニロト", "ロト6", "ロト7"]:
             self.assertIn(product, html)
-        for removed in ["バランス", "過去データ", "眠っている数字", "高い数字を含める", "五つの導きをすべて試す"]:
+        for removed in ["ナンバーズ3", "ナンバーズ4", "星の儀式の流れ", "guide-panel", "FINAL CONFIRMATION"]:
             self.assertNotIn(removed, html)
+        self.assertIn("ロト・スコープ", html)
+        self.assertIn("compact-home-hero", html)
         self.assertRegex(html, r'name="product" value="loto6"[^>]*checked')
-        self.assertIn("ロトナンバーズ・スコープ", html)
-        for ritual in ["月輪の五光", "六星印の儀", "七惑星の大軌道", "三連星盤", "四星門の啓示"]:
-            self.assertIn(ritual, html)
-        self.assertNotIn("答え合わせ", html)
-        self.assertLess(html.index('id="product-panel"'), html.index('id="birth-panel"'))
-        self.assertIn("まず、数字を尋ねるくじを選んでください", html)
-        self.assertIn("次に、あなたの誕生日を教えてください", html)
-        self.assertNotIn("data-oracle-digit", html)
 
-    def test_all_products_generate_correct_shapes(self) -> None:
+    def test_product_choices_are_loto_only(self) -> None:
+        self.assertEqual([item["product_id"] for item in product_choices()], ["miniloto", "loto6", "loto7"])
+
+    def test_all_loto_products_generate_correct_shapes(self) -> None:
         expected = {
-            "miniloto": (5, 31, "loto"),
-            "loto6": (6, 43, "loto"),
-            "loto7": (7, 37, "loto"),
-            "numbers3": (3, 9, "numbers"),
-            "numbers4": (4, 9, "numbers"),
+            "miniloto": (5, 31),
+            "loto6": (6, 43),
+            "loto7": (7, 37),
         }
-        profile = calculate_astrology_profile(__import__('datetime').date(1975, 8, 16))
-        for product_id, (length, maximum, kind) in expected.items():
+        profile = calculate_astrology_profile(__import__("datetime").date(1975, 8, 16))
+        for product_id, (length, maximum) in expected.items():
             with self.subTest(product_id=product_id):
                 rows = generate_product_rows(product_id, 3, profile, seed=f"seed-{product_id}")
                 self.assertEqual(len(rows), 3)
                 for row in rows:
                     self.assertEqual(len(row["numbers"]), length)
-                    if kind == "loto":
-                        self.assertEqual(len(set(row["numbers"])), length)
-                        self.assertTrue(all(1 <= number <= maximum for number in row["numbers"]))
-                    else:
-                        self.assertEqual(len(row["display_number"]), length)
-                        self.assertTrue(row["display_number"].isdigit())
+                    self.assertEqual(len(set(row["numbers"])), length)
+                    self.assertTrue(all(1 <= number <= maximum for number in row["numbers"]))
+                    self.assertEqual(row["product_kind"], "loto")
 
-    def test_result_has_no_answer_check(self) -> None:
+    def test_numbers_products_are_rejected(self) -> None:
+        profile = calculate_astrology_profile(__import__("datetime").date(1975, 8, 16))
+        for product_id in ["numbers3", "numbers4"]:
+            with self.assertRaises(ValueError):
+                generate_product_rows(product_id, 1, profile, seed="x")
+
+    def test_result_renders(self) -> None:
         response = self.generate("loto7", count="2")
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
         self.assertIn("今回、星が導いた七つの数字", html)
-        self.assertIn("この数字へつながった星読み", html)
         self.assertIn("七惑星の大軌道", html)
         self.assertIn('data-reveal-product="loto7"', html)
-        self.assertNotIn("答え合わせ", html)
-        self.assertNotIn('action="/check"', html)
-
-    def test_answer_check_routes_are_not_published(self) -> None:
-        self.assertEqual(self.client.get("/check").status_code, 404)
-        self.assertEqual(self.client.post("/check", data={}).status_code, 404)
-        self.assertEqual(self.client.post("/check-result", data={}).status_code, 404)
+        self.assertNotIn("ナンバーズ", html)
 
     def test_invalid_inputs_are_rejected(self) -> None:
         invalid_count = self.generate("loto6", count="11")
@@ -115,13 +106,14 @@ class LotoNumbersScopeSmokeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["name"], "獅子座")
 
-    def test_public_code_contains_no_answer_check_copy(self) -> None:
+    def test_public_runtime_code_has_no_numbers_products(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        public_files = [root / "app.py", *(root / "templates").glob("*.html"), root / "static/js/app.js"]
+        public_files = [root / "app.py", root / "src/product_numbers.py", *(root / "templates").glob("*.html"), root / "static/js/app.js"]
         public_text = "\n".join(path.read_text(encoding="utf-8") for path in public_files)
-        self.assertNotIn("答え合わせ", public_text)
-        self.assertNotIn('@app.post("/check")', public_text)
-        self.assertNotIn('@app.post("/check-result")', public_text)
+        self.assertNotIn("ナンバーズ3", public_text)
+        self.assertNotIn("ナンバーズ4", public_text)
+        self.assertNotIn('data-ritual-scene="numbers3"', public_text)
+        self.assertNotIn('data-ritual-scene="numbers4"', public_text)
 
 
 if __name__ == "__main__":
