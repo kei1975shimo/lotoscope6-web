@@ -56,9 +56,39 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "ritual_name": "七惑星の大軌道",
         "ritual_duration": 5400,
     },
+    "numbers3": {
+        "product_id": "numbers3",
+        "name": "ナンバーズ3",
+        "english": "NUMBERS 3",
+        "kind": "numbers",
+        "digit_count": 3,
+        "digit_min": 0,
+        "digit_max": 9,
+        "badge": "0〜9から3桁（順序あり）",
+        "result_title": "今回、星が導いた三つの数字",
+        "button_label": "星読みの数字を生成する",
+        "ritual_symbol": "☿",
+        "ritual_name": "三星印の共鳴",
+        "ritual_duration": 3800,
+    },
+    "numbers4": {
+        "product_id": "numbers4",
+        "name": "ナンバーズ4",
+        "english": "NUMBERS 4",
+        "kind": "numbers",
+        "digit_count": 4,
+        "digit_min": 0,
+        "digit_max": 9,
+        "badge": "0〜9から4桁（順序あり）",
+        "result_title": "今回、星が導いた四つの数字",
+        "button_label": "星読みの数字を生成する",
+        "ritual_symbol": "♀",
+        "ritual_name": "四星印の共鳴",
+        "ritual_duration": 4200,
+    },
 }
 
-PRODUCT_ORDER = ["miniloto", "loto6", "loto7"]
+PRODUCT_ORDER = ["miniloto", "loto6", "loto7", "numbers3", "numbers4"]
 
 
 def product_choices() -> List[Dict[str, Any]]:
@@ -69,7 +99,7 @@ def get_product(product_id: str) -> Dict[str, Any]:
     try:
         return dict(PRODUCTS[product_id])
     except KeyError as exc:
-        raise ValueError("ミニロト・ロト6・ロト7から選択してください。") from exc
+        raise ValueError("ミニロト・ロト6・ロト7・ナンバーズ3・ナンバーズ4から選択してください。") from exc
 
 
 def _fold_to_range(value: int, maximum: int) -> int:
@@ -279,6 +309,167 @@ def _generate_loto_rows(
     return rows
 
 
+def _fold_to_digit(value: int) -> int:
+    return int(value) % 10
+
+
+def build_digit_weights(profile: Mapping[str, Any]) -> Dict[int, float]:
+    """星読みプロフィール（1〜43の重み）をナンバーズの桁（0〜9）へ畳み込む。"""
+    result = {digit: 1.0 for digit in range(10)}
+    source_weights = _profile_weights(profile)
+
+    for source_number in range(1, 44):
+        score = _weight_value(source_weights, source_number)
+        if score <= 0:
+            continue
+        folded = _fold_to_digit(source_number)
+        result[folded] += score
+        # 星の響きを一点に固定しすぎないよう、隣接する桁へ弱い余韻を加える。
+        result[_fold_to_digit(folded - 1)] += score * 0.10
+        result[_fold_to_digit(folded + 1)] += score * 0.10
+
+    for index, row in enumerate(profile.get("planet_rows", []) or []):
+        if not isinstance(row, Mapping):
+            continue
+        resonance = float(row.get("resonance", 0.0) or 0.0)
+        planet_bonus = max(8.0, 22.0 + resonance * 0.12 - index)
+        for key, factor in (("primary_candidate", 1.0), ("secondary_candidate", 0.55), ("tertiary_candidate", 0.38)):
+            if row.get(key) is None:
+                continue
+            digit = _fold_to_digit(int(row[key]))
+            result[digit] += planet_bonus * factor
+
+    return result
+
+
+def numbers_core_digits(profile: Mapping[str, Any], product: Mapping[str, Any]) -> List[int]:
+    wanted = int(product["digit_count"])
+    ordered_candidates: List[int] = []
+    ordered_candidates.extend(int(value) for value in profile.get("core_numbers", []) or [])
+    ordered_candidates.extend(int(value) for value in profile.get("pool_numbers", []) or [])
+    seen: set[int] = set()
+    result: List[int] = []
+
+    for value in ordered_candidates:
+        folded = _fold_to_digit(value)
+        if folded in seen:
+            continue
+        seen.add(folded)
+        result.append(folded)
+        if len(result) >= wanted:
+            break
+
+    cursor = 0
+    while len(result) < wanted:
+        if cursor not in seen:
+            result.append(cursor)
+            seen.add(cursor)
+        cursor += 1
+    return sorted(result)
+
+
+def _digit_weighted_choice(weights: Mapping[int, float], rng: RandomSource) -> int:
+    digits = list(range(10))
+    candidate_weights = [max(0.01, float(weights.get(digit, 1.0))) for digit in digits]
+    return rng.choices(digits, weights=candidate_weights, k=1)[0]
+
+
+def _numbers_metrics(digits: Sequence[int]) -> Dict[str, int]:
+    values = [int(d) for d in digits]
+    return {
+        "set_sum": sum(values),
+        "odd_count": sum(1 for d in values if d % 2),
+        "even_count": sum(1 for d in values if d % 2 == 0),
+        "spread": (max(values) - min(values)) if values else 0,
+        "consecutive_count": len(values) - len(set(values)),
+    }
+
+
+def _numbers_composition_score(digits: Sequence[int]) -> int:
+    metrics = _numbers_metrics(digits)
+    count = len(digits)
+    odd_target = count / 2
+    odd_score = max(0.0, 1.0 - abs(metrics["odd_count"] - odd_target) / max(1.0, odd_target))
+    spread_score = min(1.0, metrics["spread"] / 9.0)
+    repeat_score = max(0.0, 1.0 - metrics["consecutive_count"] * 0.35)
+    return round((odd_score * 0.34 + spread_score * 0.36 + repeat_score * 0.30) * 100)
+
+
+def _numbers_astrology_score(digits: Sequence[int], weights: Mapping[int, float]) -> int:
+    max_weight = max(weights.values()) if weights else 1.0
+    selected = [float(weights.get(d, 0.0)) for d in digits]
+    if not selected or max_weight <= 0:
+        return 0
+    average = sum(selected) / len(selected)
+    peak = max(selected)
+    normalized = (average / max_weight) * 0.72 + (peak / max_weight) * 0.28
+    return max(0, min(100, round(normalized * 100)))
+
+
+def _numbers_reason(digits: Sequence[int], core_digits: Sequence[int], product: Mapping[str, Any]) -> str:
+    overlap = sorted(set(digits) & set(core_digits))
+    if overlap:
+        overlap_text = "・".join(str(number) for number in overlap)
+        return (
+            f"誕生の日と今日の天体を{product['name']}の桁ごとの響きへ重ね、"
+            f"中心の響きと重なった{overlap_text}を軸に桁を並べました。"
+        )
+    return (
+        f"誕生の日と今日の七天体を{product['name']}の桁ごとの響きへ映し、"
+        "強く響く数字が順序よく並ぶよう導きました。"
+    )
+
+
+def _generate_numbers_rows(
+    product: Mapping[str, Any],
+    count: int,
+    profile: Mapping[str, Any],
+    rng: RandomSource,
+) -> List[Dict[str, Any]]:
+    digit_count = int(product["digit_count"])
+    weights = build_digit_weights(profile)
+    core_digits = numbers_core_digits(profile, product)
+    seen: MutableSet[tuple[int, ...]] = set()
+    rows: List[Dict[str, Any]] = []
+    attempts = 0
+
+    while len(rows) < count and attempts < 5000:
+        attempts += 1
+        digits = [_digit_weighted_choice(weights, rng) for _ in range(digit_count)]
+        key = tuple(digits)
+        if key in seen:
+            continue
+        seen.add(key)
+        metrics = _numbers_metrics(digits)
+        astro_score = _numbers_astrology_score(digits, weights)
+        composition_score = _numbers_composition_score(digits)
+        total_score = round(astro_score * 0.78 + composition_score * 0.22)
+        overlap = sorted(set(digits) & set(core_digits))
+        box_digits = sorted(digits)
+        rows.append(
+            {
+                "product_id": product["product_id"],
+                "product_name": product["name"],
+                "product_kind": "numbers",
+                "numbers": digits,
+                "box_numbers": box_digits,
+                "display_number": "-".join(str(number) for number in digits),
+                "display_box_number": "-".join(str(number) for number in box_digits),
+                "astrology_numbers": core_digits,
+                "astrology_hit_count": len(overlap),
+                "astrology_fit_score": astro_score,
+                "composition_score": composition_score,
+                "ticket_score": total_score,
+                "reason": _numbers_reason(digits, core_digits, product),
+                **metrics,
+            }
+        )
+
+    if len(rows) < count:
+        raise RuntimeError(f"{product['name']}の数字を指定口数だけ導けませんでした。口数を減らして、もう一度お試しください。")
+    return rows
+
+
 def generate_product_rows(
     product_id: str,
     count: int,
@@ -287,7 +478,10 @@ def generate_product_rows(
 ) -> List[Dict[str, Any]]:
     product = get_product(product_id)
     rng: RandomSource = random.Random(seed) if seed else random.SystemRandom()
-    rows = _generate_loto_rows(product, count, profile, rng)
+    if product.get("kind") == "numbers":
+        rows = _generate_numbers_rows(product, count, profile, rng)
+    else:
+        rows = _generate_loto_rows(product, count, profile, rng)
 
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     stamp = datetime.now().strftime("%Y%m%d%H%M%S")

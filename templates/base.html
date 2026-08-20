@@ -7,11 +7,41 @@
   <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="あなたの誕生星と今日の天体を重ね、ミニロト・ロト6・ロト7の数字を導く、ロト・スコープです。">
+  <meta name="description" content="あなたの誕生星と今日の天体を重ね、ミニロト・ロト6・ロト7・ナンバーズ3・ナンバーズ4の数字を導く、ロト・スコープです。">
   <title>{% block title %}ロト・スコープ{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ app_version }}">
 </head>
 <body class="{% block body_class %}app-mobile{% endblock %}">
+  <div class="cosmic-field" aria-hidden="true">
+    <div class="cosmic-nebula cosmic-nebula-a"></div>
+    <div class="cosmic-nebula cosmic-nebula-b"></div>
+    <div class="cosmic-nebula cosmic-nebula-c"></div>
+    <svg class="cosmic-meteors" viewBox="0 0 400 800" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="meteorGradA" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#7c5cf0" stop-opacity="0"/>
+          <stop offset="55%" stop-color="#7c5cf0" stop-opacity=".9"/>
+          <stop offset="100%" stop-color="#e6dbff" stop-opacity="1"/>
+        </linearGradient>
+        <linearGradient id="meteorGradB" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#3fe0b0" stop-opacity="0"/>
+          <stop offset="55%" stop-color="#3fe0b0" stop-opacity=".85"/>
+          <stop offset="100%" stop-color="#e6dbff" stop-opacity="1"/>
+        </linearGradient>
+        <linearGradient id="meteorGradC" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ea8fe6" stop-opacity="0"/>
+          <stop offset="55%" stop-color="#ea8fe6" stop-opacity=".85"/>
+          <stop offset="100%" stop-color="#e6dbff" stop-opacity="1"/>
+        </linearGradient>
+      </defs>
+      <path class="cosmic-meteor cosmic-meteor-a" d="M-40 760 C 80 620, 170 600, 250 440 S 370 160, 440 30" stroke="url(#meteorGradA)"/>
+      <path class="cosmic-meteor cosmic-meteor-b" d="M440 640 C 300 560, 230 540, 150 380 S 30 140, -40 30" stroke="url(#meteorGradB)"/>
+      <path class="cosmic-meteor cosmic-meteor-c" d="M-40 420 C 90 380, 210 400, 300 320 S 420 200, 460 170" stroke="url(#meteorGradC)"/>
+    </svg>
+    <div class="cosmic-stars">
+      {% for i in range(1, 33) %}<i style="--star:{{ i }}"></i>{% endfor %}
+    </div>
+  </div>
   <a class="skip-link" href="#main-content">本文へ移動</a>
   <main id="main-content" class="wrap app-shell">
     <header class="app-bar">
@@ -70,6 +100,22 @@
             <div class="seven-core"><span>Ⅶ</span><small>ORBIT</small></div>
             <div class="seven-rays"></div>
             <b>SEVEN PLANETARY ORBITS</b>
+          </div>
+
+          <div class="ritual-scene ritual-scene-numbers3" data-ritual-scene="numbers3">
+            <div class="number-dials">
+              {% for i in range(3) %}<div class="celestial-dial"><span>✦</span><i></i></div>{% endfor %}
+            </div>
+            <div class="dial-constellation" aria-hidden="true"><i></i><i></i><i></i></div>
+            <b>THREE DIGIT RESONANCE</b>
+          </div>
+
+          <div class="ritual-scene ritual-scene-numbers4" data-ritual-scene="numbers4">
+            <div class="star-gates">
+              {% for i in range(4) %}<div class="star-gate"><i>✦</i><span>✦</span><em></em></div>{% endfor %}
+            </div>
+            <div class="gate-floor" aria-hidden="true"></div>
+            <b>FOUR DIGIT RESONANCE</b>
           </div>
 
         </div>

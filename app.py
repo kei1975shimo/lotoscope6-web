@@ -29,7 +29,7 @@ from product_numbers import (  # noqa: E402
 )
 from utils import load_json  # noqa: E402
 
-APP_VERSION = "v1.9.8-celestial-patterns"
+APP_VERSION = "v1.10.3-cosmic-meteors"
 DEFAULT_PRODUCT_ID = "loto6"
 
 
