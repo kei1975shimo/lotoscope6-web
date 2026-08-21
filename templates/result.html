@@ -29,6 +29,14 @@
       {% for n in best.numbers %}{{ render_number(n, best.astrology_numbers, product.kind) }}{% endfor %}
     </div>
     {% if product.kind == 'numbers' %}<p class="primary-result-box-note">ボックス目安（並べ替え可）：<strong>{{ best.display_box_number }}</strong></p>{% endif %}
+    {% if best.sub_numbers %}
+    <div class="sub-number-block">
+      <p class="sub-number-label">サブ数字（追加の参考数字）</p>
+      <div class="numbers sub-numbers {% if product.kind == 'numbers' %}digit-number{% endif %}" aria-label="サブ数字">
+        {% for n in best.sub_numbers %}{{ render_number(n, [], product.kind) }}{% endfor %}
+      </div>
+    </div>
+    {% endif %}
     <div class="primary-result-meta"><span><small>宝くじ</small><strong>{{ product.name }}</strong></span><span><small>星との響き</small><strong>{{ best.ticket_score }} / 100</strong></span><span><small>生成した候補</small><strong>{{ rows|length }}口</strong></span></div>
     <p class="primary-result-reason">{{ best.reason }}</p>
   </div>
@@ -50,7 +58,7 @@
     {% for row in rows|sort(attribute='ticket_score', reverse=true) %}
     <details class="ticket-card compact-ticket" {% if loop.first %}open{% endif %}>
       <summary class="ticket-card-summary"><div><div class="ticket-kicker">{{ product.name }} <span>#{{ loop.index }}</span></div><div class="numbers {% if product.kind == 'numbers' %}digit-number{% endif %}">{% for n in row.numbers %}{{ render_number(n, row.astrology_numbers, product.kind) }}{% endfor %}</div></div><div class="score-pill"><span>星の響き</span>{{ row.ticket_score }}</div></summary>
-      <div class="ticket-extra"><div class="score-bar" aria-label="星の響き {{ row.ticket_score }}点"><span style="width:{{ row.ticket_score }}%"></span></div>{% if product.kind == 'numbers' %}<p class="numbers-box-note">ボックス目安（並べ替え可）：{{ row.display_box_number }}</p>{% endif %}<div class="metrics"><div><span>合計値</span><strong>{{ row.set_sum }}</strong></div><div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div><div><span>範囲の広がり</span><strong>{{ row.spread }}</strong></div><div><span>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</span><strong>{{ row.consecutive_count }}組</strong></div></div><div class="score-mini-breakdown"><span>星読み {{ row.astrology_fit_score }}</span><span>数字の広がり {{ row.composition_score }}</span></div><p class="reason">{{ row.reason }}</p></div>
+      <div class="ticket-extra"><div class="score-bar" aria-label="星の響き {{ row.ticket_score }}点"><span style="width:{{ row.ticket_score }}%"></span></div>{% if product.kind == 'numbers' %}<p class="numbers-box-note">ボックス目安（並べ替え可）：{{ row.display_box_number }}</p>{% endif %}{% if row.sub_numbers %}<div class="sub-number-block"><p class="sub-number-label">サブ数字（追加の参考数字）</p><div class="numbers sub-numbers {% if product.kind == 'numbers' %}digit-number{% endif %}" aria-label="サブ数字">{% for n in row.sub_numbers %}{{ render_number(n, [], product.kind) }}{% endfor %}</div></div>{% endif %}<div class="metrics"><div><span>合計値</span><strong>{{ row.set_sum }}</strong></div><div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div><div><span>範囲の広がり</span><strong>{{ row.spread }}</strong></div><div><span>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</span><strong>{{ row.consecutive_count }}組</strong></div></div><div class="score-mini-breakdown"><span>星読み {{ row.astrology_fit_score }}</span><span>数字の広がり {{ row.composition_score }}</span></div><p class="reason">{{ row.reason }}</p></div>
     </details>
     {% endfor %}
   </div>
@@ -64,10 +72,10 @@
       <input type="hidden" name="product" value="{{ product_id }}">
       <input type="hidden" name="count" value="{{ count }}">
       <input type="hidden" name="birth_date" value="{{ astrology_profile.birth_date }}">
-      <input type="hidden" name="seed" value="{{ seed }}">
+      <input type="hidden" name="sub_count" value="{{ sub_count }}">
       <button class="result-repeat-button" type="submit">
         <span class="result-action-icon" aria-hidden="true">↻</span>
-        <span class="result-action-copy"><strong>同じ条件でもう一度</strong><small>{% if seed %}合言葉を使って同じ数字を呼び戻す{% else %}星を読み直して、新しい数字を導く{% endif %}</small></span>
+        <span class="result-action-copy"><strong>同じ条件でもう一度</strong><small>星を読み直して、新しい数字を導く</small></span>
         <span class="result-action-arrow" aria-hidden="true">›</span>
       </button>
     </form>

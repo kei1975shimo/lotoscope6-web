@@ -50,43 +50,8 @@ body{
   -webkit-font-smoothing:antialiased;
   -webkit-text-size-adjust:100%;
   -webkit-tap-highlight-color:transparent;
-  background:
-    radial-gradient(circle at 50% -5%,rgba(139,124,246,.18),transparent 26rem),
-    radial-gradient(circle at 100% 26%,rgba(63,224,176,.10),transparent 26rem),
-    radial-gradient(circle at 0% 62%,rgba(234,143,230,.08),transparent 24rem),
-    linear-gradient(180deg,var(--bg-deep),var(--bg) 38%,#0a0a26 100%);
+  background:#050310;
 }
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  opacity:.24;
-  background-image:
-    radial-gradient(circle,rgba(255,255,255,.4) 0 1px,transparent 1.2px),
-    radial-gradient(circle,rgba(180,140,255,.34) 0 1px,transparent 1.2px);
-  background-size:34px 34px,81px 81px;
-  background-position:4px 8px,20px 14px;
-}
-body::after{
-  content:"";
-  position:fixed;
-  inset:auto -20% -26rem;
-  height:40rem;
-  z-index:0;
-  pointer-events:none;
-  background:
-    radial-gradient(ellipse at 30% 50%,rgba(63,224,176,.10),transparent 60%),
-    radial-gradient(ellipse at 70% 50%,rgba(139,124,246,.12),transparent 65%);
-  animation:auroraDrift 22s ease-in-out infinite alternate;
-}
-@keyframes auroraDrift{
-  0%{transform:translateX(-3%) translateY(0);opacity:.85}
-  50%{transform:translateX(2%) translateY(-2%);opacity:1}
-  100%{transform:translateX(-1%) translateY(1%);opacity:.9}
-}
-@media(prefers-reduced-motion:reduce){body::after{animation:none}}
 
 h1,h2,h3,p{overflow-wrap:anywhere}
 h1,h2,h3{
@@ -403,7 +368,7 @@ button,input{font:inherit}
 .label-row label,label,.field-label{color:var(--text);font-size:16px;font-weight:850}
 .label-row span,.hint,.note,.tiny{color:var(--muted);font-size:14px;line-height:1.65}
 
-input{
+input,#sub_count{
   width:100%;
   min-height:54px;
   padding:13px 14px;
@@ -415,7 +380,7 @@ input{
   font-size:17px;
   transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
 }
-input:focus{border-color:var(--blue);background:rgba(4,10,24,.94);box-shadow:0 0 0 4px rgba(87,214,255,.15)}
+input:focus,#sub_count:focus{border-color:var(--blue);background:rgba(4,10,24,.94);box-shadow:0 0 0 4px rgba(87,214,255,.15)}
 input:disabled{opacity:.52;cursor:not-allowed}
 
 .number-grid,.app-number-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
@@ -928,121 +893,29 @@ body.is-drawing{overflow:hidden}
   --shadow-md:0 18px 42px rgba(0,0,0,.40),0 0 26px rgba(102,67,180,.08);
 }
 
-body{
-  background:
-    radial-gradient(circle at 50% -8%,rgba(102,59,204,.20),transparent 24rem),
-    radial-gradient(circle at 8% 18%,rgba(92,83,183,.24),transparent 25rem),
-    radial-gradient(circle at 94% 32%,rgba(113,58,156,.22),transparent 28rem),
-    radial-gradient(ellipse at 50% 100%,rgba(38,76,139,.19),transparent 42rem),
-    linear-gradient(180deg,#02020a 0%,#09071b 34%,#0d0a24 72%,#080b1c 100%);
-}
-body::before{
-  opacity:.55;
-  background-image:
-    radial-gradient(circle,rgba(255,255,255,.88) 0 1px,transparent 1.35px),
-    radial-gradient(circle,rgba(195,169,255,.62) 0 1px,transparent 1.45px),
-    radial-gradient(circle,rgba(169,140,255,.54) 0 1px,transparent 1.5px);
-  background-size:47px 47px,93px 93px,137px 137px;
-  background-position:7px 11px,29px 18px,66px 42px;
-  animation:starDrift 90s linear infinite;
-}
-body::after{
-  inset:auto -35% -27rem;
-  height:49rem;
-  background:
-    radial-gradient(ellipse,rgba(92,83,183,.18),transparent 62%),
-    radial-gradient(ellipse at 35% 50%,rgba(102,59,204,.09),transparent 52%);
-}
-
-/* Cosmic background field — fixed behind everything, independent of scroll, for a
-   sense of foreground cards floating over a living deep-space layer. */
+/* Cosmic background field — fixed behind everything, independent of scroll.
+   A single illustrated zodiac-wheel image replaces the former CSS-drawn
+   nebula/meteor/star field. A dark overlay keeps the glass-panel cards on
+   top legible against the image's bright gold linework. */
 .cosmic-field{
   position:fixed;
   inset:0;
   z-index:0;
   overflow:hidden;
   pointer-events:none;
+  background-color:#050310;
+  background-image:url("../img/cosmic-zodiac-wheel.webp");
+  background-size:cover;
+  background-position:center 38%;
+  background-repeat:no-repeat;
 }
-.cosmic-nebula{
-  position:absolute;
-  width:130vmin;height:130vmin;
-  border-radius:50%;
-  filter:blur(50px);
-  opacity:.9;
-  mix-blend-mode:screen;
-}
-.cosmic-nebula-a{
-  left:-15vmin;top:-25vmin;
-  background:radial-gradient(circle,rgba(139,102,255,.75),rgba(139,102,255,.25) 45%,transparent 68%);
-  animation:cosmicNebulaDriftA 34s ease-in-out infinite alternate;
-}
-.cosmic-nebula-b{
-  right:-30vmin;top:20vmin;
-  background:radial-gradient(circle,rgba(63,224,176,.6),rgba(63,224,176,.18) 45%,transparent 68%);
-  animation:cosmicNebulaDriftB 40s ease-in-out infinite alternate;
-}
-.cosmic-nebula-c{
-  left:10vmin;bottom:-35vmin;
-  width:150vmin;height:150vmin;
-  background:radial-gradient(circle,rgba(234,143,230,.55),rgba(234,143,230,.15) 45%,transparent 68%);
-  animation:cosmicNebulaDriftC 50s ease-in-out infinite alternate;
-}
-@keyframes cosmicNebulaDriftA{
-  0%{transform:translate(0,0) scale(1)}
-  50%{transform:translate(9vmin,7vmin) scale(1.16)}
-  100%{transform:translate(-5vmin,10vmin) scale(1.05)}
-}
-@keyframes cosmicNebulaDriftB{
-  0%{transform:translate(0,0) scale(1)}
-  50%{transform:translate(-10vmin,-6vmin) scale(1.18)}
-  100%{transform:translate(4vmin,-12vmin) scale(1.06)}
-}
-@keyframes cosmicNebulaDriftC{
-  0%{transform:translate(0,0) scale(1)}
-  50%{transform:translate(-8vmin,-10vmin) scale(1.12)}
-  100%{transform:translate(10vmin,4vmin) scale(1.04)}
-}
-.cosmic-meteors{
+.cosmic-field::before{
+  content:"";
   position:absolute;
   inset:0;
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.cosmic-meteor{
-  fill:none;
-  stroke-width:2.6;
-  stroke-linecap:round;
-  stroke-dasharray:6 13;
-  opacity:.8;
-}
-.cosmic-meteor-a{filter:drop-shadow(0 0 8px rgba(124,92,240,.6));animation:cosmicMeteorFlow 9s linear infinite}
-.cosmic-meteor-b{filter:drop-shadow(0 0 8px rgba(63,224,176,.55));animation:cosmicMeteorFlow 12s linear infinite reverse}
-.cosmic-meteor-c{filter:drop-shadow(0 0 8px rgba(234,143,230,.55));animation:cosmicMeteorFlow 10.5s linear infinite}
-@keyframes cosmicMeteorFlow{to{stroke-dashoffset:-570}}
-@media(prefers-reduced-motion:reduce){.cosmic-meteor{animation:none}}
-.cosmic-stars{position:absolute;inset:0}
-.cosmic-stars i{
-  position:absolute;
-  left:calc((var(--star) * 12.97%) % 100%);
-  top:calc((var(--star) * 8.41% + 3%) % 96%);
-  width:calc(1.5px + (var(--star) % 3) * 1.6px);
-  height:calc(1.5px + (var(--star) % 3) * 1.6px);
-  border-radius:50%;
-  background:var(--star-color, #e6dbff);
-  box-shadow:0 0 10px 1px var(--star-color, #e6dbff);
-  opacity:.5;
-  animation:cosmicStarTwinkle calc(2.6s + (var(--star) % 5) * .5s) ease-in-out infinite alternate;
-  animation-delay:calc(var(--star) * -.31s);
-}
-.cosmic-stars i:nth-child(3n){--star-color:#3fe0b0}
-.cosmic-stars i:nth-child(5n){--star-color:#ea8fe6}
-@keyframes cosmicStarTwinkle{
-  0%{opacity:.22;transform:scale(.75)}
-  100%{opacity:1;transform:scale(1.5)}
-}
-@media(prefers-reduced-motion:reduce){
-  .cosmic-nebula-a,.cosmic-nebula-b,.cosmic-nebula-c,.cosmic-stars i{animation:none!important}
+  background:
+    radial-gradient(ellipse at 50% 40%,rgba(5,3,16,.02),rgba(5,3,16,.05) 68%,rgba(5,3,16,.09) 100%),
+    linear-gradient(180deg,rgba(5,3,16,.05) 0%,rgba(5,3,16,.02) 20%,rgba(5,3,16,.02) 60%,rgba(5,3,16,.08) 100%);
 }
 
 .app-bar{
@@ -1361,12 +1234,12 @@ body::after{
   background:linear-gradient(90deg,var(--gold-light),rgba(169,140,255,.35),transparent);
 }
 
-input{
+input,#sub_count{
   border-color:rgba(214,195,255,.22);
   background:linear-gradient(180deg,rgba(4,3,15,.86),rgba(15,11,35,.82));
   box-shadow:inset 0 0 16px rgba(169,140,255,.025);
 }
-input:focus{
+input:focus,#sub_count:focus{
   border-color:var(--gold-light);
   background:rgba(12,8,31,.98);
   box-shadow:0 0 0 4px rgba(156,118,244,.12),0 0 22px rgba(169,140,255,.10);
@@ -1472,7 +1345,6 @@ button::after,.small-button::after{
 
 .footer,.app-footer{color:#bdb2ca}
 
-@keyframes starDrift{to{background-position:54px 76px,122px 111px,203px 154px}}
 @keyframes scopeRotate{to{transform:rotate(360deg)}}
 @keyframes auraPulse{0%,100%{opacity:.58;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
 @keyframes coreGlow{0%,100%{box-shadow:inset 0 0 28px rgba(169,140,255,.16),0 0 22px rgba(156,118,244,.13),0 0 44px rgba(169,140,255,.08)}50%{box-shadow:inset 0 0 34px rgba(169,140,255,.23),0 0 31px rgba(156,118,244,.20),0 0 62px rgba(169,140,255,.15)}}
@@ -1501,7 +1373,7 @@ button::after,.small-button::after{
 }
 
 @media (prefers-reduced-motion:reduce){
-  body::before,.scope-aura,.cosmic-scope::before,.scope-zodiac,.scope-orbit,.scope-number,.scope-core,button::after,.small-button::after{animation:none!important}
+  .scope-aura,.cosmic-scope::before,.scope-zodiac,.scope-orbit,.scope-number,.scope-core,button::after,.small-button::after{animation:none!important}
 }
 
 /* Tablet-width balance: keep the brand title intact without crowding the scope */
@@ -2109,64 +1981,42 @@ body.page-home::after,body.page-result::after{
 .ritual-card-border::before{left:10px;top:7px}.ritual-card-border::after{right:10px;bottom:7px}
 .ritual-kicker{position:relative;z-index:4;margin:0 0 5px;color:color-mix(in srgb,var(--loader-accent) 78%,white);font-size:9px;font-weight:900;letter-spacing:.16em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .product-ritual-stage{position:relative;z-index:2;width:min(64vw,238px);height:min(64vw,238px);margin:2px auto 4px}
-.ritual-scene{position:absolute;inset:0;display:none;place-items:center;border-radius:50%}
-.ritual-scene>b{position:absolute;left:0;right:0;bottom:7px;color:color-mix(in srgb,var(--loader-accent) 78%,white);font-size:8px;letter-spacing:.2em;text-shadow:0 0 12px var(--loader-glow)}
-.draw-loader.ritual-miniloto .ritual-scene-miniloto,.draw-loader.ritual-loto6 .ritual-scene-loto6,.draw-loader.ritual-loto7 .ritual-scene-loto7,.draw-loader.ritual-numbers3 .ritual-scene-numbers3,.draw-loader.ritual-numbers4 .ritual-scene-numbers4{display:grid}
 
-/* Mini Loto: lunar five-light ritual */
-.ritual-scene-miniloto{background:radial-gradient(circle,rgba(99,168,230,.12),transparent 64%)}
-.mini-moon{position:absolute;left:50%;top:47%;width:96px;height:96px;display:grid;place-items:center;border:1px solid rgba(197,232,255,.35);border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.22),rgba(69,122,180,.12) 48%,rgba(4,15,35,.9) 72%);box-shadow:0 0 35px rgba(137,202,255,.28),inset 0 0 24px rgba(184,226,255,.12)}
-.mini-moon span{color:#e6f5ff;font-family:Georgia,serif;font-size:57px;line-height:1;text-shadow:0 0 22px rgba(189,231,255,.8);animation:miniMoonPulse 2s ease-in-out infinite alternate}
-.mini-orbit{position:absolute;inset:25px;border:1px dotted rgba(183,226,255,.35);border-radius:50%;animation:ritualRotate 9s linear infinite}
-.mini-orbit::before{content:"";position:absolute;left:50%;top:-4px;width:8px;height:8px;border-radius:50%;background:#e7f6ff;box-shadow:0 0 18px #a5d8ff}
-.mini-star-crown{position:absolute;inset:0;animation:ritualRotate 13s linear infinite}
-.mini-star-crown i{position:absolute;left:50%;top:50%;color:#d9efff;font-style:normal;font-size:18px;transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-91px) rotate(calc(var(--i) * -72deg));text-shadow:0 0 14px #8bc8ff;animation:miniStarWake 1.15s ease-in-out infinite alternate;animation-delay:calc(var(--i) * .15s)}
-.mini-lotus{position:absolute;left:50%;top:49%;width:130px;height:130px;transform:translate(-50%,-50%);animation:ritualRotateReverse 18s linear infinite}
-.mini-lotus i{position:absolute;left:50%;top:50%;width:30px;height:64px;border:1px solid rgba(178,222,255,.16);border-radius:50% 50% 42% 42%;transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(calc(var(--i) * 72deg));background:linear-gradient(180deg,rgba(172,218,255,.1),transparent)}
-.draw-loader.ritual-miniloto.is-final-phase .mini-star-crown i{color:#fff;filter:brightness(1.35);animation-duration:.45s}
-
-/* Loto 6: six celestial seals */
-.ritual-scene-loto6{background:radial-gradient(circle,rgba(160,102,226,.14),transparent 64%)}
-.hex-halo{position:absolute;inset:18px;border:1px dotted rgba(201,161,255,.31);border-radius:50%;animation:ritualRotate 14s linear infinite}
-.hexagram{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);overflow:visible;filter:drop-shadow(0 0 9px rgba(160,107,240,.35));animation:hexagramBreathe 2.8s ease-in-out infinite alternate}
-.hexagram polygon,.hexagram circle{fill:none;stroke:rgba(217,198,255,.55);stroke-width:1;stroke-dasharray:8 5;transform-origin:center;animation:hexTrace 4.7s linear infinite}
-.hexagram polygon:nth-child(2){stroke:rgba(160,107,240,.54);animation-direction:reverse}
-.hexagram circle:nth-child(3){stroke-dasharray:2 7;animation-duration:7s}
-.hex-seals{position:absolute;inset:0;animation:ritualRotate 10s linear infinite}
-.hex-seals i{position:absolute;left:50%;top:50%;width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(217,198,255,.35);border-radius:50%;color:#e6d6ff;background:#110724;font-family:Georgia,serif;font-size:14px;font-style:normal;transform:translate(-50%,-50%) rotate(calc(var(--i) * 60deg)) translateY(-91px) rotate(calc(var(--i) * -60deg));box-shadow:0 0 14px rgba(160,107,240,.22);animation:sealPulse 1.5s ease-in-out infinite alternate;animation-delay:calc(var(--i) * .12s)}
-.hex-core{position:absolute;left:50%;top:50%;width:66px;height:66px;display:grid;place-items:center;border:1px solid rgba(217,198,255,.45);border-radius:50%;transform:translate(-50%,-50%);color:#e9daff;background:radial-gradient(circle,rgba(160,107,240,.35),rgba(8,3,20,.96) 70%);font-family:Georgia,serif;font-size:30px;text-shadow:0 0 20px #c9a8ff;box-shadow:0 0 30px rgba(160,107,240,.22),inset 0 0 16px rgba(217,198,255,.08);animation:coreOraclePulse 1.25s ease-in-out infinite alternate}
-.draw-loader.ritual-loto6.is-final-phase .hexagram{filter:drop-shadow(0 0 18px rgba(217,198,255,.67))}.draw-loader.ritual-loto6.is-final-phase .hex-core{box-shadow:0 0 52px rgba(200,150,255,.44),inset 0 0 22px rgba(217,198,255,.13)}
-
-/* Loto 7: seven planetary orbits */
-.ritual-scene-loto7{background:radial-gradient(circle,rgba(63,224,176,.2),transparent 66%)}
-.seven-ring{position:absolute;left:50%;top:47%;border:1px solid rgba(158,245,214,.24);border-radius:50%;transform:translate(-50%,-50%) rotate(18deg)}
-.seven-ring.ring-a{width:205px;height:82px;animation:sevenOrbitA 6s linear infinite}.seven-ring.ring-b{width:165px;height:152px;animation:sevenOrbitB 8s linear infinite}.seven-ring.ring-c{width:96px;height:195px;animation:sevenOrbitA 11s linear infinite reverse}
-.seven-planets{position:absolute;inset:0;animation:ritualRotate 16s linear infinite}
-.seven-planets i{position:absolute;left:50%;top:47%;width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(179,245,229,.38);border-radius:50%;color:#d9fff2;background:#04241c;font-family:Georgia,serif;font-size:13px;font-style:normal;transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-91px) rotate(calc(var(--i) * -51.428deg));box-shadow:0 0 16px rgba(63,224,176,.35);animation:planetWake 1.6s ease-in-out infinite alternate;animation-delay:calc(var(--i) * .13s)}
-.seven-core{position:absolute;left:50%;top:47%;width:75px;height:75px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(180,245,229,.42);border-radius:50%;transform:translate(-50%,-50%);color:#dffff5;background:radial-gradient(circle,rgba(63,224,176,.42),rgba(2,25,20,.97) 70%);box-shadow:0 0 36px rgba(63,224,176,.36),inset 0 0 18px rgba(190,255,235,.08);animation:sevenCorePulse 1.45s ease-in-out infinite alternate}
-.seven-core span{font-family:Georgia,serif;font-size:28px;line-height:1;text-shadow:0 0 16px #8cffd9}.seven-core small{margin-top:4px;font-size:7px;letter-spacing:.2em}
-.seven-rays{position:absolute;inset:15px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(167,255,222,.11) 0deg 1deg,transparent 1deg 25.7deg);animation:ritualRotateReverse 12s linear infinite,sevenRayBreathe 1.8s ease-in-out infinite alternate}
-.draw-loader.ritual-loto7.is-final-phase .seven-planets i{box-shadow:0 0 25px rgba(170,255,226,.68)}.draw-loader.ritual-loto7.is-final-phase .seven-core{box-shadow:0 0 58px rgba(63,224,176,.58),inset 0 0 24px rgba(190,255,235,.14)}
-
-/* Numbers 3: astral dials */
-.ritual-scene-numbers3{background:radial-gradient(circle,rgba(172,74,239,.18),transparent 67%)}
-.number-dials{position:relative;display:flex;align-items:center;justify-content:center;gap:9px;perspective:700px}
-.celestial-dial{position:relative;width:58px;height:84px;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(231,192,255,.39);border-radius:18px;background:linear-gradient(180deg,rgba(91,41,125,.56),rgba(13,4,29,.97));box-shadow:0 0 20px rgba(174,73,239,.22),inset 0 1px rgba(255,255,255,.12);animation:dialFloat 1.7s ease-in-out infinite alternate}
-.celestial-dial:nth-child(2){animation-delay:.18s}.celestial-dial:nth-child(3){animation-delay:.36s}
-.celestial-dial::before,.celestial-dial::after{content:"✦";position:absolute;left:0;right:0;color:rgba(231,192,255,.25);font-size:9px}.celestial-dial::before{top:5px}.celestial-dial::after{bottom:5px}
-.celestial-dial span{color:#f3d9ff;font-family:Georgia,serif;font-size:42px;font-weight:800;line-height:1;text-shadow:0 0 18px rgba(223,154,255,.6);font-variant-numeric:tabular-nums}
-.celestial-dial i{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.24),transparent);box-shadow:0 -16px rgba(255,255,255,.05),0 16px rgba(255,255,255,.05)}
-.dial-constellation{position:absolute;inset:23px;border:1px dotted rgba(221,179,255,.22);border-radius:50%;animation:ritualRotate 10s linear infinite}.dial-constellation i{position:absolute;width:5px;height:5px;border-radius:50%;background:#f0d2ff;box-shadow:0 0 14px #cc83ff}.dial-constellation i:nth-child(1){left:10%;top:38%}.dial-constellation i:nth-child(2){right:12%;top:25%}.dial-constellation i:nth-child(3){right:24%;bottom:10%}
-.draw-loader.ritual-numbers3.is-final-phase .celestial-dial{border-color:rgba(246,218,255,.8);box-shadow:0 0 30px rgba(207,111,255,.48),inset 0 1px rgba(255,255,255,.16)}
-
-/* Numbers 4: four celestial gates */
-.ritual-scene-numbers4{background:radial-gradient(circle,rgba(224,69,155,.18),transparent 67%);perspective:800px}
-.star-gates{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;transform-style:preserve-3d}
-.star-gate{position:relative;width:47px;height:99px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(255,195,224,.38);border-radius:22px 22px 10px 10px;background:linear-gradient(180deg,rgba(118,31,77,.58),rgba(25,3,18,.98));box-shadow:0 0 18px rgba(223,73,158,.22),inset 0 1px rgba(255,255,255,.1);transform-origin:left center;animation:gateOpen 2.4s ease-in-out infinite alternate;animation-delay:calc(var(--gate-index,0) * .15s)}
-.star-gate:nth-child(1){--gate-index:0}.star-gate:nth-child(2){--gate-index:1}.star-gate:nth-child(3){--gate-index:2}.star-gate:nth-child(4){--gate-index:3}
-.star-gate i{position:absolute;top:8px;color:#ffd5e8;font-size:10px;font-style:normal;text-shadow:0 0 9px #ff86be}.star-gate span{color:#ffe0ef;font-family:Georgia,serif;font-size:32px;font-weight:800;text-shadow:0 0 17px rgba(255,119,184,.6);font-variant-numeric:tabular-nums}.star-gate em{position:absolute;left:8px;right:8px;bottom:8px;height:2px;background:linear-gradient(90deg,transparent,#ffc7e2,transparent);box-shadow:0 0 8px #ff6daf}
-.gate-floor{position:absolute;left:17%;right:17%;bottom:37px;height:26px;border:1px solid rgba(255,183,218,.16);border-radius:50%;transform:rotateX(72deg);background:radial-gradient(ellipse,rgba(232,79,166,.22),transparent 66%);box-shadow:0 0 24px rgba(224,67,157,.24)}
-.draw-loader.ritual-numbers4.is-final-phase .star-gate{animation:gateFinal .7s var(--ease) forwards;animation-delay:calc(var(--gate-index) * .11s)}
+/* Celestial compass -- a unified generation animation shared by every product,
+   themed per product via the --loader-accent/--loader-secondary variables. */
+.compass-instrument{position:relative;width:100%;height:100%;display:grid;place-items:center}
+.compass-ring{position:absolute;border-radius:50%;pointer-events:none}
+.compass-ring-outer{inset:0;border:1px dashed color-mix(in srgb,var(--loader-accent) 34%,transparent);animation:compassSpin 26s linear infinite}
+.compass-ring-mid{inset:15%;border:1px solid color-mix(in srgb,var(--loader-accent) 20%,transparent);animation:compassSpinReverse 19s linear infinite}
+.compass-ring-inner{inset:31%;border:1px dotted color-mix(in srgb,var(--loader-accent) 42%,transparent);animation:compassSpin 12s linear infinite}
+.compass-ticks{position:absolute;inset:0;animation:compassSpin 26s linear infinite}
+.compass-ticks i{position:absolute;left:50%;top:50%;width:2px;height:9px;border-radius:2px;background:color-mix(in srgb,var(--loader-accent) 60%,transparent);transform:translate(-50%,-50%) rotate(calc(var(--t) * 30deg)) translateY(-95px);box-shadow:0 0 6px color-mix(in srgb,var(--loader-accent) 35%,transparent)}
+.compass-ticks i:nth-child(3n){height:14px;background:var(--loader-accent);box-shadow:0 0 10px var(--loader-accent)}
+.compass-orbit{position:absolute;border-radius:50%;pointer-events:none}
+.compass-orbit span{position:absolute;left:50%;top:0;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);background:var(--loader-accent);box-shadow:0 0 13px var(--loader-accent)}
+.compass-orbit-a{inset:6%;animation:compassSpin 5.4s linear infinite}
+.compass-orbit-b{inset:19%;animation:compassSpinReverse 4.1s linear infinite}
+.compass-orbit-b span{width:5px;height:5px;background:var(--loader-secondary);box-shadow:0 0 12px var(--loader-secondary)}
+.compass-orbit-c{inset:-4%;animation:compassSpin 8.4s linear infinite}
+.compass-orbit-c span{width:4px;height:4px;opacity:.82}
+.compass-core{
+  position:relative;
+  z-index:3;
+  width:36%;
+  height:36%;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--loader-accent) 55%,transparent);
+  background:radial-gradient(circle,color-mix(in srgb,var(--loader-secondary) 40%,transparent),color-mix(in srgb,var(--loader-deep) 92%,#050510) 72%);
+  box-shadow:0 0 34px var(--loader-glow),inset 0 0 20px color-mix(in srgb,var(--loader-accent) 12%,transparent);
+  animation:compassCorePulse 1.6s ease-in-out infinite alternate;
+}
+.compass-core span{color:var(--loader-accent);font-family:Georgia,"Yu Mincho",serif;font-size:clamp(28px,9vw,42px);line-height:1;text-shadow:0 0 18px var(--loader-glow)}
+.compass-pulse{position:absolute;inset:33%;border-radius:50%;border:1px solid var(--loader-accent);opacity:0;animation:compassPulseRing 2.6s ease-out infinite}
+.compass-pulse-b{animation-delay:1.3s}
+.draw-loader.is-final-phase .compass-core{box-shadow:0 0 54px var(--loader-glow),inset 0 0 26px color-mix(in srgb,var(--loader-accent) 18%,transparent);border-color:color-mix(in srgb,var(--loader-accent) 82%,transparent)}
+.draw-loader.is-final-phase .compass-ticks i:nth-child(3n){box-shadow:0 0 16px var(--loader-accent)}
 
 .ritual-product-name{position:relative;z-index:4;margin:0 auto 4px;color:var(--loader-accent);font-family:"Yu Mincho",Georgia,serif;font-size:13px;font-weight:800;letter-spacing:.08em;text-shadow:0 0 14px var(--loader-glow)}
 .ritual-loader-card .loader-title{position:relative;z-index:4;color:#fff8e8;font-size:20px;line-height:1.45;text-shadow:0 0 14px var(--loader-glow)}
@@ -2192,7 +2042,7 @@ body.page-home::after,body.page-result::after{
 .draw-loader.is-quick::after{opacity:0;pointer-events:none}
 .draw-loader.is-quick .product-ritual-stage{opacity:1;transform:scale(.9);margin-top:-7px;margin-bottom:-8px}
 .draw-loader.is-quick .ritual-loader-card{padding-top:16px;padding-bottom:18px}
-.draw-loader.is-quick .ritual-scene>b{opacity:.78}
+.draw-loader.is-quick .compass-ticks i{opacity:.5}
 
 /* Product-specific result altar and reveals */
 .primary-result-hero{position:relative;overflow:hidden;border-color:color-mix(in srgb,var(--ritual-primary) 34%,transparent);background:radial-gradient(circle at 50% 13%,var(--ritual-glow),transparent 39%),linear-gradient(180deg,color-mix(in srgb,var(--ritual-deep) 70%,#111936),rgba(6,9,24,.99))}
@@ -2224,19 +2074,10 @@ body.page-home::after,body.page-result::after{
 @keyframes ritualUniverseBreathe{from{opacity:.4;transform:scale(.94)}to{opacity:1;transform:scale(1.06)}}
 @keyframes ritualVeilDrift{from{transform:translate3d(-2%,-1%,0) scale(.97)}to{transform:translate3d(2%,1%,0) scale(1.04)}}
 @keyframes ritualSkyTwinkle{from{opacity:.08;transform:scale(.5)}to{opacity:.9;transform:scale(1.65)}}
-@keyframes miniMoonPulse{from{opacity:.7;transform:scale(.94)}to{opacity:1;transform:scale(1.06)}}
-@keyframes miniStarWake{from{opacity:.35;transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-91px) rotate(calc(var(--i) * -72deg)) scale(.7)}to{opacity:1;transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-91px) rotate(calc(var(--i) * -72deg)) scale(1.25)}}
-@keyframes hexagramBreathe{from{opacity:.58;transform:scale(.94) rotate(-2deg)}to{opacity:1;transform:scale(1.03) rotate(2deg)}}
-@keyframes hexTrace{to{stroke-dashoffset:-52}}
-@keyframes sealPulse{from{opacity:.45;filter:brightness(.75)}to{opacity:1;filter:brightness(1.35)}}
-@keyframes sevenOrbitA{to{transform:translate(-50%,-50%) rotate(378deg)}}
-@keyframes sevenOrbitB{to{transform:translate(-50%,-50%) rotate(-342deg)}}
-@keyframes planetWake{from{opacity:.45;transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-91px) rotate(calc(var(--i) * -51.428deg)) scale(.76)}to{opacity:1;transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-91px) rotate(calc(var(--i) * -51.428deg)) scale(1.12)}}
-@keyframes sevenCorePulse{from{filter:brightness(.82);box-shadow:0 0 24px rgba(76,123,255,.26),inset 0 0 12px rgba(190,235,255,.06)}to{filter:brightness(1.22);box-shadow:0 0 52px rgba(104,170,255,.55),inset 0 0 25px rgba(210,242,255,.16)}}
-@keyframes sevenRayBreathe{from{opacity:.38;filter:brightness(.78)}to{opacity:1;filter:brightness(1.35)}}
-@keyframes dialFloat{from{transform:translateY(5px) rotateX(-3deg)}to{transform:translateY(-5px) rotateX(3deg)}}
-@keyframes gateOpen{from{transform:rotateY(-9deg) translateY(4px)}to{transform:rotateY(9deg) translateY(-4px)}}
-@keyframes gateFinal{0%{transform:rotateY(-65deg);opacity:.35}70%{transform:rotateY(7deg);opacity:1}100%{transform:none;opacity:1;box-shadow:0 0 32px rgba(255,130,190,.55),inset 0 1px rgba(255,255,255,.16)}}
+@keyframes compassSpin{to{transform:rotate(360deg)}}
+@keyframes compassSpinReverse{to{transform:rotate(-360deg)}}
+@keyframes compassCorePulse{from{transform:scale(.94);filter:brightness(.92)}to{transform:scale(1.05);filter:brightness(1.15)}}
+@keyframes compassPulseRing{0%{opacity:.55;transform:scale(.7)}100%{opacity:0;transform:scale(1.85)}}
 @keyframes revealMoonDrop{0%{opacity:0;transform:translateY(-42px) rotate(calc((var(--reveal-index) - 2) * 14deg)) scale(.2);filter:blur(7px)}66%{opacity:1;transform:translateY(4px) rotate(-2deg) scale(1.13);filter:blur(0);box-shadow:0 0 31px rgba(164,218,255,.55)}100%{opacity:1;transform:none;filter:none}}
 @keyframes revealHexSeal{0%{opacity:0;transform:rotate(calc(var(--reveal-index) * 60deg)) translateY(-72px) scale(.15);filter:blur(7px)}68%{opacity:1;transform:rotate(-4deg) scale(1.15);filter:blur(0);box-shadow:0 0 34px rgba(234,188,255,.52)}100%{opacity:1;transform:none;filter:none}}
 @keyframes revealPlanetOrbit{0%{opacity:0;transform:rotate(calc(var(--reveal-index) * 51deg)) translateY(-84px) scale(.18);filter:blur(8px)}72%{opacity:1;transform:rotate(3deg) scale(1.14);filter:blur(0);box-shadow:0 0 34px rgba(118,186,255,.56)}100%{opacity:1;transform:none;filter:none}}
@@ -2246,10 +2087,7 @@ body.page-home::after,body.page-result::after{
 @media(max-height:680px){
   .ritual-loader-card{padding-top:13px;padding-bottom:12px}
   .product-ritual-stage{width:190px;height:190px}
-  .ritual-scene>b{bottom:1px}
-  .mini-star-crown i{transform:translate(-50%,-50%) rotate(calc(var(--i) * 72deg)) translateY(-73px) rotate(calc(var(--i) * -72deg))}
-  .hex-seals i{transform:translate(-50%,-50%) rotate(calc(var(--i) * 60deg)) translateY(-73px) rotate(calc(var(--i) * -60deg))}
-  .seven-planets i{transform:translate(-50%,-50%) rotate(calc(var(--i) * 51.428deg)) translateY(-73px) rotate(calc(var(--i) * -51.428deg))}
+  .compass-ticks i{transform:translate(-50%,-50%) rotate(calc(var(--t) * 30deg)) translateY(-73px)}
   .ritual-loader-card .loader-text{min-height:42px;font-size:12px}
 }
 @media(max-width:370px){
@@ -2260,7 +2098,7 @@ body.page-home::after,body.page-result::after{
   .product-card{grid-template-columns:50px 1fr}.product-card .product-ritual-icon{width:50px;height:50px;font-size:21px}
 }
 @media(prefers-reduced-motion:reduce){
-  .draw-loader::before,.draw-loader::after,.ritual-veil,.ritual-sky i,.mini-moon span,.mini-orbit,.mini-star-crown,.mini-star-crown i,.mini-lotus,.hex-halo,.hexagram,.hexagram polygon,.hexagram circle,.hex-seals,.hex-seals i,.hex-core,.seven-ring,.seven-planets,.seven-planets i,.seven-core,.seven-rays,.celestial-dial,.dial-constellation,.star-gate,.primary-result-hero::before,.result-ritual-crest::before,.result-ritual-crest::after{animation:none!important}
+  .draw-loader::before,.draw-loader::after,.ritual-veil,.ritual-sky i,.compass-ring,.compass-ticks,.compass-orbit,.compass-core,.compass-pulse,.primary-result-hero::before,.result-ritual-crest::before,.result-ritual-crest::after{animation:none!important}
   .number-reveal-group.is-revealing .num,.number-reveal-group.is-revealing .digit-tile{opacity:1!important;transform:none!important;filter:none!important;animation:none!important}
 }
 
@@ -2280,9 +2118,6 @@ body.page-home::after,body.page-result::after{
   filter:drop-shadow(0 0 12px currentColor);
   animation:oracleGlyphPulse 1.45s ease-in-out infinite alternate;
 }
-.celestial-dial:nth-child(2) .oracle-ritual-glyph,.star-gate:nth-child(2) .oracle-ritual-glyph{animation-delay:.16s}
-.celestial-dial:nth-child(3) .oracle-ritual-glyph,.star-gate:nth-child(3) .oracle-ritual-glyph{animation-delay:.32s}
-.star-gate:nth-child(4) .oracle-ritual-glyph{animation-delay:.48s}
 @keyframes oracleGlyphPulse{
   from{opacity:.38;transform:scale(.72) rotate(-12deg)}
   to{opacity:1;transform:scale(1.08) rotate(12deg)}
@@ -2896,11 +2731,6 @@ body.loto-only-compact .status-chip{min-height:28px;padding:0 9px;font-size:10px
 .mobile-celestial-stage{display:none}
 
 @media(max-width:559px){
-  body.loto-only-compact::before{
-    opacity:.62;
-    animation:starDrift 90s linear infinite,mobileStarBreath 7s ease-in-out infinite alternate;
-  }
-
   .compact-home-hero{
     isolation:isolate;
     min-height:124px;
@@ -3084,7 +2914,6 @@ body.loto-only-compact .status-chip{min-height:28px;padding:0 9px;font-size:10px
   }
 }
 
-@keyframes mobileStarBreath{from{filter:brightness(.9)}to{filter:brightness(1.18)}}
 @keyframes phaseBreath{0%,100%{opacity:.65}50%{opacity:1;text-shadow:0 0 9px color-mix(in srgb,var(--ritual-primary) 55%,transparent)}}
 @keyframes constellationFloat{from{transform:rotate(-9deg) translateY(0)}to{transform:rotate(-7deg) translateY(-4px)}}
 @keyframes mobileHaloPulse{0%,100%{opacity:.5;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
@@ -3596,4 +3425,253 @@ body.loto-only-compact .status-chip{min-height:28px;padding:0 9px;font-size:10px
 }
 @media(prefers-reduced-motion:reduce){
   .compact-sticky-submit button::after{animation:none!important;display:none}
+}
+
+/* ==========================================================================
+   v1.10.8 — Panel transparency pass, near-full
+   Panels now carry almost no solid color of their own — just enough tint to
+   anchor the border/shadow — and rely on backdrop-filter blur alone for
+   text legibility. The cosmic-field dark overlay is reduced to a bare hint.
+   ========================================================================== */
+
+.app-bar{
+  background:
+    radial-gradient(circle at 86% 18%,rgba(165,132,244,.11),transparent 26%),
+    linear-gradient(118deg,transparent 0 73%,rgba(169,136,245,.035) 73.3% 73.7%,transparent 74%),
+    linear-gradient(180deg,rgba(10,9,31,.03),rgba(5,7,22,.03));
+  backdrop-filter:blur(30px) saturate(1.7);
+  -webkit-backdrop-filter:blur(36px) saturate(1.6);
+}
+
+.mystic-hero{
+  background:
+    radial-gradient(circle at 76% 35%,rgba(169,140,255,.24),transparent 34%),
+    radial-gradient(circle at 28% 16%,rgba(156,118,244,.17),transparent 30%),
+    linear-gradient(145deg,rgba(28,19,63,.02),rgba(7,7,24,.02) 58%,rgba(13,18,44,.02));
+  backdrop-filter:blur(32px) saturate(1.9);
+  -webkit-backdrop-filter:blur(38px) saturate(1.7);
+}
+
+.panel{
+  background:
+    radial-gradient(circle at 100% 0,rgba(169,140,255,.14),transparent 34%),
+    linear-gradient(180deg,rgba(30,22,66,.02),rgba(10,9,29,.03));
+  backdrop-filter:blur(30px) saturate(1.8);
+  -webkit-backdrop-filter:blur(36px) saturate(1.6);
+}
+
+.mode-card,.method-card{
+  background:
+    radial-gradient(circle at 92% 8%,rgba(156,118,244,.08),transparent 30%),
+    linear-gradient(145deg,rgba(42,29,88,.03),rgba(10,8,29,.04));
+  backdrop-filter:blur(26px);
+  -webkit-backdrop-filter:blur(26px);
+}
+.mode-card:has(input:checked),.method-card:has(input:checked){
+  background:
+    radial-gradient(circle at 92% 5%,rgba(156,118,244,.17),transparent 34%),
+    linear-gradient(145deg,rgba(66,42,109,.06),rgba(20,14,48,.07));
+}
+
+.product-card{
+  background:linear-gradient(145deg,rgba(24,35,71,.03),rgba(6,10,25,.04));
+  backdrop-filter:blur(28px) saturate(1.6);
+  -webkit-backdrop-filter:blur(28px) saturate(1.5);
+}
+.product-card .product-ritual-icon{
+  background:radial-gradient(circle,color-mix(in srgb,var(--card-accent) 18%,transparent),rgba(5,7,22,.06) 68%);
+}
+
+input,#sub_count{
+  background:linear-gradient(180deg,rgba(4,3,15,.04),rgba(15,11,35,.04));
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+}
+input:focus,#sub_count:focus{background:rgba(12,8,31,.07)}
+
+.num-box{
+  background:
+    radial-gradient(circle at 35% 22%,rgba(255,255,255,.12),transparent 30%),
+    radial-gradient(circle,rgba(52,37,100,.04),rgba(5,4,18,.05));
+}
+
+.digit-tile{
+  background:linear-gradient(180deg,rgba(52,38,84,.05),rgba(13,10,31,.06));
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+
+.astrology-report,.page-result #all-results{
+  background:
+    radial-gradient(circle at 100% 0,transparent 0 72px,rgba(169,136,245,.038) 73px 74px,transparent 75px),
+    linear-gradient(29deg,transparent 0 72%,rgba(223,204,255,.025) 72.2% 72.5%,transparent 72.8%),
+    radial-gradient(circle at 100% 0,rgba(169,140,255,.10),transparent 34%),
+    linear-gradient(180deg,rgba(30,22,66,.04),rgba(10,9,29,.05));
+  backdrop-filter:blur(30px) saturate(1.7);
+  -webkit-backdrop-filter:blur(36px) saturate(1.6);
+}
+.zodiac-summary-card{
+  background:
+    radial-gradient(circle at 14% 50%,rgba(169,136,245,.055),transparent 33%),
+    linear-gradient(160deg,rgba(25,17,55,.03),rgba(7,8,25,.04));
+}
+
+.fortune-date-card{
+  background:radial-gradient(circle at 85% 5%,rgba(172,137,255,.12),transparent 34%),linear-gradient(155deg,rgba(8,5,27,.04),rgba(31,20,65,.03));
+  backdrop-filter:blur(26px);
+  -webkit-backdrop-filter:blur(26px);
+}
+.fortune-date-emblem{background:radial-gradient(circle,rgba(169,140,255,.25),rgba(5,3,18,.05) 68%)}
+.zodiac-oracle-ring{
+  background:
+    repeating-conic-gradient(from 0deg,rgba(180,148,255,.48) 0 1deg,transparent 1deg 29deg),
+    radial-gradient(circle,rgba(166,132,244,.13),rgba(6,5,22,.05) 67%);
+}
+
+.result-action-panel{
+  background:linear-gradient(180deg,rgba(8,12,30,.03),rgba(4,7,20,.02));
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+}
+
+/* ==========================================================================
+   v1.11.0 — Sub numbers (up to 3 additional reference numbers per ticket)
+   ========================================================================== */
+.sub-number-block{
+  margin-top:14px;
+  padding-top:13px;
+  border-top:1px dashed rgba(169,136,245,.22);
+}
+.sub-number-label{
+  margin:0 0 8px;
+  color:var(--muted-strong,#c9bfe0);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.sub-numbers{opacity:.82}
+.sub-numbers .num,.sub-numbers .digit-tile{
+  filter:saturate(.72) brightness(.92);
+  transform:scale(.86);
+  transform-origin:center;
+}
+
+/* ==========================================================================
+   v1.13.0 — Product picker redesigned as a grid of glowing tile buttons
+   (icon on top, label below), replacing the old horizontal switch-row +
+   toggle-knob layout. Unselected tiles are dim; the selected tile gets a
+   bright border and a soft accent-colored glow, similar to a segmented
+   pill-button control.
+   ========================================================================== */
+.switch-product-list,
+.compact-product-grid.switch-product-list{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+}
+.compact-product-grid .product-switch-row,
+.switch-product-list .product-switch-row{
+  flex-direction:column;
+  justify-content:center;
+  min-height:108px;
+  padding:16px 6px 12px;
+  gap:7px;
+  border-width:1.5px;
+  border-color:rgba(255,255,255,.12);
+  border-radius:18px;
+  text-align:center;
+  background:rgba(9,12,28,.5);
+  box-shadow:none;
+  transition:border-color .22s ease,background .22s ease,box-shadow .22s ease;
+}
+.switch-product-list .product-switch-row::after{content:none}
+.switch-product-list .product-switch-row::before{content:none}
+.product-switch-main{
+  flex-direction:column;
+  gap:7px;
+}
+.product-switch-copy{
+  flex-direction:column;
+  gap:2px;
+  text-align:center;
+}
+.compact-product-grid .product-switch-row strong,
+.switch-product-list .product-switch-row strong{
+  font-size:13px;
+  line-height:1.2;
+  white-space:normal;
+  color:var(--muted-strong);
+  transition:color .22s ease,text-shadow .22s ease;
+}
+.compact-product-grid .product-switch-row .mode-badge,
+.switch-product-list .product-switch-row .mode-badge{
+  min-height:0;
+  padding:0;
+  border:none;
+  background:none;
+  font-size:8.5px;
+  line-height:1.3;
+  white-space:normal;
+  opacity:.62;
+  transition:opacity .22s ease,color .22s ease;
+}
+
+/* Icon: dim by default, brightens on selection */
+.compact-product-grid .product-emblem-stage.compact-product-sigil,
+.switch-product-list .product-emblem-stage.compact-product-sigil{
+  flex:0 0 40px;
+  width:40px;
+  min-width:40px;
+  height:40px;
+  min-height:40px;
+  border-color:rgba(255,255,255,.14);
+  background:rgba(6,8,20,.6);
+  box-shadow:none;
+  opacity:.62;
+  transition:opacity .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.compact-product-grid .compact-product-sigil .product-emblem-svg,
+.switch-product-list .compact-product-sigil .product-emblem-svg{
+  color:var(--muted-strong);
+  filter:none;
+  transition:color .22s ease,filter .22s ease;
+}
+
+/* Selected tile: bright border + accent glow, like a lit segmented button */
+.product-switch-row:has(input:checked){
+  border-color:#fff;
+  background:
+    radial-gradient(circle at 50% 12%,color-mix(in srgb,var(--card-accent) 32%,transparent),transparent 62%),
+    rgba(9,12,28,.68);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--card-accent) 45%,transparent),0 0 22px color-mix(in srgb,var(--card-accent) 32%,transparent);
+}
+.product-switch-row:has(input:checked) .compact-product-sigil{
+  opacity:1;
+  border-color:color-mix(in srgb,var(--card-accent) 70%,white 10%);
+  box-shadow:0 0 16px color-mix(in srgb,var(--card-accent) 34%,transparent);
+}
+.product-switch-row:has(input:checked) .compact-product-sigil .product-emblem-svg{
+  color:var(--card-accent);
+  filter:drop-shadow(0 0 8px color-mix(in srgb,var(--card-accent) 55%,transparent));
+}
+.product-switch-row:has(input:checked) strong{
+  color:#fff;
+  text-shadow:0 0 10px color-mix(in srgb,var(--card-accent) 45%,transparent);
+}
+.product-switch-row:has(input:checked) .mode-badge{
+  opacity:1;
+  color:var(--card-accent);
+}
+.switch-product-list .product-switch-row:has(input:focus-visible){
+  outline:2px solid color-mix(in srgb,var(--card-accent) 70%,white);
+  outline-offset:2px;
+}
+
+@media(min-width:420px){
+  .compact-product-grid .product-switch-row,
+  .switch-product-list .product-switch-row{min-height:118px}
+}
+@media(min-width:560px){
+  .switch-product-list,
+  .compact-product-grid.switch-product-list{grid-template-columns:repeat(5,minmax(0,1fr))}
 }

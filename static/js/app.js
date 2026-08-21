@@ -223,6 +223,7 @@ function runRitual({ loader, productId, productName, ritualName, ritualSymbol, r
 
   const kicker = loader.querySelector('[data-loader-kicker]');
   const product = loader.querySelector('[data-loader-product]');
+  const symbol = loader.querySelector('[data-loader-symbol]');
   const title = loader.querySelector('[data-loader-title]');
   const text = loader.querySelector('[data-loader-text]');
   const stage = loader.querySelector('[data-loader-stage]');
@@ -230,6 +231,7 @@ function runRitual({ loader, productId, productName, ritualName, ritualSymbol, r
   const dots = Array.from(loader.querySelectorAll('.ritual-step-dots i'));
   if (kicker) kicker.textContent = theme.kicker;
   if (product) product.textContent = `${productName} · ${ritualName}`;
+  if (symbol) symbol.textContent = ritualSymbol || '✦';
 
   const phases = theme.phases;
   const span = duration / phases.length;
@@ -278,6 +280,8 @@ function resetRitualLoader(loader) {
   loader.querySelectorAll('.ritual-step-dots i').forEach((dot) => dot.classList.remove('is-active', 'is-complete'));
   const progress = loader.querySelector('[data-loader-progress]');
   if (progress) { progress.style.transitionDuration = '0ms'; progress.style.width = '0%'; }
+  const symbol = loader.querySelector('[data-loader-symbol]');
+  if (symbol) symbol.textContent = '✦';
   const skipButton = loader.querySelector('[data-loader-skip]');
   if (skipButton) { skipButton.hidden = true; skipButton.onclick = null; }
 }

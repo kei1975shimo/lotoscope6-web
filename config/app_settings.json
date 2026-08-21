@@ -1,4 +1,6 @@
 {
   "default_ticket_count": 1,
-  "max_ticket_count": 10
+  "max_ticket_count": 10,
+  "default_sub_count": 1,
+  "max_sub_count": 3
 }

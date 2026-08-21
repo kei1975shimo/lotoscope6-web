@@ -12,36 +12,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ app_version }}">
 </head>
 <body class="{% block body_class %}app-mobile{% endblock %}">
-  <div class="cosmic-field" aria-hidden="true">
-    <div class="cosmic-nebula cosmic-nebula-a"></div>
-    <div class="cosmic-nebula cosmic-nebula-b"></div>
-    <div class="cosmic-nebula cosmic-nebula-c"></div>
-    <svg class="cosmic-meteors" viewBox="0 0 400 800" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="meteorGradA" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#7c5cf0" stop-opacity="0"/>
-          <stop offset="55%" stop-color="#7c5cf0" stop-opacity=".9"/>
-          <stop offset="100%" stop-color="#e6dbff" stop-opacity="1"/>
-        </linearGradient>
-        <linearGradient id="meteorGradB" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#3fe0b0" stop-opacity="0"/>
-          <stop offset="55%" stop-color="#3fe0b0" stop-opacity=".85"/>
-          <stop offset="100%" stop-color="#e6dbff" stop-opacity="1"/>
-        </linearGradient>
-        <linearGradient id="meteorGradC" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#ea8fe6" stop-opacity="0"/>
-          <stop offset="55%" stop-color="#ea8fe6" stop-opacity=".85"/>
-          <stop offset="100%" stop-color="#e6dbff" stop-opacity="1"/>
-        </linearGradient>
-      </defs>
-      <path class="cosmic-meteor cosmic-meteor-a" d="M-40 760 C 80 620, 170 600, 250 440 S 370 160, 440 30" stroke="url(#meteorGradA)"/>
-      <path class="cosmic-meteor cosmic-meteor-b" d="M440 640 C 300 560, 230 540, 150 380 S 30 140, -40 30" stroke="url(#meteorGradB)"/>
-      <path class="cosmic-meteor cosmic-meteor-c" d="M-40 420 C 90 380, 210 400, 300 320 S 420 200, 460 170" stroke="url(#meteorGradC)"/>
-    </svg>
-    <div class="cosmic-stars">
-      {% for i in range(1, 33) %}<i style="--star:{{ i }}"></i>{% endfor %}
-    </div>
-  </div>
+  <div class="cosmic-field" aria-hidden="true"></div>
   <a class="skip-link" href="#main-content">本文へ移動</a>
   <main id="main-content" class="wrap app-shell">
     <header class="app-bar">
@@ -67,57 +38,20 @@
         <div class="ritual-kicker" data-loader-kicker>LOTO SCOPE · CELESTIAL RITUAL</div>
 
         <div class="product-ritual-stage" aria-hidden="true">
-          <div class="ritual-scene ritual-scene-miniloto" data-ritual-scene="miniloto">
-            <div class="mini-moon"><span>☾</span></div>
-            <div class="mini-orbit"></div>
-            <div class="mini-star-crown">
-              {% for i in range(5) %}<i style="--i:{{ i }}">✦</i>{% endfor %}
+          <div class="compass-instrument">
+            <div class="compass-pulse"></div>
+            <div class="compass-pulse compass-pulse-b"></div>
+            <div class="compass-ring compass-ring-outer"></div>
+            <div class="compass-ticks">
+              {% for i in range(12) %}<i style="--t:{{ i }}"></i>{% endfor %}
             </div>
-            <div class="mini-lotus"><i></i><i></i><i></i><i></i><i></i></div>
-            <b>FIVE LUNAR LIGHTS</b>
+            <div class="compass-ring compass-ring-mid"></div>
+            <div class="compass-ring compass-ring-inner"></div>
+            <div class="compass-orbit compass-orbit-a"><span></span></div>
+            <div class="compass-orbit compass-orbit-b"><span></span></div>
+            <div class="compass-orbit compass-orbit-c"><span></span></div>
+            <div class="compass-core"><span data-loader-symbol>✦</span></div>
           </div>
-
-          <div class="ritual-scene ritual-scene-loto6" data-ritual-scene="loto6">
-            <div class="hex-halo"></div>
-            <svg class="hexagram" viewBox="0 0 220 220">
-              <polygon points="110,20 188,155 32,155"/>
-              <polygon points="110,200 32,65 188,65"/>
-              <circle cx="110" cy="110" r="71"/>
-              <circle cx="110" cy="110" r="32"/>
-            </svg>
-            <div class="hex-seals">
-              {% for i in range(6) %}<i style="--i:{{ i }}">{{ ['☉','☾','☿','♀','♂','♃'][i] }}</i>{% endfor %}
-            </div>
-            <div class="hex-core">✦</div>
-            <b>SIX CELESTIAL SEALS</b>
-          </div>
-
-          <div class="ritual-scene ritual-scene-loto7" data-ritual-scene="loto7">
-            <div class="seven-ring ring-a"></div><div class="seven-ring ring-b"></div><div class="seven-ring ring-c"></div>
-            <div class="seven-planets">
-              {% for symbol in ['☉','☾','☿','♀','♂','♃','♄'] %}<i style="--i:{{ loop.index0 }}">{{ symbol }}</i>{% endfor %}
-            </div>
-            <div class="seven-core"><span>Ⅶ</span><small>ORBIT</small></div>
-            <div class="seven-rays"></div>
-            <b>SEVEN PLANETARY ORBITS</b>
-          </div>
-
-          <div class="ritual-scene ritual-scene-numbers3" data-ritual-scene="numbers3">
-            <div class="number-dials">
-              {% for i in range(3) %}<div class="celestial-dial"><span>✦</span><i></i></div>{% endfor %}
-            </div>
-            <div class="dial-constellation" aria-hidden="true"><i></i><i></i><i></i></div>
-            <b>THREE DIGIT RESONANCE</b>
-          </div>
-
-          <div class="ritual-scene ritual-scene-numbers4" data-ritual-scene="numbers4">
-            <div class="star-gates">
-              {% for i in range(4) %}<div class="star-gate"><i>✦</i><span>✦</span><em></em></div>{% endfor %}
-            </div>
-            <div class="gate-floor" aria-hidden="true"></div>
-            <b>FOUR DIGIT RESONANCE</b>
-          </div>
-
         </div>
 
         <div class="ritual-product-name" data-loader-product>ロト6</div>

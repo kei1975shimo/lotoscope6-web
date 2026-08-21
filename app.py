@@ -29,7 +29,7 @@ from product_numbers import (  # noqa: E402
 )
 from utils import load_json  # noqa: E402
 
-APP_VERSION = "v1.10.3-cosmic-meteors"
+APP_VERSION = "v1.13.0-tile-picker"
 DEFAULT_PRODUCT_ID = "loto6"
 
 
@@ -51,6 +51,8 @@ def create_app() -> Flask:
             "csrf_token": get_csrf_token,
             "default_ticket_count": int(settings.get("default_ticket_count", 1)),
             "max_ticket_count": int(settings.get("max_ticket_count", 10)),
+            "default_sub_count": int(settings.get("default_sub_count", 1)),
+            "max_sub_count": int(settings.get("max_sub_count", 3)),
             "today_date": datetime.now(JST).date().isoformat(),
             "current_year": datetime.now(JST).year,
         }
@@ -94,17 +96,17 @@ def create_app() -> Flask:
     @app.post("/generate")
     def generate():
         try:
-            product_id, count, seed, birth_date_value = parse_generate_form(request.form)
+            product_id, count, birth_date_value, sub_count = parse_generate_form(request.form)
             product = get_product(product_id)
             astrology_profile = calculate_astrology_profile(birth_date_value)
-            rows = generate_product_rows(product_id, count, astrology_profile, seed=seed)
+            rows = generate_product_rows(product_id, count, astrology_profile, sub_count=sub_count)
             return render_template(
                 "result.html",
                 rows=rows,
                 product=product,
                 product_id=product_id,
                 count=count,
-                seed=seed,
+                sub_count=sub_count,
                 astrology_profile=astrology_profile,
             )
         except (ValueError, RuntimeError) as exc:
@@ -148,7 +150,7 @@ def create_app() -> Flask:
     return app
 
 
-def parse_generate_form(form: Any) -> Tuple[str, int, str, date]:
+def parse_generate_form(form: Any) -> Tuple[str, int, date, int]:
     product_id = str(form.get("product", DEFAULT_PRODUCT_ID)).strip()
     get_product(product_id)
 
@@ -161,12 +163,17 @@ def parse_generate_form(form: Any) -> Tuple[str, int, str, date]:
     if not 1 <= count <= max_count:
         raise ValueError(f"受け取る口数は1〜{max_count}の範囲で選んでください。")
 
-    seed = str(form.get("seed", "")).strip()
-    if len(seed) > 80:
-        raise ValueError("星読みの合言葉は80文字以内で入力してください。")
+    max_sub_count = int(settings.get("max_sub_count", 3))
+    default_sub_count = int(settings.get("default_sub_count", 1))
+    try:
+        sub_count = int(str(form.get("sub_count", default_sub_count)).strip())
+    except Exception as exc:
+        raise ValueError(f"サブ数字の数を1〜{max_sub_count}で選んでください。") from exc
+    if not 1 <= sub_count <= max_sub_count:
+        raise ValueError(f"サブ数字の数は1〜{max_sub_count}の範囲で選んでください。")
 
     birth_date_value = parse_birth_date(str(form.get("birth_date", "")).strip())
-    return product_id, count, seed, birth_date_value
+    return product_id, count, birth_date_value, sub_count
 
 
 def is_production_environment() -> bool:

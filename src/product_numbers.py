@@ -182,7 +182,7 @@ def _weighted_sample_without_replacement(
 ) -> List[int]:
     available = list(population)
     chosen: List[int] = []
-    for _ in range(count):
+    for _ in range(min(count, len(available))):
         candidate_weights = [max(0.01, float(weights.get(number, 1.0))) for number in available]
         selected = rng.choices(available, weights=candidate_weights, k=1)[0]
         chosen.append(selected)
@@ -265,6 +265,7 @@ def _generate_loto_rows(
     count: int,
     profile: Mapping[str, Any],
     rng: RandomSource,
+    sub_count: int = 0,
 ) -> List[Dict[str, Any]]:
     maximum = int(product["max_number"])
     pick_count = int(product["pick_count"])
@@ -287,6 +288,10 @@ def _generate_loto_rows(
         composition_score = _composition_score(numbers, maximum)
         total_score = round(astro_score * 0.78 + composition_score * 0.22)
         overlap = sorted(set(numbers) & set(core_numbers))
+        remaining_population = [number for number in population if number not in set(numbers)]
+        sub_numbers = sorted(
+            _weighted_sample_without_replacement(remaining_population, weights, sub_count, rng)
+        )
         rows.append(
             {
                 "product_id": product["product_id"],
@@ -294,6 +299,8 @@ def _generate_loto_rows(
                 "product_kind": "loto",
                 "numbers": numbers,
                 "display_number": " ".join(f"{number:02d}" for number in numbers),
+                "sub_numbers": sub_numbers,
+                "display_sub_number": " ".join(f"{number:02d}" for number in sub_numbers),
                 "astrology_numbers": core_numbers,
                 "astrology_hit_count": len(overlap),
                 "astrology_fit_score": astro_score,
@@ -425,6 +432,7 @@ def _generate_numbers_rows(
     count: int,
     profile: Mapping[str, Any],
     rng: RandomSource,
+    sub_count: int = 0,
 ) -> List[Dict[str, Any]]:
     digit_count = int(product["digit_count"])
     weights = build_digit_weights(profile)
@@ -446,6 +454,8 @@ def _generate_numbers_rows(
         total_score = round(astro_score * 0.78 + composition_score * 0.22)
         overlap = sorted(set(digits) & set(core_digits))
         box_digits = sorted(digits)
+        remaining_digits = [digit for digit in range(10) if digit not in set(digits)]
+        sub_digits = sorted(_weighted_sample_without_replacement(remaining_digits, weights, sub_count, rng))
         rows.append(
             {
                 "product_id": product["product_id"],
@@ -455,6 +465,8 @@ def _generate_numbers_rows(
                 "box_numbers": box_digits,
                 "display_number": "-".join(str(number) for number in digits),
                 "display_box_number": "-".join(str(number) for number in box_digits),
+                "sub_numbers": sub_digits,
+                "display_sub_number": "-".join(str(number) for number in sub_digits),
                 "astrology_numbers": core_digits,
                 "astrology_hit_count": len(overlap),
                 "astrology_fit_score": astro_score,
@@ -475,13 +487,15 @@ def generate_product_rows(
     count: int,
     profile: Mapping[str, Any],
     seed: str = "",
+    sub_count: int = 1,
 ) -> List[Dict[str, Any]]:
     product = get_product(product_id)
     rng: RandomSource = random.Random(seed) if seed else random.SystemRandom()
+    sub_count = max(0, int(sub_count))
     if product.get("kind") == "numbers":
-        rows = _generate_numbers_rows(product, count, profile, rng)
+        rows = _generate_numbers_rows(product, count, profile, rng, sub_count=sub_count)
     else:
-        rows = _generate_loto_rows(product, count, profile, rng)
+        rows = _generate_loto_rows(product, count, profile, rng, sub_count=sub_count)
 
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     stamp = datetime.now().strftime("%Y%m%d%H%M%S")

@@ -29,7 +29,7 @@ class LotoScopeSmokeTests(unittest.TestCase):
         html = response.get_data(as_text=True)
         return html, self.csrf(html)
 
-    def generate(self, product: str = "loto6", count: str = "2", seed: str = "smoke-test"):
+    def generate(self, product: str = "loto6", count: str = "2", sub_count: str = "1"):
         html, csrf = self.get_index()
         return self.client.post(
             "/generate",
@@ -37,7 +37,7 @@ class LotoScopeSmokeTests(unittest.TestCase):
                 "csrf_token": csrf,
                 "product": product,
                 "count": count,
-                "seed": seed,
+                "sub_count": sub_count,
                 "birth_date": "1975-08-16",
             },
         )
@@ -125,7 +125,7 @@ class LotoScopeSmokeTests(unittest.TestCase):
         html, csrf = self.get_index()
         missing_birth = self.client.post(
             "/generate",
-            data={"csrf_token": csrf, "product": "loto6", "count": "1", "seed": "", "birth_date": ""},
+            data={"csrf_token": csrf, "product": "loto6", "count": "1", "birth_date": ""},
         )
         self.assertEqual(missing_birth.status_code, 400)
         self.assertIn("生年月日", missing_birth.get_data(as_text=True))
@@ -139,6 +139,34 @@ class LotoScopeSmokeTests(unittest.TestCase):
         response = self.client.get("/zodiac-preview?birth_date=1975-08-16")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["name"], "獅子座")
+
+    def test_sub_numbers_generated_for_loto(self) -> None:
+        profile = calculate_astrology_profile(__import__("datetime").date(1988, 5, 20))
+        rows = generate_product_rows("loto6", 2, profile, seed="sub-test-loto", sub_count=3)
+        for row in rows:
+            self.assertEqual(len(row["sub_numbers"]), 3)
+            self.assertTrue(set(row["sub_numbers"]).isdisjoint(set(row["numbers"])))
+            self.assertTrue(all(1 <= number <= 43 for number in row["sub_numbers"]))
+
+    def test_sub_numbers_generated_for_numbers(self) -> None:
+        profile = calculate_astrology_profile(__import__("datetime").date(1988, 5, 20))
+        rows = generate_product_rows("numbers3", 2, profile, seed="sub-test-numbers", sub_count=2)
+        for row in rows:
+            self.assertEqual(len(row["sub_numbers"]), 2)
+            self.assertTrue(set(row["sub_numbers"]).isdisjoint(set(row["numbers"])))
+            self.assertTrue(all(0 <= digit <= 9 for digit in row["sub_numbers"]))
+
+    def test_sub_count_range_is_validated(self) -> None:
+        response = self.generate("loto6", count="1", sub_count="4")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("1〜3", response.get_data(as_text=True))
+
+    def test_result_page_shows_sub_numbers(self) -> None:
+        response = self.generate("loto6", count="2", sub_count="2")
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn("サブ数字", html)
+        self.assertIn("sub-numbers", html)
 
 
 if __name__ == "__main__":
