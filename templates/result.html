@@ -18,7 +18,7 @@
 {%- endmacro %}
 
 {% set best = rows|sort(attribute='ticket_score')|last %}
-<section id="best-pick" class="hero compact result-hero primary-result-hero result-product-{{ product_id }}" data-result-product="{{ product_id }}">
+<section id="best-pick" class="hero compact result-hero primary-result-hero result-product-{{ product_id }}">
   <div class="result-zodiac-pattern" aria-hidden="true">{% for glyph in ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'] %}<i style="--z:{{ loop.index0 }}">{{ glyph }}</i>{% endfor %}</div>
   <div class="primary-result-copy">
     <div class="hero-kicker">{{ product.english }} × {{ product.ritual_name }}</div>

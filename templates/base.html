@@ -23,7 +23,12 @@
           <small>LOTO SCOPE</small>
         </span>
       </a>
-      <div class="app-bar-actions"><span class="status-chip app-status">公開中</span></div>
+      <div class="app-bar-actions header-zodiac-slot" aria-hidden="true">
+        <span class="header-zodiac-wheel">
+          <img src="{{ url_for('static', filename='img/cosmic-zodiac-wheel.webp') }}" alt="">
+          <i class="header-zodiac-core">✦</i>
+        </span>
+      </div>
     </header>
 
     {% block content %}{% endblock %}

@@ -10,50 +10,18 @@
 {% set birth_month_value = birth_iso[5:7] if birth_iso|length >= 10 else '' %}
 {% set birth_day_value = birth_iso[8:10] if birth_iso|length >= 10 else '' %}
 
-<section class="hero app-hero home-hero mystic-hero compact-home-hero">
-  <div class="mobile-celestial-stage" aria-hidden="true">
-    <span class="mobile-celestial-halo"></span>
-    <span class="mobile-orbit mobile-orbit-outer"></span>
-    <span class="mobile-orbit mobile-orbit-inner"></span>
-    <span class="mobile-celestial-moon">☾</span>
-    <span class="mobile-orbit-star mobile-orbit-star-a">✦</span>
-    <span class="mobile-orbit-star mobile-orbit-star-b">✧</span>
-    <span class="mobile-orbit-star mobile-orbit-star-c">✦</span>
-  </div>
-  <div class="hero-zodiac-pattern" aria-hidden="true">
-    {% for glyph in ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'] %}<i style="--z:{{ loop.index0 }}">{{ glyph }}</i>{% endfor %}
-  </div>
-  <svg class="hero-constellation constellation-left" viewBox="0 0 180 130" aria-hidden="true"><path d="M18 96 L52 62 L83 76 L118 34 L154 52"/><circle cx="18" cy="96" r="2.4"/><circle cx="52" cy="62" r="3.1"/><circle cx="83" cy="76" r="2.2"/><circle cx="118" cy="34" r="3"/><circle cx="154" cy="52" r="2.2"/></svg>
-  <div class="moon-phase-row" aria-hidden="true"><span>●</span><span>◐</span><span>○</span><span>◑</span><span>●</span></div>
-  <div class="hero-grid">
-    <div class="hero-copy">
-      <div class="hero-kicker">CELESTIAL LOTO ORACLE</div>
-      <h1>ロト・スコープ<small>星が導く、あなただけの数字</small></h1>
-    </div>
-    <div class="hero-visual mystic-hero-visual" aria-hidden="true">
-      <div class="scope-aura"></div>
-      <div class="cosmic-scope">
-        <div class="scope-ring scope-ring-outer"></div>
-        <div class="scope-zodiac"><span style="--i:0">♈</span><span style="--i:1">♉</span><span style="--i:2">♊</span><span style="--i:3">♋</span><span style="--i:4">♌</span><span style="--i:5">♍</span><span style="--i:6">♎</span><span style="--i:7">♏</span><span style="--i:8">♐</span><span style="--i:9">♑</span><span style="--i:10">♒</span><span style="--i:11">♓</span></div>
-        <div class="scope-ring scope-ring-inner"></div>
-        <div class="scope-orbit scope-orbit-a"><span class="scope-number num-band-1">06</span></div><div class="scope-orbit scope-orbit-c"><span class="scope-number num-band-4">37</span></div>
-        <div class="scope-core"><small>LOTO</small><strong>✦</strong><em>CELESTIAL SCOPE</em></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 {% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
 
-<form id="number-form" class="panel app-form-panel compact-loto-form" method="post" action="{{ url_for('generate') }}" data-generate-form data-today="{{ today_date }}">
+<form id="number-form" class="app-form-panel compact-loto-form home-column-form" method="post" action="{{ url_for('generate') }}" data-generate-form data-today="{{ today_date }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+  <section class="panel home-column home-column-product">
   <div class="panel-head app-panel-head compact-step-head"><div><span>Step 1</span><h2>ロトを選ぶ</h2></div></div>
   <div id="product-panel" class="field compact-product-field">
     <div class="mode-grid app-mode-grid product-grid compact-product-grid switch-product-list">
       {% for item in product_choices %}
       <label class="mode-card product-card product-switch-row product-{{ item.product_id }}">
-        <input type="radio" name="product" value="{{ item.product_id }}" data-product-name="{{ item.name }}" data-product-rule="{{ item.badge }}" data-button-label="{{ item.button_label }}" data-product-kind="{{ item.kind }}" data-product-count="{{ item.pick_count }}" data-ritual-name="{{ item.ritual_name }}" data-ritual-symbol="{{ item.ritual_symbol }}" data-ritual-duration="{{ item.ritual_duration }}" {% if current_product == item.product_id %}checked{% endif %}>
+        <input type="radio" name="product" value="{{ item.product_id }}" data-product-name="{{ item.name }}" data-button-label="{{ item.button_label }}" data-ritual-name="{{ item.ritual_name }}" data-ritual-symbol="{{ item.ritual_symbol }}" data-ritual-duration="{{ item.ritual_duration }}" {% if current_product == item.product_id %}checked{% endif %}>
         <span class="product-switch-main">
           <span class="product-emblem-stage product-emblem-{{ item.product_id }} compact-product-sigil" aria-hidden="true">
             {% if item.product_id == 'miniloto' %}
@@ -77,27 +45,34 @@
       {% endfor %}
     </div>
   </div>
+  </section>
 
+  <section class="panel home-column home-column-birth">
   <div class="panel-head app-panel-head form-substep-head compact-step-head"><div><span>Step 2</span><h2>誕生日を選ぶ</h2></div></div>
-  <div id="birth-panel" class="astrology-entry compact-astrology-entry is-oracle-active" data-astrology-entry>
-    <div class="astrology-date-field" data-astrology-fields>
+  <div id="birth-panel" class="astrology-entry compact-astrology-entry is-oracle-active">
+    <div class="astrology-date-field">
       <input id="birth_date" name="birth_date" type="hidden" value="{{ birth_iso }}">
       <div class="fortune-date-card compact-fortune-date-card">
         <div class="date-select-grid" role="group" aria-label="生年月日">
-          <label class="date-select-field" for="birth_year"><span>西暦</span><span class="select-shell"><select id="birth_year" class="birth-select birth-select-year" data-birth-part="year" autocomplete="bday-year" aria-label="生まれた年"><option value="">年</option>{% for year in range(current_year, 1899, -1) %}<option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}年</option>{% endfor %}</select></span></label>
-          <label class="date-select-field" for="birth_month"><span>月</span><span class="select-shell"><select id="birth_month" class="birth-select birth-select-month" data-birth-part="month" autocomplete="bday-month" aria-label="生まれた月"><option value="">月</option>{% for month in range(1, 13) %}<option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ month }}月</option>{% endfor %}</select></span></label>
-          <label class="date-select-field" for="birth_day"><span>日</span><span class="select-shell"><select id="birth_day" class="birth-select birth-select-day" data-birth-part="day" autocomplete="bday-day" aria-label="生まれた日"><option value="">日</option>{% for day in range(1, 32) %}<option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ day }}日</option>{% endfor %}</select></span></label>
+          <label class="date-select-field" for="birth_year"><span>西暦</span><span class="select-shell"><select id="birth_year" class="birth-select birth-select-year" autocomplete="bday-year" aria-label="生まれた年"><option value="">年</option>{% for year in range(current_year, 1899, -1) %}<option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}年</option>{% endfor %}</select></span></label>
+          <label class="date-select-field" for="birth_month"><span>月</span><span class="select-shell"><select id="birth_month" class="birth-select birth-select-month" autocomplete="bday-month" aria-label="生まれた月"><option value="">月</option>{% for month in range(1, 13) %}<option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ month }}月</option>{% endfor %}</select></span></label>
+          <label class="date-select-field" for="birth_day"><span>日</span><span class="select-shell"><select id="birth_day" class="birth-select birth-select-day" autocomplete="bday-day" aria-label="生まれた日"><option value="">日</option>{% for day in range(1, 32) %}<option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ day }}日</option>{% endfor %}</select></span></label>
         </div>
         <div class="birth-date-seal compact-birth-seal" data-birth-preview aria-live="polite"><span class="seal-symbol" aria-hidden="true">✦</span><div class="seal-copy"><small>YOUR CELESTIAL SIGN</small><strong data-birth-preview-date>生年月日を選んでください</strong></div><span class="seal-status" data-birth-preview-status>WAITING</span><div class="birth-zodiac-preview zodiac-oracle-card" data-birth-zodiac hidden><span class="birth-zodiac-oracle" aria-hidden="true"><i class="zodiac-oracle-ring"></i><span class="birth-zodiac-symbol" data-zodiac-symbol>✦</span></span><span class="birth-zodiac-copy"><small>太陽星座</small><b data-zodiac-name>星の位置を確認中</b><em data-zodiac-english>CELESTIAL SIGN</em></span><span class="zodiac-symbol-strip" aria-hidden="true">{% for glyph in ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'] %}<i data-zodiac-wheel-symbol="{{ loop.index0 }}">{{ glyph }}</i>{% endfor %}</span></div></div>
       </div>
       <div class="privacy-note compact-privacy-note">生年月日は保存しません。</div>
     </div>
   </div>
+  </section>
 
+  <section class="panel home-column home-column-count">
   <div class="field compact-count-field"><label for="count">受け取る口数</label><input id="count" name="count" type="number" inputmode="numeric" min="1" max="{{ max_ticket_count }}" value="{{ current_count }}"></div>
 
   <div class="field compact-count-field"><label for="sub_count">サブ数字の数（追加の参考数字）</label><select id="sub_count" name="sub_count">{% for n in range(1, max_sub_count + 1) %}<option value="{{ n }}" {% if current_sub_count == n %}selected{% endif %}>{{ n }}つ</option>{% endfor %}</select></div>
+  </section>
 
+  <section class="panel home-column home-column-action">
   <div class="sticky-submit compact-sticky-submit"><button type="submit" data-generate-button><span aria-hidden="true">✡</span> 星読みの数字を生成する</button></div>
+  </section>
 </form>
 {% endblock %}

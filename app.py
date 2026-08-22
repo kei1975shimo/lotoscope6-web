@@ -29,7 +29,7 @@ from product_numbers import (  # noqa: E402
 )
 from utils import load_json  # noqa: E402
 
-APP_VERSION = "v1.13.0-tile-picker"
+APP_VERSION = "v1.13.3-header-zodiac"
 DEFAULT_PRODUCT_ID = "loto6"
 
 

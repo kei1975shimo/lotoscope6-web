@@ -290,28 +290,11 @@ function updateProductSummary() {
   const form = document.querySelector('form[data-generate-form]');
   if (!form) return;
   const selected = selectedProduct(form);
-  const countInput = form.querySelector('#count');
-  if (!selected || !countInput) return;
-  const count = Math.max(1, Number(countInput.value) || 1);
+  if (!selected) return;
   const productId = selected.value || 'loto6';
   applyRitualTheme(productId);
 
-  const nameNode = document.getElementById('selected-product-name');
-  const ruleNode = document.getElementById('selected-product-rule');
-  const ritualNameNode = document.getElementById('selected-ritual-name');
-  const ritualSymbolNode = document.getElementById('selected-ritual-symbol');
-  const ritualDescriptionNode = document.getElementById('selected-ritual-description');
-  const totalNode = document.getElementById('planned-total');
-  const detailNode = document.getElementById('planned-total-detail');
   const button = form.querySelector('[data-generate-button]');
-
-  if (nameNode) nameNode.textContent = selected.dataset.productName || '宝くじ';
-  if (ruleNode) ruleNode.textContent = selected.dataset.productRule || '';
-  if (ritualNameNode) ritualNameNode.textContent = selected.dataset.ritualName || '星の儀式';
-  if (ritualSymbolNode) ritualSymbolNode.textContent = selected.dataset.ritualSymbol || '✦';
-  if (ritualDescriptionNode) ritualDescriptionNode.textContent = selected.dataset.ritualDescription || '';
-  if (totalNode) totalNode.textContent = `${count}口`;
-  if (detailNode) detailNode.textContent = `${selected.dataset.ritualName || '星の儀式'}で${count}口を導く`;
   if (button) button.innerHTML = `<span aria-hidden="true">${selected.dataset.ritualSymbol || '✦'}</span> ${selected.dataset.buttonLabel || '星読みの数字を生成する'}`;
 }
 
@@ -337,7 +320,7 @@ function setupGenerateForm() {
       updateBirthDatePreview(form);
     });
   });
-  form.querySelectorAll('input[name="product"], #count').forEach((input) => {
+  form.querySelectorAll('input[name="product"]').forEach((input) => {
     input.addEventListener('input', updateProductSummary);
     input.addEventListener('change', updateProductSummary);
   });
