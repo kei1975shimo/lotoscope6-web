@@ -9,6 +9,14 @@ function getBirthDateControls(form) {
   };
 }
 
+function selectedProduct(form) {
+  return form.querySelector('input[name="product"]:checked');
+}
+
+function selectedDivination(form) {
+  return form.querySelector('input[name="divination"]:checked');
+}
+
 function syncBirthDate(form, { report = false } = {}) {
   const { hidden, year, month, day } = getBirthDateControls(form);
   if (!hidden || !year || !month || !day) return { complete: false, valid: false, value: '' };
@@ -28,6 +36,7 @@ function syncBirthDate(form, { report = false } = {}) {
       year.setCustomValidity('未来の生年月日は選択できません。');
     }
   }
+
   hidden.value = complete && valid
     ? `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
     : '';
@@ -38,212 +47,201 @@ function syncBirthDate(form, { report = false } = {}) {
     firstEmpty.reportValidity();
   } else if (report && !valid) {
     const target = [year, month, day].find((select) => select.validationMessage) || day;
-    if (!target.validationMessage) target.setCustomValidity('あなたが生まれた年月日を、もう一度確かめてください。');
+    if (!target.validationMessage) target.setCustomValidity('生年月日をもう一度確かめてください。');
     target.reportValidity();
   }
   return { complete, valid, value: hidden.value };
 }
 
-const zodiacPreviewState = new WeakMap();
+const previewState = new WeakMap();
 
-function resetZodiacPreview(form) {
-  const node = form.querySelector('[data-birth-zodiac]');
-  if (!node) return;
-  node.hidden = true;
-  node.classList.remove('is-ready', 'is-reading');
-  node.removeAttribute('data-zodiac-index');
-  node.querySelectorAll('[data-zodiac-wheel-symbol]').forEach((item) => item.classList.remove('is-active'));
-  zodiacPreviewState.delete(form);
+function resetDivinationPreview(form) {
+  const preview = form.querySelector('[data-divination-preview]');
+  if (preview) preview.hidden = true;
+  previewState.delete(form);
 }
 
-async function requestZodiacPreview(form, birthDate) {
-  const node = form.querySelector('[data-birth-zodiac]');
-  const symbol = form.querySelector('[data-zodiac-symbol]');
-  const name = form.querySelector('[data-zodiac-name]');
-  const english = form.querySelector('[data-zodiac-english]');
-  if (!node || !symbol || !name || !english) return;
-  const oldState = zodiacPreviewState.get(form);
-  if (oldState?.birthDate === birthDate && oldState?.ready) return;
+function renderDivinationPreview(form, data) {
+  const preview = form.querySelector('[data-divination-preview]');
+  if (!preview) return;
+  const items = Array.isArray(data.summary_items) ? data.summary_items.slice(0, 3) : [];
+  preview.querySelectorAll('[data-preview-item]').forEach((node, index) => {
+    const item = items[index] || {};
+    const small = node.querySelector('small');
+    const strong = node.querySelector('strong');
+    const span = node.querySelector('span');
+    if (small) small.textContent = item.label || 'READING';
+    if (strong) strong.textContent = item.value || '—';
+    if (span) span.textContent = item.detail || '';
+  });
+  preview.hidden = false;
+}
+
+async function requestDivinationPreview(form, birthDate) {
+  const selected = selectedDivination(form);
+  if (!selected || !birthDate) return;
+  const divinationId = selected.value || 'astrology';
+  const key = `${divinationId}:${birthDate}`;
+  const oldState = previewState.get(form);
+  if (oldState?.key === key && oldState?.ready) return;
   oldState?.controller?.abort();
+
   const controller = new AbortController();
-  zodiacPreviewState.set(form, { birthDate, controller, ready: false });
-  node.hidden = false;
-  node.classList.add('is-reading');
-  node.classList.remove('is-ready');
-  symbol.textContent = '✦';
-  name.textContent = 'あなたの星を確かめています';
-  english.textContent = 'READING THE SUN';
+  previewState.set(form, { key, controller, ready: false });
+  const preview = form.querySelector('[data-divination-preview]');
+  if (preview) preview.hidden = false;
   try {
-    const response = await fetch(`/zodiac-preview?birth_date=${encodeURIComponent(birthDate)}`, {
+    const response = await fetch(`/divination-preview?divination=${encodeURIComponent(divinationId)}&birth_date=${encodeURIComponent(birthDate)}`, {
       headers: { Accept: 'application/json' }, signal: controller.signal,
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || '星座を読み取れませんでした。');
-    if (form.querySelector('#birth_date')?.value !== birthDate) return;
-    symbol.textContent = data.symbol || '✦';
-    name.textContent = data.name || '太陽星座';
-    english.textContent = data.english || 'SUN SIGN';
-    const zodiacIndex = Number.isInteger(data.index) ? data.index : Number(data.index);
-    node.dataset.zodiacIndex = Number.isFinite(zodiacIndex) ? String(zodiacIndex) : '';
-    node.querySelectorAll('[data-zodiac-wheel-symbol]').forEach((item) => {
-      item.classList.toggle('is-active', Number(item.dataset.zodiacWheelSymbol) === zodiacIndex);
-    });
-    node.classList.remove('is-reading');
-    node.classList.add('is-ready');
-    zodiacPreviewState.set(form, { birthDate, controller: null, ready: true });
+    if (!response.ok) throw new Error(data.error || '占いを読み取れませんでした。');
+    if (form.querySelector('#birth_date')?.value !== birthDate || selectedDivination(form)?.value !== divinationId) return;
+    renderDivinationPreview(form, data);
+    previewState.set(form, { key, controller: null, ready: true });
   } catch (error) {
     if (error.name === 'AbortError') return;
-    node.classList.remove('is-reading', 'is-ready');
-    symbol.textContent = '☉';
-    name.textContent = '星の位置を確かめられませんでした';
-    english.textContent = 'TRY AGAIN';
+    resetDivinationPreview(form);
   }
 }
 
 function updateBirthDatePreview(form) {
   const preview = form.querySelector('[data-birth-preview]');
-  const dateNode = form.querySelector('[data-birth-preview-date]');
   const statusNode = form.querySelector('[data-birth-preview-status]');
-  if (!preview || !dateNode || !statusNode) return;
+  const methodName = form.querySelector('[data-preview-method-name]');
+  const methodSymbol = form.querySelector('[data-preview-method-symbol]');
+  const divination = selectedDivination(form);
+  if (!preview || !statusNode) return;
+
+  if (methodName) methodName.textContent = divination?.dataset.divinationEnglish || 'DIVINATION PROFILE';
+  if (methodSymbol) methodSymbol.textContent = divination?.dataset.divinationSymbol || '✦';
+
   const result = syncBirthDate(form);
   if (result.complete && result.valid) {
-    const [year, month, day] = result.value.split('-').map(Number);
-    dateNode.textContent = `${year}年${month}月${day}日`;
-    statusNode.textContent = 'SEALED';
+    statusNode.textContent = 'READY';
     preview.classList.add('is-complete');
-    requestZodiacPreview(form, result.value);
+    requestDivinationPreview(form, result.value);
   } else {
-    dateNode.textContent = '生年月日を選ぶと、ここに刻まれます';
     statusNode.textContent = 'WAITING';
     preview.classList.remove('is-complete');
-    resetZodiacPreview(form);
+    resetDivinationPreview(form);
   }
 }
 
-function selectedProduct(form) {
-  return form.querySelector('input[name="product"]:checked');
+const PRODUCT_RITUAL_CLASSES = ['ritual-miniloto', 'ritual-loto6', 'ritual-loto7', 'ritual-numbers3', 'ritual-numbers4'];
+const DIVINATION_RITUAL_CLASSES = ['divination-astrology', 'divination-kabbalah', 'divination-tarot'];
+const RITUAL_PHASE_CLASSES = ['ritual-phase-0', 'ritual-phase-1', 'ritual-phase-2', 'ritual-phase-3'];
+
+function applyRitualTheme(productId) {
+  const safeId = ['miniloto', 'loto6', 'loto7', 'numbers3', 'numbers4'].includes(productId) ? productId : 'loto6';
+  document.body.classList.remove(...PRODUCT_RITUAL_CLASSES.map((name) => name.replace('ritual-', 'ritual-theme-')));
+  document.body.classList.add(`ritual-theme-${safeId}`);
 }
 
-const RITUAL_THEMES = {
-  miniloto: {
-    className: 'ritual-miniloto',
-    kicker: 'MINI LOTO · LUNAR FIVE-LIGHT RITUAL',
+const DIVINATION_RITUALS = {
+  astrology: {
+    kicker: 'ASTROLOGY · CELESTIAL READING',
     phases: [
-      ['月輪の目覚め', '静かな月の円環をひらいています', '誕生の日に宿った月の光を、今夜の空へ呼び戻しています'],
-      ['五つの灯', '五つの小さな星を灯しています', '一つずつ目覚める星が、あなたに近い数字を探しています'],
-      ['月光の転写', '月の光をミニロトの数字へ映しています', '1から31の円環へ、五つの光を重ねています'],
-      ['五光の結晶', '五つの数字が月光の中で結ばれます', 'もうすぐ、あなたのための五つの数字が姿を現します'],
+      ['誕生星の照合', '生まれた日の星を読み取っています', '太陽・月・惑星の位置を、今日の空と重ねています'],
+      ['七天体の共鳴', '天体同士の響きを確かめています', '主要アスペクトへ近い配置ほど、数字への重みを強めています'],
+      ['数字への転写', '星の響きをくじの数字へ変換しています', '選んだ券種の範囲に合わせ、中心数字と周辺候補を整えています'],
+      ['星読みの結晶', '数字の組み合わせを結んでいます', '星の重みと数字のバランスから、候補がまもなく現れます'],
     ],
   },
-  loto6: {
-    className: 'ritual-loto6',
-    kicker: 'LOTO 6 · SIX CELESTIAL SEALS',
+  kabbalah: {
+    kicker: 'KABBALAH NUMEROLOGY · NUMBER READING',
     phases: [
-      ['星図の封印', 'あなたの誕生星図をひらいています', '二つの三角形へ、誕生の日の光を静かに刻んでいます'],
-      ['六天体の交差', '六つの天体印を呼び寄せています', '星の軌道が交わる場所を、一つずつ確かめています'],
-      ['六星印の共鳴', '六つの星印をロト6の数字へ映しています', '1から43の星図で、強く響く数字を結んでいます'],
-      ['数字の顕現', '六つの星印が数字へ姿を変えます', '封印がほどけるまで、あとほんの少しです'],
+      ['誕生日の還元', '生年月日を基礎数へ還元しています', '生命数・誕生日数・態度数を一つずつ導いています'],
+      ['周期数の照合', '今日へつながる数の周期を読んでいます', 'パーソナルイヤーと月の数を、誕生日の基礎数へ重ねています'],
+      ['数の展開', '数秘の基礎数をくじの範囲へ展開しています', 'マスターナンバーを含む強い数から、候補の重みを作っています'],
+      ['数秘の結晶', '数字の組み合わせを結んでいます', '数秘の響きと数字のバランスから、候補がまもなく現れます'],
     ],
   },
-  loto7: {
-    className: 'ritual-loto7',
-    kicker: 'LOTO 7 · SEVEN PLANETARY ORBITS',
+  tarot: {
+    kicker: 'TAROT · MAJOR ARCANA READING',
     phases: [
-      ['七天体の起動', '七つの惑星を目覚めさせています', '太陽から土星まで、七天体の声を一つずつ呼び集めています'],
-      ['大軌道の重なり', '七つの軌道を一枚の星図へ重ねています', '異なる速さで巡る星々が、今だけの配置を描いています'],
-      ['七光の収束', '七つの光をロト7の数字へ収束させています', '1から37の世界で、七天体の響きが重なる地点を探しています'],
-      ['大軌道の啓示', '七つの数字が星図の中心へ集まります', '最も壮大な星の儀式が、まもなく結ばれます'],
-    ],
-  },
-  numbers3: {
-    className: 'ritual-numbers3',
-    kicker: 'NUMBERS 3 · THREE DIGIT RESONANCE',
-    phases: [
-      ['三桁の目覚め', '三つの数字盤を静かにひらいています', '誕生の日と今日の天体が、三つの桁へ向けて語りかけています'],
-      ['桁ごとの響き', '一桁ずつ星の響きを重ねています', '百・十・一の位に、それぞれ違う星の光を映しています'],
-      ['星読みの整列', '三つの数字をナンバーズ3の桁へ並べています', '0から9の環の中で、強く響く数字を選び出しています'],
-      ['三星印の顕現', '三つの数字が桁の中で結ばれます', 'もうすぐ、あなたのための三桁の数字が姿を現します'],
-    ],
-  },
-  numbers4: {
-    className: 'ritual-numbers4',
-    kicker: 'NUMBERS 4 · FOUR DIGIT RESONANCE',
-    phases: [
-      ['四桁の目覚め', '四つの数字盤を静かにひらいています', '誕生の日と今日の天体が、四つの桁へ向けて語りかけています'],
-      ['桁ごとの響き', '一桁ずつ星の響きを重ねています', '千・百・十・一の位に、それぞれ違う星の光を映しています'],
-      ['星読みの整列', '四つの数字をナンバーズ4の桁へ並べています', '0から9の環の中で、強く響く数字を選び出しています'],
-      ['四星印の顕現', '四つの数字が桁の中で結ばれます', 'もうすぐ、あなたのための四桁の数字が姿を現します'],
+      ['大アルカナを開く', '誕生日に対応するカードを開いています', '22枚の大アルカナから、誕生カードと魂のカードを導いています'],
+      ['今日のカード', '生成日のカードを重ねています', '誕生カードと今日の数を結び、今の流れを示すカードを開いています'],
+      ['カード番号の転写', 'アルカナの数字をくじへ映しています', 'カード番号とその組み合わせを、選んだ券種の数字範囲へ展開しています'],
+      ['アルカナの結晶', 'カードの導きを数字へ結んでいます', '大アルカナの重みと数字のバランスから、候補がまもなく現れます'],
     ],
   },
 };
 
-const RITUAL_CLASS_NAMES = Object.values(RITUAL_THEMES).map((theme) => theme.className);
+function swapRitualCopy(copyZone, nodes, phase, reduceMotion, firstPhase = false) {
+  const [stage, title, text] = nodes;
+  const applyCopy = () => {
+    if (stage) stage.textContent = phase[0];
+    if (title) title.textContent = phase[1];
+    if (text) text.textContent = phase[2];
+  };
+  if (!copyZone || reduceMotion) {
+    applyCopy();
+    return;
+  }
 
-function applyRitualTheme(productId) {
-  const theme = RITUAL_THEMES[productId] || RITUAL_THEMES.loto6;
-  document.body.classList.remove(...RITUAL_CLASS_NAMES.map((name) => name.replace('ritual-', 'ritual-theme-')));
-  document.body.classList.add(theme.className.replace('ritual-', 'ritual-theme-'));
-  return theme;
+  // Animate the fixed-height copy zone as one surface. This avoids forced
+  // reflow and keeps the visual stage moving continuously behind the text.
+  if (copyZone.getAnimations) copyZone.getAnimations().forEach((animation) => animation.cancel());
+  if (firstPhase) {
+    applyCopy();
+    copyZone.animate(
+      [{ opacity: 0.58, transform: 'translateY(3px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 320, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'both' },
+    );
+    return;
+  }
+
+  const fadeOut = copyZone.animate(
+    [{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0.16, transform: 'translateY(-3px)' }],
+    { duration: 135, easing: 'ease-in', fill: 'forwards' },
+  );
+  fadeOut.onfinish = () => {
+    applyCopy();
+    copyZone.animate(
+      [{ opacity: 0.16, transform: 'translateY(3px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 285, easing: 'cubic-bezier(.16,.82,.24,1)', fill: 'both' },
+    );
+  };
 }
 
-const RITUAL_SEEN_KEY_PREFIX = 'lns-ritual-seen-';
-const RITUAL_QUICK_DURATION = 1800;
-
-function ritualSeenKey(productId) {
-  return `${RITUAL_SEEN_KEY_PREFIX}${productId || 'loto6'}`;
-}
-
-function hasSeenRitual(productId) {
-  try { return window.sessionStorage.getItem(ritualSeenKey(productId)) === '1'; } catch (error) { return false; }
-}
-
-function markRitualSeen(productId) {
-  try { window.sessionStorage.setItem(ritualSeenKey(productId), '1'); } catch (error) { /* storage unavailable; ignore */ }
-}
-
-/**
- * Runs the celestial-ritual loader for either the initial generation form
- * or the result-screen repeat form, then calls onComplete().
- * Handles the reduced-motion, "already seen this session" and manual-skip cases.
- */
-function runRitual({ loader, productId, productName, ritualName, ritualSymbol, ritualDuration, onButtonStart, onComplete }) {
-  const theme = RITUAL_THEMES[productId] || RITUAL_THEMES.loto6;
+function runRitual({ loader, productId, productName, divinationId, divinationName, divinationSymbol, ritualDuration, onButtonStart, onComplete }) {
+  const ritual = DIVINATION_RITUALS[divinationId] || DIVINATION_RITUALS.astrology;
+  const productClass = `ritual-${productId || 'loto6'}`;
+  const safeDivinationId = ['astrology', 'kabbalah', 'tarot'].includes(divinationId) ? divinationId : 'astrology';
+  const divinationClass = `divination-${safeDivinationId}`;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const configuredDuration = Number(ritualDuration) || 4400;
-  const alreadySeen = hasSeenRitual(productId);
-  const duration = reduceMotion ? 760 : alreadySeen ? Math.min(configuredDuration, RITUAL_QUICK_DURATION) : configuredDuration;
+  const duration = reduceMotion ? 900 : configuredDuration;
 
   document.body.classList.add('is-drawing');
-  loader.classList.remove(...RITUAL_CLASS_NAMES, 'is-final-phase');
-  loader.classList.add('is-active', theme.className);
-  loader.classList.toggle('is-quick', alreadySeen && !reduceMotion);
+  loader.classList.remove(...PRODUCT_RITUAL_CLASSES, ...DIVINATION_RITUAL_CLASSES, ...RITUAL_PHASE_CLASSES, 'is-final-phase');
+  loader.classList.add('is-active', productClass, divinationClass, 'ritual-phase-0');
   loader.setAttribute('aria-hidden', 'false');
-
-  if (onButtonStart) onButtonStart(ritualSymbol, ritualName);
+  if (onButtonStart) onButtonStart();
 
   const kicker = loader.querySelector('[data-loader-kicker]');
   const product = loader.querySelector('[data-loader-product]');
-  const symbol = loader.querySelector('[data-loader-symbol]');
   const title = loader.querySelector('[data-loader-title]');
   const text = loader.querySelector('[data-loader-text]');
   const stage = loader.querySelector('[data-loader-stage]');
   const progress = loader.querySelector('[data-loader-progress]');
   const dots = Array.from(loader.querySelectorAll('.ritual-step-dots i'));
-  if (kicker) kicker.textContent = theme.kicker;
-  if (product) product.textContent = `${productName} · ${ritualName}`;
-  if (symbol) symbol.textContent = ritualSymbol || '✦';
+  if (kicker) kicker.textContent = ritual.kicker;
+  if (product) product.textContent = `${productName} × ${divinationName}`;
 
-  const phases = theme.phases;
-  const span = duration / phases.length;
-  const phaseTimers = phases.map((phase, index) => window.setTimeout(() => {
-    if (stage) stage.textContent = phase[0];
-    if (title) title.textContent = phase[1];
-    if (text) text.textContent = phase[2];
+  const copyZone = loader.querySelector('.ritual-copy-zone');
+  const span = duration / ritual.phases.length;
+  const timers = ritual.phases.map((phase, index) => window.setTimeout(() => {
+    swapRitualCopy(copyZone, [stage, title, text], phase, reduceMotion, index === 0);
+
+    loader.classList.remove(...RITUAL_PHASE_CLASSES);
+    loader.classList.add(`ritual-phase-${index}`);
     dots.forEach((dot, dotIndex) => {
       dot.classList.toggle('is-active', dotIndex === index);
       dot.classList.toggle('is-complete', dotIndex < index);
     });
-    loader.classList.toggle('is-final-phase', index === phases.length - 1);
+    loader.classList.toggle('is-final-phase', index === ritual.phases.length - 1);
   }, Math.round(index * span)));
 
   if (progress) {
@@ -255,47 +253,48 @@ function runRitual({ loader, productId, productName, ritualName, ritualSymbol, r
   const finish = () => {
     if (done) return;
     done = true;
-    phaseTimers.forEach((id) => window.clearTimeout(id));
+    timers.forEach((id) => window.clearTimeout(id));
     window.clearTimeout(completeTimer);
-    markRitualSeen(productId);
     onComplete();
   };
   const completeTimer = window.setTimeout(finish, duration);
-
-  const skipButton = loader.querySelector('[data-loader-skip]');
-  if (skipButton) {
-    skipButton.hidden = false;
-    skipButton.onclick = () => {
-      if (progress) { progress.style.transitionDuration = '160ms'; progress.style.width = '100%'; }
-      finish();
-    };
-  }
 }
 
 function resetRitualLoader(loader) {
   document.body.classList.remove('is-drawing');
-  loader.classList.remove('is-active', 'is-final-phase', 'is-quick', ...RITUAL_CLASS_NAMES);
+  loader.classList.remove('is-active', 'is-final-phase', ...PRODUCT_RITUAL_CLASSES, ...DIVINATION_RITUAL_CLASSES, ...RITUAL_PHASE_CLASSES);
   loader.classList.add('ritual-loto6');
   loader.setAttribute('aria-hidden', 'true');
   loader.querySelectorAll('.ritual-step-dots i').forEach((dot) => dot.classList.remove('is-active', 'is-complete'));
   const progress = loader.querySelector('[data-loader-progress]');
   if (progress) { progress.style.transitionDuration = '0ms'; progress.style.width = '0%'; }
-  const symbol = loader.querySelector('[data-loader-symbol]');
-  if (symbol) symbol.textContent = '✦';
-  const skipButton = loader.querySelector('[data-loader-skip]');
-  if (skipButton) { skipButton.hidden = true; skipButton.onclick = null; }
 }
 
-function updateProductSummary() {
+function updateSelectionSummary() {
   const form = document.querySelector('form[data-generate-form]');
   if (!form) return;
-  const selected = selectedProduct(form);
-  if (!selected) return;
-  const productId = selected.value || 'loto6';
-  applyRitualTheme(productId);
+  const product = selectedProduct(form);
+  const divination = selectedDivination(form);
+  const countInput = form.querySelector('#count');
+  if (!product || !divination || !countInput) return;
 
+  const count = Math.max(1, Number(countInput.value) || 1);
+  applyRitualTheme(product.value || 'loto6');
+  const divName = divination.dataset.divinationName || '占い';
+  const divSymbol = divination.dataset.divinationSymbol || '✦';
+  const buttonLabel = '本日の数字を開く';
+
+  const divNameNode = document.getElementById('selected-divination-name');
+  const productNameNode = document.getElementById('selected-product-name');
+  const totalNode = document.getElementById('planned-total');
+  const descriptionNode = form.querySelector('[data-divination-description]');
   const button = form.querySelector('[data-generate-button]');
-  if (button) button.innerHTML = `<span aria-hidden="true">${selected.dataset.ritualSymbol || '✦'}</span> ${selected.dataset.buttonLabel || '星読みの数字を生成する'}`;
+  if (divNameNode) divNameNode.textContent = divName;
+  if (productNameNode) productNameNode.textContent = product.dataset.productName || '宝くじ';
+  if (totalNode) totalNode.textContent = `${count}口`;
+  if (descriptionNode) descriptionNode.textContent = divination.dataset.divinationDescription || '';
+  if (button) button.innerHTML = `<span aria-hidden="true">${divSymbol}</span> ${buttonLabel}`;
+  updateBirthDatePreview(form);
 }
 
 function setupGenerateForm() {
@@ -312,6 +311,7 @@ function setupGenerateForm() {
     });
     if (Number(controls.day?.value) > maxDay) controls.day.value = '';
   };
+
   selects.forEach((select) => {
     select.required = true;
     select.addEventListener('change', () => {
@@ -320,18 +320,18 @@ function setupGenerateForm() {
       updateBirthDatePreview(form);
     });
   });
-  form.querySelectorAll('input[name="product"]').forEach((input) => {
-    input.addEventListener('input', updateProductSummary);
-    input.addEventListener('change', updateProductSummary);
+  form.querySelectorAll('input[name="product"], input[name="divination"], #count').forEach((input) => {
+    input.addEventListener('input', updateSelectionSummary);
+    input.addEventListener('change', updateSelectionSummary);
   });
   form.addEventListener('submit', (event) => {
     const result = syncBirthDate(form, { report: true });
     if (!result.complete || !result.valid) event.preventDefault();
   });
+
   updateDays();
   syncBirthDate(form);
-  updateBirthDatePreview(form);
-  updateProductSummary();
+  updateSelectionSummary();
 }
 
 function setupScrollTop() {
@@ -360,9 +360,6 @@ function wrapDetailsContent(details) {
 function openDetails(details) {
   const content = getContent(details);
   if (!content || details.dataset.animating === '1' || details.open) return;
-  if (details.classList.contains('accordion') && details.parentElement?.classList.contains('accordion-group')) {
-    details.parentElement.querySelectorAll(':scope > details.accordion[open]').forEach((other) => { if (other !== details) closeDetails(other); });
-  }
   details.dataset.animating = '1'; details.open = true; updateToggleLabel(details);
   content.style.height = '0px'; content.style.opacity = '0'; content.style.transform = 'translateY(-4px)';
   requestAnimationFrame(() => { void content.offsetHeight; content.style.height = `${content.scrollHeight}px`; content.style.opacity = '1'; content.style.transform = 'translateY(0)'; });
@@ -396,7 +393,7 @@ function setupDrawAnimation() {
     resetRitualLoader(loader);
     const button = form.querySelector('button[type="submit"]');
     if (button) button.disabled = false;
-    updateProductSummary();
+    updateSelectionSummary();
   };
 
   form.addEventListener('submit', (event) => {
@@ -405,67 +402,24 @@ function setupDrawAnimation() {
     event.preventDefault();
     form.dataset.submitted = '1';
 
-    const selected = selectedProduct(form);
-    const productId = selected?.value || 'loto6';
-    const productName = selected?.dataset.productName || '数字';
-    const ritualName = selected?.dataset.ritualName || '星の儀式';
-    const ritualSymbol = selected?.dataset.ritualSymbol || '✦';
+    const product = selectedProduct(form);
+    const divination = selectedDivination(form);
     const button = form.querySelector('button[type="submit"]');
+    const productId = product?.value || 'loto6';
+    const productName = product?.dataset.productName || '数字';
+    const divinationId = divination?.value || 'astrology';
+    const divinationName = divination?.dataset.divinationName || '占い';
+    const divinationSymbol = divination?.dataset.divinationSymbol || '✦';
 
     runRitual({
-      loader,
-      productId,
-      productName,
-      ritualName,
-      ritualSymbol,
-      ritualDuration: selected?.dataset.ritualDuration,
-      onButtonStart: () => {
-        if (button) { button.disabled = true; button.innerHTML = `<span aria-hidden="true">${ritualSymbol}</span> ${ritualName}を執り行っています`; }
-      },
+      loader, productId, productName, divinationId, divinationName, divinationSymbol,
+      ritualDuration: product?.dataset.ritualDuration,
+      onButtonStart: () => { if (button) { button.disabled = true; button.innerHTML = `<span aria-hidden="true">${divinationSymbol}</span> 本日の導きを読み解いています`; } },
       onComplete: () => form.submit(),
     });
   });
 
   window.addEventListener('pageshow', resetLoader);
-}
-
-
-function setupResultRepeatForm() {
-  const form = document.querySelector('form[data-result-repeat-form]');
-  const loader = document.getElementById('draw-loader');
-  if (!form || !loader) return;
-
-  const reset = () => {
-    form.dataset.submitted = '0';
-    resetRitualLoader(loader);
-    const button = form.querySelector('button[type="submit"]');
-    if (button) button.disabled = false;
-  };
-
-  form.addEventListener('submit', (event) => {
-    if (form.dataset.submitted === '1') { event.preventDefault(); return; }
-    event.preventDefault();
-    form.dataset.submitted = '1';
-
-    const productId = form.dataset.productId || 'loto6';
-    const productName = form.dataset.productName || '数字';
-    const ritualName = form.dataset.ritualName || '星の儀式';
-    const ritualSymbol = form.dataset.ritualSymbol || '✦';
-    const button = form.querySelector('button[type="submit"]');
-
-    runRitual({
-      loader,
-      productId,
-      productName,
-      ritualName,
-      ritualSymbol,
-      ritualDuration: form.dataset.ritualDuration,
-      onButtonStart: () => { if (button) button.disabled = true; },
-      onComplete: () => HTMLFormElement.prototype.submit.call(form),
-    });
-  });
-
-  window.addEventListener('pageshow', reset);
 }
 
 function setupResultNumberReveal() {
@@ -491,6 +445,5 @@ window.addEventListener('DOMContentLoaded', () => {
   setupScrollTop();
   setupSmoothAccordions();
   setupDrawAnimation();
-  setupResultRepeatForm();
   setupResultNumberReveal();
 });

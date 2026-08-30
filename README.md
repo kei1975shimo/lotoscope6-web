@@ -1,6 +1,55 @@
-# ロト・スコープ 公開用Flask版 v1.13.0
+## v1.15.0 Daily Oracle
 
-生年月日と生成日の七天体から、数字選択式宝くじ・ナンバーズの候補を導くWebアプリです。
+- Same birthday + same JST date + same divination + same lottery now returns the same numbers.
+- The daily result changes automatically when the JST calendar date changes.
+- Ritual animation speeds no longer switch between text phases, removing visible jerks.
+- Ritual copy transitions now cross-fade inside a fixed-height area without forced layout.
+- UI explains the “one daily guidance” concept without storing the birthday.
+
+
+- Fixed the height of the changing ritual-copy area so the loader frame no longer grows/shrinks between phases.
+- Added a subtle fade/slide transition to phase text only.
+- Applied the same stable layout to Astrology, Kabbalah Numerology, and Tarot animations.
+
+## v1.14.8 Sub-number removal
+
+- 「サブ数字」機能を削除し、生成結果を本数字だけに統一しました。
+- トップ画面のサブ数字選択、結果画面のサブ数字表示、フォーム値、生成処理、関連CSS・テストを削除しました。
+- 現在の入力順は「誕生日 → 占い → くじ → 口数 → 生成」です。
+
+## v1.14.7 Text balance + mobile divination cards
+
+- 生成アニメーションを占術ごとに専用化
+  - 西洋占星術: 星座盤・惑星軌道・太陽/月の天体演出
+  - カバラ数秘術: 生命の樹・セフィラ点灯・数の収束演出
+  - タロット: カードシャッフル・ドロー・反転・アルカナ番号演出
+- 「結果をすぐに見る」ボタンを削除
+- セッション内の自動短縮演出を削除し、毎回選択した占術の演出を表示
+- 旧共通コンパス演出の不要コードを削除
+
+## v1.14.3 Hero cleanup / code cleanup
+
+- ホームのヒーロー内にあった星座盤・軌道アニメーション等の装飾を削除しました。
+- ヘッダー右側の回転する星座盤はそのまま残しています。
+- 現在のHTML/JavaScriptから参照されていない旧UI用CSSを整理しました。
+- Pythonの `__pycache__` / `.pyc` と、過去バージョン用の履歴ドキュメントを公開ZIPから除外しました。
+- 入力順「誕生日 → 占い → くじ → 口数 → 生成」と3占術の生成ロジックは変更していません。
+
+## v1.14.2 Header zodiac wheel
+
+- Removed the restored `公開中` status chip from the header.
+- Restored a rotating zodiac-wheel visual in the header's right-side action area.
+- Kept the v1.14.1 flow: birthday → divination → lottery → entries/options → generate.
+- Rotation is disabled automatically when the OS requests reduced motion.
+
+## v1.14.1 UI flow
+
+- 入力順を「誕生日 → 占い → くじ → 口数 → 生成」に変更しました。
+- 数字生成ロジック自体は v1.14.0 から変更していません。
+
+# ロト・スコープ 公開用Flask版 v1.15.0
+
+西洋占星術・カバラ数秘術・タロットの3つから占いを選び、生年月日をもとに数字選択式宝くじ・ナンバーズの候補を導くWebアプリです。
 現在の生成方式では、過去の抽せんデータ・コールド数字・旧バランス設定は使用しません。
 
 ## 対応している宝くじ
@@ -22,6 +71,7 @@ config/
   app_settings.json
 src/
   astrology_numbers.py
+  divination_numbers.py
   product_numbers.py
   utils.py
 templates/
@@ -211,16 +261,6 @@ CSSで描画していた星雲・流れ星・瞬く星の宇宙背景を、金�
 - `backdrop-filter`のぼかしを20px〜38pxまでさらに強化し、可読性は主にぼかしのみで確保
 
 
-## v1.11.0
-
-メインの数字と同時に、追加の参考候補となる「サブ数字」を生成できるようにしました。
-
-- トップ画面に「サブ数字の数」選択欄を追加（1〜3個から選択、フォームの口数欄のすぐ下）
-- メインの数字と重複しない範囲で、星読みの重みに基づきサブ数字を追加生成
-- 一覧表示される各チケット（行）ごとに、メインの数字のすぐ下にサブ数字をひとまわり小さく・落ち着いた色味で表示
-- ページ上部の一番のおすすめ（best pick）にも同様にサブ数字を表示
-- 「同じ条件でもう一度」でサブ数字の個数も引き継がれるよう対応
-- サブ数字の生成・表示を検証するスモークテストを追加
 
 
 ## v1.12.0
@@ -233,6 +273,18 @@ CSSで描画していた星雲・流れ星・瞬く星の宇宙背景を、金�
 - 進捗バー・フェーズ表示テキスト・スキップボタンなどの既存の演出ロジックはそのまま維持
 - `prefers-reduced-motion`環境向けのアニメーション停止対応も新デザインに合わせて更新
 
+
+
+## v1.14.0
+
+- 最初に「西洋占星術 / カバラ数秘術 / タロット」から占いを選ぶStepを追加
+- 画面の流れを「占い → くじ → 誕生日 → 口数 → 生成」に変更
+- カバラ数秘術：生命数、誕生日数、態度数、誕生年数、パーソナルイヤー、パーソナルマンスから重みを生成
+- タロット：大アルカナ22枚を使い、誕生カード・魂のカード・今日のカード・橋渡しカードから重みを生成
+- 結果画面を占術共通化し、選んだ占術ごとの読み解き・中心数字を表示
+- 生成中アニメーションの文言も選択した占術に連動
+
+> 数秘術・タロットには複数の流派・計算法があります。本アプリは宝くじの数字選びを楽しむための独自の簡易変換方式です。
 
 ## v1.13.0
 

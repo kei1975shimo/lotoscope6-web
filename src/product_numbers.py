@@ -16,7 +16,6 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "min_number": 1,
         "max_number": 31,
         "pick_count": 5,
-        "bonus_count": 1,
         "badge": "1〜31から5個",
         "result_title": "今回、星が導いた五つの数字",
         "button_label": "星読みの数字を生成する",
@@ -32,7 +31,6 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "min_number": 1,
         "max_number": 43,
         "pick_count": 6,
-        "bonus_count": 1,
         "badge": "1〜43から6個",
         "result_title": "今回、星が導いた六つの数字",
         "button_label": "星読みの数字を生成する",
@@ -48,7 +46,6 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "min_number": 1,
         "max_number": 37,
         "pick_count": 7,
-        "bonus_count": 2,
         "badge": "1〜37から7個",
         "result_title": "今回、星が導いた七つの数字",
         "button_label": "星読みの数字を生成する",
@@ -133,7 +130,7 @@ def build_loto_weights(profile: Mapping[str, Any], maximum: int) -> Dict[int, fl
         result[_fold_to_range(folded - 1, maximum)] += score * 0.10
         result[_fold_to_range(folded + 1, maximum)] += score * 0.10
 
-    for index, row in enumerate(profile.get("planet_rows", []) or []):
+    for index, row in enumerate(profile.get("boost_rows", profile.get("planet_rows", [])) or []):
         if not isinstance(row, Mapping):
             continue
         resonance = float(row.get("resonance", 0.0) or 0.0)
@@ -222,7 +219,7 @@ def _composition_score(numbers: Sequence[int], maximum: int) -> int:
     return round((odd_score * 0.30 + zone_coverage * 0.32 + spread_score * 0.23 + consecutive_score * 0.15) * 100)
 
 
-def _astrology_score(numbers: Sequence[int], weights: Mapping[int, float]) -> int:
+def _divination_score(numbers: Sequence[int], weights: Mapping[int, float]) -> int:
     max_weight = max(weights.values()) if weights else 1.0
     selected = [float(weights.get(number, 0.0)) for number in numbers]
     if not selected or max_weight <= 0:
@@ -246,17 +243,19 @@ def _valid_loto_shape(numbers: Sequence[int], maximum: int) -> bool:
     return True
 
 
-def _loto_reason(numbers: Sequence[int], core_numbers: Sequence[int], product: Mapping[str, Any]) -> str:
+def _loto_reason(numbers: Sequence[int], core_numbers: Sequence[int], product: Mapping[str, Any], profile: Mapping[str, Any]) -> str:
     overlap = sorted(set(numbers) & set(core_numbers))
+    source = str(profile.get("reason_source", "選んだ占いから導いた数"))
+    method = str(profile.get("method_short_name", "占い"))
     if overlap:
         overlap_text = "・".join(f"{number:02d}" for number in overlap)
         return (
-            f"誕生の日と今日の天体を{product['name']}の数字範囲へ重ね、"
-            f"中心の響きと重なった{overlap_text}を軸に結びました。"
+            f"{source}を{product['name']}の数字範囲へ重ね、"
+            f"{method}の中心数字と重なった{overlap_text}を軸に結びました。"
         )
     return (
-        f"誕生の日と今日の七天体を{product['name']}の数字範囲へ映し、"
-        "強く響く候補同士が一つの円環になるよう結びました。"
+        f"{source}を{product['name']}の数字範囲へ映し、"
+        f"{method}で強く響く候補同士が偏りすぎないよう結びました。"
     )
 
 
@@ -265,7 +264,6 @@ def _generate_loto_rows(
     count: int,
     profile: Mapping[str, Any],
     rng: RandomSource,
-    sub_count: int = 0,
 ) -> List[Dict[str, Any]]:
     maximum = int(product["max_number"])
     pick_count = int(product["pick_count"])
@@ -284,14 +282,10 @@ def _generate_loto_rows(
             continue
         seen.add(key)
         metrics = _loto_metrics(numbers, maximum)
-        astro_score = _astrology_score(numbers, weights)
+        divination_score = _divination_score(numbers, weights)
         composition_score = _composition_score(numbers, maximum)
-        total_score = round(astro_score * 0.78 + composition_score * 0.22)
+        total_score = round(divination_score * 0.78 + composition_score * 0.22)
         overlap = sorted(set(numbers) & set(core_numbers))
-        remaining_population = [number for number in population if number not in set(numbers)]
-        sub_numbers = sorted(
-            _weighted_sample_without_replacement(remaining_population, weights, sub_count, rng)
-        )
         rows.append(
             {
                 "product_id": product["product_id"],
@@ -299,14 +293,15 @@ def _generate_loto_rows(
                 "product_kind": "loto",
                 "numbers": numbers,
                 "display_number": " ".join(f"{number:02d}" for number in numbers),
-                "sub_numbers": sub_numbers,
-                "display_sub_number": " ".join(f"{number:02d}" for number in sub_numbers),
+                "reference_numbers": core_numbers,
+                "reference_hit_count": len(overlap),
+                "divination_fit_score": divination_score,
                 "astrology_numbers": core_numbers,
                 "astrology_hit_count": len(overlap),
-                "astrology_fit_score": astro_score,
+                "astrology_fit_score": divination_score,
                 "composition_score": composition_score,
                 "ticket_score": total_score,
-                "reason": _loto_reason(numbers, core_numbers, product),
+                "reason": _loto_reason(numbers, core_numbers, product, profile),
                 **metrics,
             }
         )
@@ -335,7 +330,7 @@ def build_digit_weights(profile: Mapping[str, Any]) -> Dict[int, float]:
         result[_fold_to_digit(folded - 1)] += score * 0.10
         result[_fold_to_digit(folded + 1)] += score * 0.10
 
-    for index, row in enumerate(profile.get("planet_rows", []) or []):
+    for index, row in enumerate(profile.get("boost_rows", profile.get("planet_rows", [])) or []):
         if not isinstance(row, Mapping):
             continue
         resonance = float(row.get("resonance", 0.0) or 0.0)
@@ -402,7 +397,7 @@ def _numbers_composition_score(digits: Sequence[int]) -> int:
     return round((odd_score * 0.34 + spread_score * 0.36 + repeat_score * 0.30) * 100)
 
 
-def _numbers_astrology_score(digits: Sequence[int], weights: Mapping[int, float]) -> int:
+def _numbers_divination_score(digits: Sequence[int], weights: Mapping[int, float]) -> int:
     max_weight = max(weights.values()) if weights else 1.0
     selected = [float(weights.get(d, 0.0)) for d in digits]
     if not selected or max_weight <= 0:
@@ -413,17 +408,19 @@ def _numbers_astrology_score(digits: Sequence[int], weights: Mapping[int, float]
     return max(0, min(100, round(normalized * 100)))
 
 
-def _numbers_reason(digits: Sequence[int], core_digits: Sequence[int], product: Mapping[str, Any]) -> str:
+def _numbers_reason(digits: Sequence[int], core_digits: Sequence[int], product: Mapping[str, Any], profile: Mapping[str, Any]) -> str:
     overlap = sorted(set(digits) & set(core_digits))
+    source = str(profile.get("reason_source", "選んだ占いから導いた数"))
+    method = str(profile.get("method_short_name", "占い"))
     if overlap:
         overlap_text = "・".join(str(number) for number in overlap)
         return (
-            f"誕生の日と今日の天体を{product['name']}の桁ごとの響きへ重ね、"
-            f"中心の響きと重なった{overlap_text}を軸に桁を並べました。"
+            f"{source}を{product['name']}の各桁へ重ね、"
+            f"{method}の中心数字と重なった{overlap_text}を軸に桁を並べました。"
         )
     return (
-        f"誕生の日と今日の七天体を{product['name']}の桁ごとの響きへ映し、"
-        "強く響く数字が順序よく並ぶよう導きました。"
+        f"{source}を{product['name']}の各桁へ映し、"
+        f"{method}で強く響く数字が順序よく並ぶよう導きました。"
     )
 
 
@@ -432,7 +429,6 @@ def _generate_numbers_rows(
     count: int,
     profile: Mapping[str, Any],
     rng: RandomSource,
-    sub_count: int = 0,
 ) -> List[Dict[str, Any]]:
     digit_count = int(product["digit_count"])
     weights = build_digit_weights(profile)
@@ -449,13 +445,11 @@ def _generate_numbers_rows(
             continue
         seen.add(key)
         metrics = _numbers_metrics(digits)
-        astro_score = _numbers_astrology_score(digits, weights)
+        divination_score = _numbers_divination_score(digits, weights)
         composition_score = _numbers_composition_score(digits)
-        total_score = round(astro_score * 0.78 + composition_score * 0.22)
+        total_score = round(divination_score * 0.78 + composition_score * 0.22)
         overlap = sorted(set(digits) & set(core_digits))
         box_digits = sorted(digits)
-        remaining_digits = [digit for digit in range(10) if digit not in set(digits)]
-        sub_digits = sorted(_weighted_sample_without_replacement(remaining_digits, weights, sub_count, rng))
         rows.append(
             {
                 "product_id": product["product_id"],
@@ -465,14 +459,15 @@ def _generate_numbers_rows(
                 "box_numbers": box_digits,
                 "display_number": "-".join(str(number) for number in digits),
                 "display_box_number": "-".join(str(number) for number in box_digits),
-                "sub_numbers": sub_digits,
-                "display_sub_number": "-".join(str(number) for number in sub_digits),
+                "reference_numbers": core_digits,
+                "reference_hit_count": len(overlap),
+                "divination_fit_score": divination_score,
                 "astrology_numbers": core_digits,
                 "astrology_hit_count": len(overlap),
-                "astrology_fit_score": astro_score,
+                "astrology_fit_score": divination_score,
                 "composition_score": composition_score,
                 "ticket_score": total_score,
-                "reason": _numbers_reason(digits, core_digits, product),
+                "reason": _numbers_reason(digits, core_digits, product, profile),
                 **metrics,
             }
         )
@@ -487,15 +482,13 @@ def generate_product_rows(
     count: int,
     profile: Mapping[str, Any],
     seed: str = "",
-    sub_count: int = 1,
 ) -> List[Dict[str, Any]]:
     product = get_product(product_id)
     rng: RandomSource = random.Random(seed) if seed else random.SystemRandom()
-    sub_count = max(0, int(sub_count))
     if product.get("kind") == "numbers":
-        rows = _generate_numbers_rows(product, count, profile, rng, sub_count=sub_count)
+        rows = _generate_numbers_rows(product, count, profile, rng)
     else:
-        rows = _generate_loto_rows(product, count, profile, rng, sub_count=sub_count)
+        rows = _generate_loto_rows(product, count, profile, rng)
 
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     stamp = datetime.now().strftime("%Y%m%d%H%M%S")

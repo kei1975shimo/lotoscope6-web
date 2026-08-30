@@ -22,6 +22,11 @@ from astrology_numbers import (  # noqa: E402
     calculate_birth_sun_sign,
     parse_birth_date,
 )
+from divination_numbers import (  # noqa: E402
+    calculate_divination_profile,
+    divination_choices,
+    get_divination,
+)
 from product_numbers import (  # noqa: E402
     generate_product_rows,
     get_product,
@@ -29,7 +34,8 @@ from product_numbers import (  # noqa: E402
 )
 from utils import load_json  # noqa: E402
 
-APP_VERSION = "v1.13.3-header-zodiac"
+APP_VERSION = "v1.15.0-daily-oracle"
+DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 
 
@@ -47,12 +53,11 @@ def create_app() -> Flask:
         settings = load_json("config/app_settings.json")
         return {
             "app_version": APP_VERSION,
+            "divination_choices": divination_choices(),
             "product_choices": product_choices(),
             "csrf_token": get_csrf_token,
             "default_ticket_count": int(settings.get("default_ticket_count", 1)),
             "max_ticket_count": int(settings.get("max_ticket_count", 10)),
-            "default_sub_count": int(settings.get("default_sub_count", 1)),
-            "max_sub_count": int(settings.get("max_sub_count", 3)),
             "today_date": datetime.now(JST).date().isoformat(),
             "current_year": datetime.now(JST).year,
         }
@@ -93,21 +98,46 @@ def create_app() -> Flask:
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
 
+    @app.get("/divination-preview")
+    def divination_preview():
+        try:
+            divination_id = str(request.args.get("divination", DEFAULT_DIVINATION_ID)).strip()
+            get_divination(divination_id)
+            birth_date_value = parse_birth_date(request.args.get("birth_date", ""))
+            profile = calculate_divination_profile(divination_id, birth_date_value)
+            return jsonify({
+                "method_id": profile["method_id"],
+                "method_name": profile["method_name"],
+                "method_symbol": profile["method_symbol"],
+                "summary_items": profile.get("summary_items", []),
+            })
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
     @app.post("/generate")
     def generate():
         try:
-            product_id, count, birth_date_value, sub_count = parse_generate_form(request.form)
+            divination_id, product_id, count, birth_date_value = parse_generate_form(request.form)
+            divination = get_divination(divination_id)
             product = get_product(product_id)
-            astrology_profile = calculate_astrology_profile(birth_date_value)
-            rows = generate_product_rows(product_id, count, astrology_profile, sub_count=sub_count)
+            target_date_value = datetime.now(JST).date()
+            divination_profile = calculate_divination_profile(divination_id, birth_date_value, target_date_value)
+            daily_seed = build_daily_oracle_seed(
+                birth_date_value=birth_date_value,
+                target_date_value=target_date_value,
+                divination_id=divination_id,
+                product_id=product_id,
+            )
+            rows = generate_product_rows(product_id, count, divination_profile, seed=daily_seed)
             return render_template(
                 "result.html",
                 rows=rows,
                 product=product,
                 product_id=product_id,
                 count=count,
-                sub_count=sub_count,
-                astrology_profile=astrology_profile,
+                divination=divination,
+                divination_id=divination_id,
+                divination_profile=divination_profile,
             )
         except (ValueError, RuntimeError) as exc:
             values = dict(request.form.items())
@@ -150,7 +180,10 @@ def create_app() -> Flask:
     return app
 
 
-def parse_generate_form(form: Any) -> Tuple[str, int, date, int]:
+def parse_generate_form(form: Any) -> Tuple[str, str, int, date]:
+    divination_id = str(form.get("divination", DEFAULT_DIVINATION_ID)).strip()
+    get_divination(divination_id)
+
     product_id = str(form.get("product", DEFAULT_PRODUCT_ID)).strip()
     get_product(product_id)
 
@@ -163,18 +196,31 @@ def parse_generate_form(form: Any) -> Tuple[str, int, date, int]:
     if not 1 <= count <= max_count:
         raise ValueError(f"受け取る口数は1〜{max_count}の範囲で選んでください。")
 
-    max_sub_count = int(settings.get("max_sub_count", 3))
-    default_sub_count = int(settings.get("default_sub_count", 1))
-    try:
-        sub_count = int(str(form.get("sub_count", default_sub_count)).strip())
-    except Exception as exc:
-        raise ValueError(f"サブ数字の数を1〜{max_sub_count}で選んでください。") from exc
-    if not 1 <= sub_count <= max_sub_count:
-        raise ValueError(f"サブ数字の数は1〜{max_sub_count}の範囲で選んでください。")
-
     birth_date_value = parse_birth_date(str(form.get("birth_date", "")).strip())
-    return product_id, count, birth_date_value, sub_count
+    return divination_id, product_id, count, birth_date_value
 
+
+
+def build_daily_oracle_seed(
+    birth_date_value: date,
+    target_date_value: date,
+    divination_id: str,
+    product_id: str,
+) -> str:
+    """Return a stable daily seed for one birthday × divination × lottery combination.
+
+    The same inputs on the same JST calendar day produce the same candidate rows.
+    A new JST date naturally produces a new daily reading.
+    """
+    return "|".join(
+        (
+            "lotoscope-daily-v1",
+            birth_date_value.isoformat(),
+            target_date_value.isoformat(),
+            divination_id,
+            product_id,
+        )
+    )
 
 def is_production_environment() -> bool:
     app_env = os.environ.get("APP_ENV", "").strip().lower()

@@ -1,89 +1,78 @@
 {% extends "base.html" %}
-{% block title %}ロト・スコープ | {{ product.name }}の星読み結果{% endblock %}
-{% block body_class %}app-mobile page-result ritual-theme-{{ product_id }}{% endblock %}
+{% block title %}ロト・スコープ | {{ product.name }} × {{ divination.name }}{% endblock %}
+{% block body_class %}app-mobile page-result ritual-theme-{{ product_id }} divination-theme-{{ divination_id }}{% endblock %}
 {% block content %}
-{% macro ball(n, astrology_numbers=[]) -%}
+{% macro ball(n, reference_numbers=[]) -%}
   {%- set ni = n|int -%}
   {%- if ni <= 10 -%}{%- set band = 'num-band-1' -%}{%- elif ni <= 20 -%}{%- set band = 'num-band-2' -%}{%- elif ni <= 31 -%}{%- set band = 'num-band-3' -%}{%- else -%}{%- set band = 'num-band-4' -%}{%- endif -%}
-  <span class="num {{ band }} {% if ni in astrology_numbers %}astrology-number{% endif %}" aria-label="{{ ni }}{% if ni in astrology_numbers %}、星読みの中心数字{% endif %}">{% if ni in astrology_numbers %}<i class="astro-mark" aria-hidden="true">✦</i>{% endif %}{{ '%02d'|format(ni) }}</span>
+  <span class="num {{ band }} {% if ni in reference_numbers %}astrology-number{% endif %}" aria-label="{{ ni }}{% if ni in reference_numbers %}、占いの中心数字{% endif %}">{% if ni in reference_numbers %}<i class="astro-mark" aria-hidden="true">{{ divination.symbol }}</i>{% endif %}{{ '%02d'|format(ni) }}</span>
 {%- endmacro %}
 
-{% macro digit_ball(n, astrology_numbers=[]) -%}
+{% macro digit_ball(n, reference_numbers=[]) -%}
   {%- set ni = n|int -%}
-  <span class="digit-tile {% if ni in astrology_numbers %}astrology-digit{% endif %}" aria-label="{{ ni }}{% if ni in astrology_numbers %}、星読みの中心数字{% endif %}">{% if ni in astrology_numbers %}<i aria-hidden="true">✦</i>{% endif %}{{ ni }}</span>
+  <span class="digit-tile {% if ni in reference_numbers %}astrology-digit{% endif %}" aria-label="{{ ni }}{% if ni in reference_numbers %}、占いの中心数字{% endif %}">{% if ni in reference_numbers %}<i aria-hidden="true">{{ divination.symbol }}</i>{% endif %}{{ ni }}</span>
 {%- endmacro %}
 
-{% macro render_number(n, astrology_numbers, kind) -%}
-  {%- if kind == 'numbers' -%}{{ digit_ball(n, astrology_numbers) }}{%- else -%}{{ ball(n, astrology_numbers) }}{%- endif -%}
+{% macro render_number(n, reference_numbers, kind) -%}
+  {%- if kind == 'numbers' -%}{{ digit_ball(n, reference_numbers) }}{%- else -%}{{ ball(n, reference_numbers) }}{%- endif -%}
 {%- endmacro %}
 
 {% set best = rows|sort(attribute='ticket_score')|last %}
-<section id="best-pick" class="hero compact result-hero primary-result-hero result-product-{{ product_id }}">
-  <div class="result-zodiac-pattern" aria-hidden="true">{% for glyph in ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'] %}<i style="--z:{{ loop.index0 }}">{{ glyph }}</i>{% endfor %}</div>
+<section id="best-pick" class="hero compact result-hero primary-result-hero result-product-{{ product_id }} result-divination-{{ divination_id }}" data-result-product="{{ product_id }}">
+  <div class="result-zodiac-pattern" aria-hidden="true">{% for glyph in ['✦','✡','☥','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ','Ⅶ','Ⅷ','Ⅸ'] %}<i style="--z:{{ loop.index0 }}">{{ glyph }}</i>{% endfor %}</div>
   <div class="primary-result-copy">
-    <div class="hero-kicker">{{ product.english }} × {{ product.ritual_name }}</div>
-    <div class="result-ritual-crest" aria-hidden="true"><span>{{ product.ritual_symbol }}</span><i></i><b>{{ product.ritual_name }}</b></div>
-    <h1>{{ product.result_title }}</h1>
-    <p class="primary-result-intro">{{ astrology_profile.birth_date_ja }}の星と、今日の天体を{{ product.name }}の数字へ重ねました。</p>
+    <div class="hero-kicker">{{ product.english }} × {{ divination.english }}</div>
+    <div class="result-ritual-crest divination-crest" aria-hidden="true"><span>{{ divination.symbol }}</span><i></i><b>{{ divination.name }}</b></div>
+    <h1>{{ product.name }}に届いた本日の数字</h1>
+    <p class="primary-result-intro">入力した誕生日と今日の流れを{{ divination.name }}で読み、{{ product.name }}の本日の数字として導きました。</p>
     <div class="primary-result-numbers {% if product.kind == 'numbers' %}digit-number-large numbers-digit-result{% endif %} number-reveal-group reveal-{{ product_id }}" data-reveal-product="{{ product_id }}" aria-label="今回の数字">
-      {% for n in best.numbers %}{{ render_number(n, best.astrology_numbers, product.kind) }}{% endfor %}
+      {% for n in best.numbers %}{{ render_number(n, best.reference_numbers, product.kind) }}{% endfor %}
     </div>
     {% if product.kind == 'numbers' %}<p class="primary-result-box-note">ボックス目安（並べ替え可）：<strong>{{ best.display_box_number }}</strong></p>{% endif %}
-    {% if best.sub_numbers %}
-    <div class="sub-number-block">
-      <p class="sub-number-label">サブ数字（追加の参考数字）</p>
-      <div class="numbers sub-numbers {% if product.kind == 'numbers' %}digit-number{% endif %}" aria-label="サブ数字">
-        {% for n in best.sub_numbers %}{{ render_number(n, [], product.kind) }}{% endfor %}
-      </div>
-    </div>
-    {% endif %}
-    <div class="primary-result-meta"><span><small>宝くじ</small><strong>{{ product.name }}</strong></span><span><small>星との響き</small><strong>{{ best.ticket_score }} / 100</strong></span><span><small>生成した候補</small><strong>{{ rows|length }}口</strong></span></div>
+    <div class="primary-result-meta"><span><small>占い</small><strong>{{ divination.name }}</strong></span><span><small>くじ</small><strong>{{ product.name }}</strong></span><span><small>占いとの響き</small><strong>{{ best.ticket_score }} / 100</strong></span></div>
     <p class="primary-result-reason">{{ best.reason }}</p>
   </div>
 </section>
 
-<section id="astrology-reading" class="panel compact-panel astrology-report">
-  <div class="panel-head compact-head"><div><div class="section-kicker">CELESTIAL READING</div><h2>この数字へつながった星読み</h2></div><p>{{ astrology_profile.birth_date_ja }} × {{ astrology_profile.target_date_ja }}</p></div>
-  <div class="astrology-summary-grid zodiac-summary-grid"><div class="zodiac-summary-card"><i aria-hidden="true">{{ astrology_profile.sun_sign_symbol }}</i><span>太陽星座</span><strong>{{ astrology_profile.sun_sign }}</strong></div><div class="zodiac-summary-card"><i aria-hidden="true">{{ astrology_profile.moon_sign_symbol }}</i><span>月星座</span><strong>{{ astrology_profile.moon_sign }}</strong></div><div class="zodiac-summary-card"><i aria-hidden="true">{{ astrology_profile.current_sun_sign_symbol }}</i><span>生成日の太陽</span><strong>{{ astrology_profile.current_sun_sign }}</strong></div></div>
-  <div class="reference-number-heading"><strong>{{ product.name }}で参考にした中心数字</strong><span>下の数字は買い目そのものではなく、組み合わせを選ぶための手がかりです。</span></div>
-  <div class="numbers astrology-core-numbers {% if product.kind == 'numbers' %}digit-number{% endif %}">{% for n in best.astrology_numbers %}{{ render_number(n, best.astrology_numbers, product.kind) }}{% endfor %}</div>
-  <p class="note">実際に受け取った数字は、ページ最上部に大きく表示しています。中心数字と重なったものには✦を添えています。</p>
-  <details class="advanced astrology-details"><summary><span data-toggle-label data-open-label="天体位置を閉じる" data-closed-label="星が重なった位置を詳しく見る">星が重なった位置を詳しく見る</span></summary><div class="planet-table">{% for planet in astrology_profile.planet_rows %}<div class="planet-row"><strong>{{ planet.symbol }} {{ planet.planet_name }}</strong><span>出生時 {{ planet.birth_sign_symbol }} {{ planet.birth_sign }} {{ planet.birth_degree }}°</span><span>生成日 {{ planet.current_sign_symbol }} {{ planet.current_sign }} {{ planet.current_degree }}°</span><span>{{ planet.aspect_name }} {{ planet.aspect_degree }}°への誤差 {{ planet.orb }}°</span></div>{% endfor %}</div><p class="tiny">出生時刻・出生地を使わない簡易星読みです。七天体の位置と主要アスペクトを、選択した券種の数字範囲へ変換しています。</p></details>
+<section id="divination-reading" class="panel compact-panel astrology-report divination-report divination-report-{{ divination_id }}">
+  <div class="panel-head compact-head"><div><div class="section-kicker">{{ divination_profile.reading_kicker }}</div><h2>{{ divination_profile.reading_title }}</h2></div></div>
+  <div class="astrology-summary-grid zodiac-summary-grid divination-summary-grid">
+    {% for item in divination_profile.summary_items %}
+    <div class="zodiac-summary-card divination-summary-card"><i aria-hidden="true">{{ item.symbol }}</i><span>{{ item.label }}</span><strong>{{ item.value }}</strong>{% if item.detail %}<small>{{ item.detail }}</small>{% endif %}</div>
+    {% endfor %}
+  </div>
+  <div class="reference-number-heading"><strong>{{ product.name }}で参考にした{{ divination.short_name }}の中心数字</strong><span>買い目そのものではなく、候補を選ぶ際の重み付けに使った数字です。</span></div>
+  <div class="numbers astrology-core-numbers {% if product.kind == 'numbers' %}digit-number{% endif %}">{% for n in best.reference_numbers %}{{ render_number(n, best.reference_numbers, product.kind) }}{% endfor %}</div>
+  <p class="note">最上部の数字のうち、中心数字と重なったものには{{ divination.symbol }}を添えています。</p>
+  <details class="advanced astrology-details divination-details"><summary><span data-toggle-label data-open-label="読み解きを閉じる" data-closed-label="{{ divination.name }}の読み解きを詳しく見る">{{ divination.name }}の読み解きを詳しく見る</span></summary>
+    <div class="planet-table divination-detail-list">{% for row in divination_profile.detail_rows %}<div class="planet-row divination-detail-row"><strong>{{ row.symbol }} {{ row.title }}</strong><span>{{ row.line1 }}</span><span>{{ row.line2 }}</span><span>{{ row.line3 }}</span></div>{% endfor %}</div>
+    <p class="tiny">{{ divination_profile.method_note }}</p>
+  </details>
 </section>
 
 {% if rows|length > 1 %}
 <section id="all-results" class="panel compact-panel">
-  <div class="panel-head compact-head"><div><div class="section-kicker">OTHER PICKS</div><h2>ほかに届いた{{ product.name }}の候補</h2></div><p>最初の数字とは別に、心に残る候補がないか見比べられます。</p></div>
+  <div class="panel-head compact-head"><div><div class="section-kicker">OTHER PICKS</div><h2>ほかに届いた{{ product.name }}の候補</h2></div><p>{{ divination.short_name }}の重みを使った別候補です。</p></div>
   <div class="ticket-list compact-list">
     {% for row in rows|sort(attribute='ticket_score', reverse=true) %}
     <details class="ticket-card compact-ticket" {% if loop.first %}open{% endif %}>
-      <summary class="ticket-card-summary"><div><div class="ticket-kicker">{{ product.name }} <span>#{{ loop.index }}</span></div><div class="numbers {% if product.kind == 'numbers' %}digit-number{% endif %}">{% for n in row.numbers %}{{ render_number(n, row.astrology_numbers, product.kind) }}{% endfor %}</div></div><div class="score-pill"><span>星の響き</span>{{ row.ticket_score }}</div></summary>
-      <div class="ticket-extra"><div class="score-bar" aria-label="星の響き {{ row.ticket_score }}点"><span style="width:{{ row.ticket_score }}%"></span></div>{% if product.kind == 'numbers' %}<p class="numbers-box-note">ボックス目安（並べ替え可）：{{ row.display_box_number }}</p>{% endif %}{% if row.sub_numbers %}<div class="sub-number-block"><p class="sub-number-label">サブ数字（追加の参考数字）</p><div class="numbers sub-numbers {% if product.kind == 'numbers' %}digit-number{% endif %}" aria-label="サブ数字">{% for n in row.sub_numbers %}{{ render_number(n, [], product.kind) }}{% endfor %}</div></div>{% endif %}<div class="metrics"><div><span>合計値</span><strong>{{ row.set_sum }}</strong></div><div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div><div><span>範囲の広がり</span><strong>{{ row.spread }}</strong></div><div><span>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</span><strong>{{ row.consecutive_count }}組</strong></div></div><div class="score-mini-breakdown"><span>星読み {{ row.astrology_fit_score }}</span><span>数字の広がり {{ row.composition_score }}</span></div><p class="reason">{{ row.reason }}</p></div>
+      <summary class="ticket-card-summary"><div><div class="ticket-kicker">{{ product.name }} <span>#{{ loop.index }}</span></div><div class="numbers {% if product.kind == 'numbers' %}digit-number{% endif %}">{% for n in row.numbers %}{{ render_number(n, row.reference_numbers, product.kind) }}{% endfor %}</div></div><div class="score-pill"><span>{{ divination.short_name }}</span>{{ row.ticket_score }}</div></summary>
+      <div class="ticket-extra"><div class="score-bar" aria-label="占いとの響き {{ row.ticket_score }}点"><span style="width:{{ row.ticket_score }}%"></span></div>{% if product.kind == 'numbers' %}<p class="numbers-box-note">ボックス目安（並べ替え可）：{{ row.display_box_number }}</p>{% endif %}<div class="metrics"><div><span>合計値</span><strong>{{ row.set_sum }}</strong></div><div><span>奇数／偶数</span><strong>{{ row.odd_count }}／{{ row.even_count }}</strong></div><div><span>範囲の広がり</span><strong>{{ row.spread }}</strong></div><div><span>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</span><strong>{{ row.consecutive_count }}組</strong></div></div><div class="score-mini-breakdown"><span>{{ divination.short_name }} {{ row.divination_fit_score }}</span><span>数字構成 {{ row.composition_score }}</span></div><p class="reason">{{ row.reason }}</p></div>
     </details>
     {% endfor %}
   </div>
 </section>
 {% endif %}
 
+<div class="daily-result-note"><span aria-hidden="true">☾</span><p><strong>この組み合わせの本日の導きは固定されています。</strong><small>日付が変わると、次の日の数字へ切り替わります。</small></p></div>
+
 <section class="result-final-actions" aria-label="次の操作">
   <div class="primary-result-action result-action-panel">
-    <form class="result-repeat-form" method="post" action="{{ url_for('generate') }}" data-result-repeat-form data-product-id="{{ product_id }}" data-product-name="{{ product.name }}" data-ritual-name="{{ product.ritual_name }}" data-ritual-symbol="{{ product.ritual_symbol }}" data-ritual-duration="{{ product.ritual_duration }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <input type="hidden" name="product" value="{{ product_id }}">
-      <input type="hidden" name="count" value="{{ count }}">
-      <input type="hidden" name="birth_date" value="{{ astrology_profile.birth_date }}">
-      <input type="hidden" name="sub_count" value="{{ sub_count }}">
-      <button class="result-repeat-button" type="submit">
-        <span class="result-action-icon" aria-hidden="true">↻</span>
-        <span class="result-action-copy"><strong>同じ条件でもう一度</strong><small>星を読み直して、新しい数字を導く</small></span>
-        <span class="result-action-arrow" aria-hidden="true">›</span>
-      </button>
+    <form class="result-repeat-form" method="post" action="{{ url_for('generate') }}" data-result-repeat-form data-product-id="{{ product_id }}" data-product-name="{{ product.name }}" data-divination-id="{{ divination_id }}" data-divination-name="{{ divination.name }}" data-divination-symbol="{{ divination.symbol }}" data-ritual-duration="{{ product.ritual_duration }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="divination" value="{{ divination_id }}"><input type="hidden" name="product" value="{{ product_id }}"><input type="hidden" name="count" value="{{ count }}"><input type="hidden" name="birth_date" value="{{ divination_profile.birth_date }}">
+      <button class="result-repeat-button" type="submit"><span class="result-action-icon" aria-hidden="true">↻</span><span class="result-action-copy"><strong>本日の数字を再確認</strong><small>同じ条件では、今日の数字は変わりません</small></span><span class="result-action-arrow" aria-hidden="true">›</span></button>
     </form>
-    <a class="result-reset-button" href="{{ url_for('index') }}">
-      <span class="result-action-icon result-home-icon" aria-hidden="true">⌂</span>
-      <span class="result-action-copy"><strong>最初から選び直す</strong><small>トップ画面へ戻り、くじと誕生日を選ぶ</small></span>
-      <span class="result-action-arrow" aria-hidden="true">›</span>
-    </a>
+    <a class="result-reset-button" href="{{ url_for('index') }}"><span class="result-action-icon result-home-icon" aria-hidden="true">⌂</span><span class="result-action-copy"><strong>最初から選び直す</strong><small>占い・くじ・誕生日を選び直す</small></span><span class="result-action-arrow" aria-hidden="true">›</span></a>
   </div>
 </section>
 

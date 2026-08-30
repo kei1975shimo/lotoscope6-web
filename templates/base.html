@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="あなたの誕生星と今日の天体を重ね、ミニロト・ロト6・ロト7・ナンバーズ3・ナンバーズ4の数字を導く、ロト・スコープです。">
+  <meta name="description" content="西洋占星術・カバラ数秘術・タロットから占いを選び、誕生日をもとに宝くじの数字候補を導くロト・スコープです。">
   <title>{% block title %}ロト・スコープ{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ app_version }}">
 </head>
@@ -23,11 +23,11 @@
           <small>LOTO SCOPE</small>
         </span>
       </a>
-      <div class="app-bar-actions header-zodiac-slot" aria-hidden="true">
-        <span class="header-zodiac-wheel">
+      <div class="app-bar-actions">
+        <div class="header-zodiac-wheel" aria-hidden="true" title="星座盤">
           <img src="{{ url_for('static', filename='img/cosmic-zodiac-wheel.webp') }}" alt="">
-          <i class="header-zodiac-core">✦</i>
-        </span>
+          <span class="header-zodiac-core">✦</span>
+        </div>
       </div>
     </header>
 
@@ -40,37 +40,72 @@
       </div>
       <div class="draw-loader-card ritual-loader-card">
         <div class="ritual-card-border" aria-hidden="true"></div>
-        <div class="ritual-kicker" data-loader-kicker>LOTO SCOPE · CELESTIAL RITUAL</div>
+        <div class="ritual-kicker" data-loader-kicker>LOTO SCOPE · DIVINATION READING</div>
 
         <div class="product-ritual-stage" aria-hidden="true">
-          <div class="compass-instrument">
-            <div class="compass-pulse"></div>
-            <div class="compass-pulse compass-pulse-b"></div>
-            <div class="compass-ring compass-ring-outer"></div>
-            <div class="compass-ticks">
-              {% for i in range(12) %}<i style="--t:{{ i }}"></i>{% endfor %}
+          <div class="ritual-visual ritual-visual-astrology">
+            <div class="astro-wheel-stage">
+              <div class="astro-wheel-glow"></div>
+              <img class="astro-wheel-image" src="{{ url_for('static', filename='img/cosmic-zodiac-wheel.webp') }}" alt="">
+              <div class="astro-orbit astro-orbit-outer"><span>♄</span></div>
+              <div class="astro-orbit astro-orbit-mid"><span>♃</span></div>
+              <div class="astro-orbit astro-orbit-inner"><span>♂</span></div>
+              <div class="astro-center"><b>☉</b><i>☾</i></div>
+              <div class="astro-planet-sparks"><i>☿</i><i>♀</i><i>✦</i></div>
             </div>
-            <div class="compass-ring compass-ring-mid"></div>
-            <div class="compass-ring compass-ring-inner"></div>
-            <div class="compass-orbit compass-orbit-a"><span></span></div>
-            <div class="compass-orbit compass-orbit-b"><span></span></div>
-            <div class="compass-orbit compass-orbit-c"><span></span></div>
-            <div class="compass-core"><span data-loader-symbol>✦</span></div>
+          </div>
+
+          <div class="ritual-visual ritual-visual-kabbalah">
+            <div class="kabbalah-stage">
+              <svg class="kabbalah-paths" viewBox="0 0 220 238" focusable="false" aria-hidden="true">
+                <path d="M110 18 L63 58 L157 58 Z M63 58 L52 105 M157 58 L168 105 M63 58 L110 103 M157 58 L110 103 M52 105 L110 103 L168 105 M52 105 L70 156 M168 105 L150 156 M110 103 L70 156 M110 103 L150 156 M110 103 L110 184 M70 156 L110 184 L150 156 M70 156 L110 220 M150 156 L110 220 M110 184 L110 220"/>
+              </svg>
+              <div class="sephirah sephirah-1"><b>1</b><span>KETER</span></div>
+              <div class="sephirah sephirah-2"><b>2</b></div>
+              <div class="sephirah sephirah-3"><b>3</b></div>
+              <div class="sephirah sephirah-4"><b>4</b></div>
+              <div class="sephirah sephirah-5"><b>5</b></div>
+              <div class="sephirah sephirah-6"><b>6</b><span>TIPHARETH</span></div>
+              <div class="sephirah sephirah-7"><b>7</b></div>
+              <div class="sephirah sephirah-8"><b>8</b></div>
+              <div class="sephirah sephirah-9"><b>9</b></div>
+              <div class="sephirah sephirah-10"><b>10</b><span>MALKUTH</span></div>
+              <div class="kabbalah-number-stream"><i>11</i><i>22</i><i>33</i><i>7</i><i>3</i></div>
+              <div class="kabbalah-core" data-loader-symbol>✡</div>
+            </div>
+          </div>
+
+          <div class="ritual-visual ritual-visual-tarot">
+            <div class="tarot-stage">
+              <div class="tarot-halo"></div>
+              <div class="tarot-deck tarot-deck-left"><i></i><i></i><i></i></div>
+              <div class="tarot-deck tarot-deck-right"><i></i><i></i><i></i></div>
+              <div class="tarot-card tarot-card-a"><span>XVII</span><b>✦</b><small>THE STAR</small></div>
+              <div class="tarot-card tarot-card-b"><span>XVIII</span><b>☾</b><small>THE MOON</small></div>
+              <div class="tarot-card tarot-card-focus">
+                <div class="tarot-card-inner">
+                  <div class="tarot-card-back"><b>☥</b><i>✦</i></div>
+                  <div class="tarot-card-front"><span>X</span><b>☉</b><small>ARCANA</small></div>
+                </div>
+              </div>
+              <div class="tarot-number-orbit"><i>3</i><i>7</i><i>10</i><i>21</i><i>22</i></div>
+            </div>
           </div>
         </div>
 
         <div class="ritual-product-name" data-loader-product>ロト6</div>
-        <div class="loader-title" data-loader-title>あなたの星を静かに読み解いています</div>
-        <div class="loader-text" data-loader-text>ほんの少しだけ、星の声に耳を澄ませてください</div>
-        <div class="loader-stage" data-loader-stage>誕生の光</div>
+        <div class="ritual-copy-zone">
+          <div class="loader-title" data-loader-title>選んだ占いを静かに読み解いています</div>
+          <div class="loader-text" data-loader-text>誕生日と選んだ占術から、数字の響きを探しています</div>
+          <div class="loader-stage" data-loader-stage>誕生日の読み解き</div>
+        </div>
         <div class="ritual-progress" aria-hidden="true"><i data-loader-progress></i></div>
         <div class="ritual-step-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-        <button type="button" class="ritual-skip-btn" data-loader-skip hidden>結果をすぐに見る</button>
       </div>
     </div>
 
     <p class="footer app-footer">
-      星読みは、数字を選ぶ時間を楽しむためのひとつの導きです。当せんを保証したり、未来の抽せん結果を断定したりするものではありません。結果は宝くじ公式情報でご確認ください。
+      占いによる数字生成は、数字を選ぶ時間を楽しむためのエンターテインメントです。当せんを保証したり、未来の抽せん結果を断定したりするものではありません。結果は宝くじ公式情報でご確認ください。
     </p>
   </main>
   <script src="{{ url_for('static', filename='js/app.js') }}?v={{ app_version }}"></script>
