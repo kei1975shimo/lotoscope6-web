@@ -1,0 +1,34 @@
+<dialog id="ritual" class="ritual" aria-labelledby="ritual-title" aria-describedby="ritual-text">
+  <div class="ritual-card" data-phase="0" data-theme="astrology">
+    <p class="eyebrow" data-ritual-kicker>ASTROLOGY</p>
+    <div class="ritual-stage" aria-hidden="true">
+      <div class="ritual-visual astrology-visual">
+        <img class="spinning-chart" src="{{ url_for('static', filename='img/oracle-astrology.webp') }}" width="512" height="512" alt="">
+        <span class="planet-orbit orbit-one"><i></i></span><span class="planet-orbit orbit-two"><i></i></span>
+        <span class="ritual-core">✦</span>
+      </div>
+      <div class="ritual-visual kabbalah-visual">
+        <img src="{{ url_for('static', filename='img/oracle-kabbalah.webp') }}" width="512" height="512" alt="">
+        <svg class="tree-light" viewBox="0 0 240 300" focusable="false">
+          <path pathLength="100" d="M120 25L62 74L178 74ZM62 74L62 128L120 159L178 128L178 74M120 25V159M62 74L120 159L178 74M62 128H178M62 128L62 203L120 248L178 203L178 128M120 159L62 203H178ZM120 159V275M62 203L120 275L178 203"/>
+          {% for x,y in [(120,25),(178,74),(62,74),(178,128),(62,128),(120,159),(178,203),(62,203),(120,248),(120,275)] %}<circle class="node-{{ loop.index }}" cx="{{ x }}" cy="{{ y }}" r="9"/>{% endfor %}
+        </svg>
+      </div>
+      <div class="ritual-visual tarot-visual">
+        <img class="tarot-atmosphere" src="{{ url_for('static', filename='img/oracle-tarot.webp') }}" width="512" height="512" alt="">
+        <div class="tarot-fan">
+          {% for symbol in ['☾', '✦', '☉'] %}<div class="ritual-tarot tarot-{{ loop.index }}"><div class="card-turn"><span class="card-back">✧</span><span class="card-front"><i>{{ symbol }}</i><small>✧ · ✧</small></span></div></div>{% endfor %}
+        </div>
+      </div>
+      <div class="ritual-dust"><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <p class="ritual-product" data-ritual-product></p>
+    <div class="ritual-copy" aria-live="polite" aria-atomic="true">
+      <h2 id="ritual-title">星の扉を開いています</h2>
+      <p id="ritual-text">誕生日と今日の空を重ねて。</p>
+    </div>
+    <progress class="ritual-progress" value="0" max="4" aria-label="演出の進行"></progress>
+    <p class="ritual-footnote">今日、あなたに届く数字を。</p>
+    <button class="text-button" type="button" data-cancel-ritual>入力に戻る</button>
+  </div>
+</dialog>

@@ -119,7 +119,7 @@ class LotoScopeSmokeTests(unittest.TestCase):
             for row in rows:
                 self.assertEqual(len(row["numbers"]), digit_count)
                 self.assertTrue(all(0 <= digit <= 9 for digit in row["numbers"]))
-                self.assertEqual(row["box_numbers"], sorted(row["numbers"]))
+                self.assertEqual(row["display_box_number"], "-".join(str(n) for n in sorted(row["numbers"])))
 
     def test_result_renders_for_each_divination(self) -> None:
         for method_id, label in [("astrology", "西洋占星術"), ("kabbalah", "カバラ数秘術"), ("tarot", "タロット")]:
@@ -132,7 +132,8 @@ class LotoScopeSmokeTests(unittest.TestCase):
 
     def test_divination_preview(self) -> None:
         for method_id in ["astrology", "kabbalah", "tarot"]:
-            response = self.client.get(f"/divination-preview?divination={method_id}&birth_date=1975-08-16")
+            _, csrf = self.get_index()
+            response = self.client.post("/divination-preview", data={"csrf_token": csrf, "divination": method_id, "birth_date": "1975-08-16"})
             self.assertEqual(response.status_code, 200)
             data = response.get_json()
             self.assertEqual(data["method_id"], method_id)

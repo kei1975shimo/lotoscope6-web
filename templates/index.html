@@ -1,119 +1,61 @@
 {% extends "base.html" %}
-{% block title %}ロト・スコープ | 占いから数字を受け取る{% endblock %}
-{% block body_class %}app-mobile page-home ritual-theme-loto6 loto-only-compact{% endblock %}
+{% block title %}ロト・スコープ | 今日の導きを、あなたの数字へ{% endblock %}
 {% block content %}
 {% set current_divination = values.get('divination', 'astrology') %}
 {% set current_product = values.get('product', 'loto6') %}
 {% set current_count = values.get('count', default_ticket_count|string) %}
 {% set birth_iso = values.get('birth_date', '') %}
-{% set birth_year_value = birth_iso[0:4] if birth_iso|length >= 10 else '' %}
-{% set birth_month_value = birth_iso[5:7] if birth_iso|length >= 10 else '' %}
-{% set birth_day_value = birth_iso[8:10] if birth_iso|length >= 10 else '' %}
-
-<section class="hero app-hero home-hero mystic-hero compact-home-hero multi-oracle-hero">
-  <div class="hero-copy">
-    <div class="hero-kicker">THREE ORACLES · ONE NUMBER SCOPE</div>
-    <h1>ロト・スコープ<small>誕生日から、あなただけの数字を受け取る</small></h1>
-    <p class="multi-oracle-copy">まず誕生日を入力し、西洋占星術・カバラ数秘術・タロットから占いを選択。今日の流れと重ねて、その日だけの数字候補を導きます。</p>
-  </div>
+{% set birth_y = values.get('birth_year', birth_iso[0:4]) %}
+{% set birth_m = values.get('birth_month', birth_iso[5:7]) %}
+{% set birth_d = values.get('birth_day', birth_iso[8:10]) %}
+<section class="intro">
+  <div><p class="eyebrow">THE DAILY ORACLE</p><h1 tabindex="-1">今日の導きを、<br class="mobile-break">あなたの数字へ。</h1><p class="intro-note">星、数、カード。心に響く占いをひとつ。</p></div>
+  <time class="date-emblem" datetime="{{ today_date }}"><span>{{ today_label }}</span><small>日本時間・毎日更新</small></time>
 </section>
-
-{% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
-
-<form id="number-form" class="panel app-form-panel compact-loto-form multi-divination-form" method="post" action="{{ url_for('generate') }}" data-generate-form data-today="{{ today_date }}">
+<form method="post" action="{{ url_for('generate') }}" data-oracle-form data-home-form data-preview-url="{{ url_for('divination_preview') }}" data-today="{{ today_date }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-  <div class="panel-head app-panel-head compact-step-head"><div><span>Step 1</span><h2>誕生日を入力する</h2></div></div>
-  <div id="birth-panel" class="astrology-entry compact-astrology-entry is-oracle-active" data-astrology-entry>
-    <div class="astrology-date-field" data-astrology-fields>
-      <input id="birth_date" name="birth_date" type="hidden" value="{{ birth_iso }}">
-      <div class="fortune-date-card compact-fortune-date-card">
-        <div class="date-select-grid" role="group" aria-label="生年月日">
-          <label class="date-select-field" for="birth_year"><span>西暦</span><span class="select-shell"><select id="birth_year" class="birth-select birth-select-year" data-birth-part="year" autocomplete="bday-year" aria-label="生まれた年"><option value="">年</option>{% for year in range(current_year, 1899, -1) %}<option value="{{ year }}" {% if birth_year_value|int == year %}selected{% endif %}>{{ year }}年</option>{% endfor %}</select></span></label>
-          <label class="date-select-field" for="birth_month"><span>月</span><span class="select-shell"><select id="birth_month" class="birth-select birth-select-month" data-birth-part="month" autocomplete="bday-month" aria-label="生まれた月"><option value="">月</option>{% for month in range(1, 13) %}<option value="{{ month }}" {% if birth_month_value|int == month %}selected{% endif %}>{{ month }}月</option>{% endfor %}</select></span></label>
-          <label class="date-select-field" for="birth_day"><span>日</span><span class="select-shell"><select id="birth_day" class="birth-select birth-select-day" data-birth-part="day" autocomplete="bday-day" aria-label="生まれた日"><option value="">日</option>{% for day in range(1, 32) %}<option value="{{ day }}" {% if birth_day_value|int == day %}selected{% endif %}>{{ day }}日</option>{% endfor %}</select></span></label>
-        </div>
-        <div class="birth-date-seal compact-birth-seal" data-birth-preview aria-live="polite">
-          <span class="seal-symbol" data-preview-method-symbol aria-hidden="true">✦</span>
-          <div class="seal-copy"><small data-preview-method-name>YOUR DIVINATION PROFILE</small></div>
-          <span class="seal-status" data-birth-preview-status>WAITING</span>
-          <div class="divination-preview" data-divination-preview hidden>
-            <div data-preview-item="0"><small>READING</small><strong>—</strong><span></span></div>
-            <div data-preview-item="1"><small>READING</small><strong>—</strong><span></span></div>
-            <div data-preview-item="2"><small>READING</small><strong>—</strong><span></span></div>
-          </div>
-        </div>
+  <div class="form-error" role="alert" tabindex="-1" {% if not error %}hidden{% endif %}>{{ error }}</div>
+  <fieldset class="birthday-section">
+    <legend class="step-title"><span>01</span> 誕生日を教えてください</legend>
+    <div class="birthday-layout">
+      <div class="date-fields">
+        <label for="birth_year"><span>西暦</span><select id="birth_year" name="birth_year" autocomplete="bday-year" required><option value="">年を選択</option>{% for year in range(current_year, 1899, -1) %}<option value="{{ year }}" {% if birth_y|int == year %}selected{% endif %}>{{ year }}年</option>{% endfor %}</select></label>
+        <label for="birth_month"><span>月</span><select id="birth_month" name="birth_month" autocomplete="bday-month" required><option value="">月</option>{% for month in range(1, 13) %}<option value="{{ month }}" {% if birth_m|int == month %}selected{% endif %}>{{ month }}月</option>{% endfor %}</select></label>
+        <label for="birth_day"><span>日</span><select id="birth_day" name="birth_day" autocomplete="bday-day" required><option value="">日</option>{% for day in range(1, 32) %}<option value="{{ day }}" {% if birth_d|int == day %}selected{% endif %}>{{ day }}日</option>{% endfor %}</select></label>
       </div>
-      <div class="privacy-note compact-privacy-note">生年月日は保存しません。</div>
+      <p class="privacy-note"><span aria-hidden="true">◇</span> 生年月日は計算だけに使用し、<br>サーバーに保存しません。</p>
     </div>
-  </div>
-
-
-  <div class="panel-head app-panel-head form-substep-head compact-step-head"><div><span>Step 2</span><h2>占いを選ぶ</h2></div></div>
-  <div id="divination-panel" class="field divination-field">
-    <div class="mode-grid app-mode-grid divination-grid">
+  </fieldset>
+  <fieldset class="oracle-section">
+    <legend class="step-title"><span>02</span> 心に響く占いを選ぶ</legend>
+    <div class="oracle-grid">
       {% for item in divination_choices %}
-      <label class="mode-card divination-card divination-{{ item.divination_id }}">
-        <input type="radio" name="divination" value="{{ item.divination_id }}"
-          data-divination-name="{{ item.name }}"
-          data-divination-short-name="{{ item.short_name }}"
-          data-divination-english="{{ item.english }}"
-          data-divination-symbol="{{ item.symbol }}"
-          data-divination-description="{{ item.description }}"
-          data-button-label="{{ item.button_label }}"
-          {% if current_divination == item.divination_id %}checked{% endif %}>
-        <span class="divination-card-inner">
-          <span class="divination-symbol" aria-hidden="true">{{ item.symbol }}</span>
-          <span class="divination-copy"><strong>{{ item.name }}</strong><small>{{ item.english }}</small><span>{{ item.badge }}</span></span>
-          <i class="divination-check" aria-hidden="true">✓</i>
-        </span>
+      <label class="oracle-option">
+        <input type="radio" name="divination" value="{{ item.divination_id }}" data-name="{{ item.name }}" data-english="{{ item.english }}" data-description="{{ item.description }}" data-button-label="{{ item.button_label }}" {% if current_divination == item.divination_id %}checked{% endif %} required>
+        <span class="oracle-card"><span class="oracle-art"><img src="{{ url_for('static', filename='img/oracle-' ~ item.divination_id ~ '.webp') }}" width="512" height="512" alt=""><span class="selection-check" aria-hidden="true">✓</span></span><span class="oracle-copy"><small>{{ item.english }}</small><strong>{{ item.name }}</strong><span>{{ item.badge }}</span></span></span>
       </label>
       {% endfor %}
     </div>
-    <p class="selection-description" data-divination-description>選んだ占いのロジックで数字候補を導きます。</p>
+    <p class="selection-description" data-selection-description>{{ divination_choices[0].description }}</p>
+    <div class="reading-preview" aria-live="polite" aria-atomic="true" hidden></div>
+  </fieldset>
+  <div class="lower-form">
+    <fieldset class="product-section">
+      <legend class="step-title"><span>03</span> くじを選ぶ</legend>
+      <div class="product-list">
+        {% for item in product_choices %}
+        <label class="product-option"><input type="radio" name="product" value="{{ item.product_id }}" data-name="{{ item.name }}" data-duration="{{ item.ritual_duration }}" {% if current_product == item.product_id %}checked{% endif %} required><span class="product-row"><span class="product-name">{{ item.name }}</span><small>{{ item.badge }}</small><span class="radio-mark" aria-hidden="true"></span></span></label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <section class="receive-section" aria-labelledby="receive-title">
+      <h2 class="step-title" id="receive-title"><span>04</span> 導きを受け取る</h2>
+      <label class="count-field" for="count"><span>受け取る口数<small>1〜{{ max_ticket_count }}口</small></span><select id="count" name="count" required>{% for n in range(1, max_ticket_count + 1) %}<option value="{{ n }}" {% if current_count|int == n %}selected{% endif %}>{{ n }}口</option>{% endfor %}</select></label>
+      <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>今日の導きは、ひとつ。</strong><small>同じ誕生日・日本時間の日付・占い・くじなら、何度開いても同じ数字です。口数を増やしても、先頭の数字と順番は変わりません。</small></p></div>
+      <div class="selection-summary" aria-live="polite"><span data-summary-method>西洋占星術</span><span aria-hidden="true">×</span><span data-summary-product>ロト6</span><span data-summary-count>1口</span></div>
+      <button class="primary-button" type="submit" data-submit-button><span aria-hidden="true">✦</span><span data-button-copy>星の導きを受け取る</span><span aria-hidden="true">→</span></button>
+      <p class="submit-note">あなたの誕生日と、今日を重ねて。</p>
+    </section>
   </div>
-
-
-  <div class="panel-head app-panel-head form-substep-head compact-step-head"><div><span>Step 3</span><h2>くじを選ぶ</h2></div></div>
-  <div id="product-panel" class="field compact-product-field">
-    <div class="mode-grid app-mode-grid product-grid compact-product-grid switch-product-list">
-      {% for item in product_choices %}
-      <label class="mode-card product-card product-switch-row product-{{ item.product_id }}">
-        <input type="radio" name="product" value="{{ item.product_id }}" data-product-name="{{ item.name }}" data-product-rule="{{ item.badge }}" data-button-label="{{ item.button_label }}" data-product-kind="{{ item.kind }}" data-product-count="{{ item.pick_count }}" data-ritual-name="{{ item.ritual_name }}" data-ritual-symbol="{{ item.ritual_symbol }}" data-ritual-duration="{{ item.ritual_duration }}" {% if current_product == item.product_id %}checked{% endif %}>
-        <span class="product-switch-main">
-          <span class="product-emblem-stage product-emblem-{{ item.product_id }} compact-product-sigil" aria-hidden="true">
-            {% if item.product_id == 'miniloto' %}
-            <svg class="product-emblem-svg" viewBox="0 0 64 64"><circle class="emblem-orbit" cx="32" cy="32" r="24"/><path class="emblem-line" d="M18 36L26 20L38 18L47 30L40 45L24 46Z"/><g class="emblem-nodes"><circle cx="18" cy="36" r="2.5"/><circle cx="26" cy="20" r="2.5"/><circle cx="38" cy="18" r="2.5"/><circle cx="47" cy="30" r="2.5"/><circle cx="40" cy="45" r="2.5"/></g></svg>
-            {% elif item.product_id == 'loto6' %}
-            <svg class="product-emblem-svg" viewBox="0 0 64 64"><circle class="emblem-orbit" cx="32" cy="32" r="25"/><polygon class="emblem-line emblem-hex" points="32,8 53,44 11,44"/><polygon class="emblem-line emblem-hex" points="32,56 11,20 53,20"/><circle class="emblem-core" cx="32" cy="32" r="5"/></svg>
-            {% elif item.product_id == 'loto7' %}
-            <svg class="product-emblem-svg" viewBox="0 0 64 64"><circle class="emblem-orbit" cx="32" cy="32" r="25"/><circle class="emblem-orbit emblem-orbit-secondary" cx="32" cy="32" r="17"/><g class="emblem-seven-rays"><path class="emblem-line" d="M32 32L32 7M32 32L51.5 16.4M32 32L56.4 37.6M32 32L42.8 54.5M32 32L21.2 54.5M32 32L7.6 37.6M32 32L12.5 16.4"/></g><circle class="emblem-core" cx="32" cy="32" r="4"/></svg>
-            {% elif item.product_id == 'numbers3' %}
-            <svg class="product-emblem-svg" viewBox="0 0 64 64"><circle class="emblem-orbit" cx="32" cy="32" r="24"/><path class="emblem-line" d="M18 40L32 20L46 40"/><g class="emblem-nodes"><circle cx="18" cy="40" r="3"/><circle cx="32" cy="20" r="3"/><circle cx="46" cy="40" r="3"/></g><circle class="emblem-core" cx="32" cy="32" r="4"/></svg>
-            {% else %}
-            <svg class="product-emblem-svg" viewBox="0 0 64 64"><circle class="emblem-orbit" cx="32" cy="32" r="24"/><path class="emblem-line" d="M32 12L52 32L32 52L12 32Z"/><circle class="emblem-core" cx="32" cy="32" r="4"/></svg>
-            {% endif %}
-          </span>
-          <span class="product-switch-copy"><strong>{{ item.name }}</strong><span class="mode-badge">{{ item.badge }}</span></span>
-        </span>
-      </label>
-      {% endfor %}
-    </div>
-  </div>
-
-
-  <div class="panel-head app-panel-head form-substep-head compact-step-head compact-inline-step"><div><span>Step 4</span><h2>受け取る数字を決める</h2></div></div>
-  <div class="choice-count-grid count-only-grid">
-    <div class="field compact-count-field"><label for="count">受け取る口数</label><input id="count" name="count" type="number" inputmode="numeric" min="1" max="{{ max_ticket_count }}" value="{{ current_count }}"></div>
-  </div>
-
-  <div class="selection-summary" aria-live="polite">
-    <span><small>占い</small><strong id="selected-divination-name">西洋占星術</strong></span>
-    <span><small>くじ</small><strong id="selected-product-name">ロト6</strong></span>
-    <span><small>口数</small><strong id="planned-total">1口</strong></span>
-  </div>
-
-  <div class="daily-oracle-note"><span aria-hidden="true">☾</span><p><strong>本日の導きは一日一回</strong><small>同じ誕生日・同じ日・同じ占い・同じくじなら、何度開いても同じ数字です。</small></p></div>
-  <div class="sticky-submit compact-sticky-submit"><button type="submit" data-generate-button><span aria-hidden="true">✦</span> 本日の数字を開く</button></div>
 </form>
 {% endblock %}

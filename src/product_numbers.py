@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import math
 import random
-from datetime import datetime
 from typing import Any, Dict, List, Mapping, MutableSet, Sequence
+
+from settings import MAX_TICKET_COUNT
 
 RandomSource = random.Random | random.SystemRandom
 
@@ -13,14 +14,9 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "name": "ミニロト",
         "english": "MINI LOTO",
         "kind": "loto",
-        "min_number": 1,
         "max_number": 31,
         "pick_count": 5,
         "badge": "1〜31から5個",
-        "result_title": "今回、星が導いた五つの数字",
-        "button_label": "星読みの数字を生成する",
-        "ritual_symbol": "☾",
-        "ritual_name": "月輪の五光",
         "ritual_duration": 3900,
     },
     "loto6": {
@@ -28,14 +24,9 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "name": "ロト6",
         "english": "LOTO 6",
         "kind": "loto",
-        "min_number": 1,
         "max_number": 43,
         "pick_count": 6,
         "badge": "1〜43から6個",
-        "result_title": "今回、星が導いた六つの数字",
-        "button_label": "星読みの数字を生成する",
-        "ritual_symbol": "✡",
-        "ritual_name": "六星印の儀",
         "ritual_duration": 4700,
     },
     "loto7": {
@@ -43,14 +34,9 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "name": "ロト7",
         "english": "LOTO 7",
         "kind": "loto",
-        "min_number": 1,
         "max_number": 37,
         "pick_count": 7,
         "badge": "1〜37から7個",
-        "result_title": "今回、星が導いた七つの数字",
-        "button_label": "星読みの数字を生成する",
-        "ritual_symbol": "Ⅶ",
-        "ritual_name": "七惑星の大軌道",
         "ritual_duration": 5400,
     },
     "numbers3": {
@@ -59,13 +45,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "english": "NUMBERS 3",
         "kind": "numbers",
         "digit_count": 3,
-        "digit_min": 0,
-        "digit_max": 9,
         "badge": "0〜9から3桁（順序あり）",
-        "result_title": "今回、星が導いた三つの数字",
-        "button_label": "星読みの数字を生成する",
-        "ritual_symbol": "☿",
-        "ritual_name": "三星印の共鳴",
         "ritual_duration": 3800,
     },
     "numbers4": {
@@ -74,13 +54,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "english": "NUMBERS 4",
         "kind": "numbers",
         "digit_count": 4,
-        "digit_min": 0,
-        "digit_max": 9,
         "badge": "0〜9から4桁（順序あり）",
-        "result_title": "今回、星が導いた四つの数字",
-        "button_label": "星読みの数字を生成する",
-        "ritual_symbol": "♀",
-        "ritual_name": "四星印の共鳴",
         "ritual_duration": 4200,
     },
 }
@@ -99,76 +73,77 @@ def get_product(product_id: str) -> Dict[str, Any]:
         raise ValueError("ミニロト・ロト6・ロト7・ナンバーズ3・ナンバーズ4から選択してください。") from exc
 
 
-def _fold_to_range(value: int, maximum: int) -> int:
-    return ((int(value) - 1) % maximum) + 1
-
-
-def _profile_weights(profile: Mapping[str, Any]) -> Mapping[Any, Any]:
-    raw = profile.get("weights", {})
-    return raw if isinstance(raw, Mapping) else {}
-
-
 def _weight_value(weights: Mapping[Any, Any], number: int) -> float:
-    value = weights.get(number, weights.get(str(number), 0.0))
     try:
-        return float(value or 0.0)
+        value = float(weights.get(number, weights.get(str(number), 0.0)) or 0.0)
+        return max(0.0, value) if math.isfinite(value) else 0.0
     except (TypeError, ValueError):
         return 0.0
 
 
-def build_loto_weights(profile: Mapping[str, Any], maximum: int) -> Dict[int, float]:
-    result = {number: 1.0 for number in range(1, maximum + 1)}
-    source_weights = _profile_weights(profile)
-
-    for source_number in range(1, 44):
-        score = _weight_value(source_weights, source_number)
-        if score <= 0:
-            continue
-        folded = _fold_to_range(source_number, maximum)
-        result[folded] += score
-        # 星の響きを一点に固定しすぎないよう、隣接数字へ弱い余韻を加える。
-        result[_fold_to_range(folded - 1, maximum)] += score * 0.10
-        result[_fold_to_range(folded + 1, maximum)] += score * 0.10
-
-    for index, row in enumerate(profile.get("boost_rows", profile.get("planet_rows", [])) or []):
+def _source_weights(profile: Mapping[str, Any]) -> List[float]:
+    """Keep each method's character in the original 43 equal-width bins."""
+    raw = profile.get("weights", {})
+    weights = raw if isinstance(raw, Mapping) else {}
+    source = [_weight_value(weights, n) for n in range(1, 44)]
+    # Smooth on the source circle, before converting to a lottery's range.
+    result = [source[i] + .1 * (source[(i - 1) % 43] + source[(i + 1) % 43]) for i in range(43)]
+    for index, row in enumerate(profile.get("boost_rows", []) or []):
         if not isinstance(row, Mapping):
             continue
-        resonance = float(row.get("resonance", 0.0) or 0.0)
-        planet_bonus = max(8.0, 22.0 + resonance * 0.12 - index)
-        for key, factor in (("primary_candidate", 1.0), ("secondary_candidate", 0.55), ("tertiary_candidate", 0.38)):
-            if row.get(key) is None:
+        resonance = _weight_value({1: row.get("resonance")}, 1)
+        bonus = max(8.0, 22.0 + resonance * .12 - index)
+        for key, factor in (("primary_candidate", 1.0), ("secondary_candidate", .55), ("tertiary_candidate", .38)):
+            try:
+                number = int(row.get(key, 0))
+            except (TypeError, ValueError):
                 continue
-            number = _fold_to_range(int(row[key]), maximum)
-            result[number] += planet_bonus * factor
-
+            if 1 <= number <= 43:
+                result[number - 1] += bonus * factor
     return result
 
 
+def _resample_weights(source: Sequence[float], size: int) -> List[float]:
+    """Area-average equal intervals of [0, 1], without modulo fold-over.
+
+    Use integer interval boundaries (source bins have width `size`, target
+    bins have width len(source)). A flat source is exactly flat for ALL
+    destination sizes; neither the low band nor digits 1/2/3 get extra mass.
+    Source peaks are preserved as fractional overlap, without dropping bins.
+    """
+    width = len(source)
+    return [
+        sum(value * max(0, min((j + 1) * width, (i + 1) * size)
+                        - max(j * width, i * size))
+            for i, value in enumerate(source)) / width
+        for j in range(size)
+    ]
+
+
+def build_loto_weights(profile: Mapping[str, Any], maximum: int) -> Dict[int, float]:
+    return {i + 1: 1.0 + value for i, value in enumerate(_resample_weights(_source_weights(profile), maximum))}
+
+
+def build_digit_weights(profile: Mapping[str, Any]) -> Dict[int, float]:
+    return {i: 1.0 + value for i, value in enumerate(_resample_weights(_source_weights(profile), 10))}
+
+
+def _core_numbers(profile: Mapping[str, Any], size: int, wanted: int, minimum: int) -> List[int]:
+    # Resample the core signal in the same coordinate system as the weights.
+    cores = set(profile.get("core_numbers", []) or [])
+    source = _source_weights(profile)
+    signal = _resample_weights([1.0 if n in cores else 0.0 for n in range(1, 44)], size)
+    strengths = _resample_weights(source, size)
+    ranked = sorted(range(size), key=lambda i: (-signal[i], -strengths[i], i))
+    return sorted(i + minimum for i in ranked[:wanted])
+
+
 def product_core_numbers(profile: Mapping[str, Any], product: Mapping[str, Any]) -> List[int]:
-    maximum = int(product["max_number"])
-    wanted = int(product["pick_count"])
-    ordered_candidates: List[int] = []
-    ordered_candidates.extend(int(value) for value in profile.get("core_numbers", []) or [])
-    ordered_candidates.extend(int(value) for value in profile.get("pool_numbers", []) or [])
-    seen: set[int] = set()
-    result: List[int] = []
+    return _core_numbers(profile, int(product["max_number"]), int(product["pick_count"]), 1)
 
-    for value in ordered_candidates:
-        folded = _fold_to_range(value, maximum)
-        if folded in seen:
-            continue
-        seen.add(folded)
-        result.append(folded)
-        if len(result) >= wanted:
-            break
 
-    cursor = 1
-    while len(result) < wanted:
-        if cursor not in seen:
-            result.append(cursor)
-            seen.add(cursor)
-        cursor += 1
-    return sorted(result)
+def numbers_core_digits(profile: Mapping[str, Any], product: Mapping[str, Any]) -> List[int]:
+    return _core_numbers(profile, 10, int(product["digit_count"]), 0)
 
 
 def _weighted_sample_without_replacement(
@@ -285,89 +260,21 @@ def _generate_loto_rows(
         divination_score = _divination_score(numbers, weights)
         composition_score = _composition_score(numbers, maximum)
         total_score = round(divination_score * 0.78 + composition_score * 0.22)
-        overlap = sorted(set(numbers) & set(core_numbers))
         rows.append(
             {
-                "product_id": product["product_id"],
-                "product_name": product["name"],
-                "product_kind": "loto",
                 "numbers": numbers,
-                "display_number": " ".join(f"{number:02d}" for number in numbers),
                 "reference_numbers": core_numbers,
-                "reference_hit_count": len(overlap),
                 "divination_fit_score": divination_score,
-                "astrology_numbers": core_numbers,
-                "astrology_hit_count": len(overlap),
-                "astrology_fit_score": divination_score,
                 "composition_score": composition_score,
                 "ticket_score": total_score,
                 "reason": _loto_reason(numbers, core_numbers, product, profile),
-                **metrics,
+                **{key: metrics[key] for key in ("set_sum", "odd_count", "even_count", "spread", "consecutive_count")},
             }
         )
 
     if len(rows) < count:
         raise RuntimeError(f"{product['name']}の数字を指定口数だけ導けませんでした。口数を減らして、もう一度お試しください。")
     return rows
-
-
-def _fold_to_digit(value: int) -> int:
-    return int(value) % 10
-
-
-def build_digit_weights(profile: Mapping[str, Any]) -> Dict[int, float]:
-    """星読みプロフィール（1〜43の重み）をナンバーズの桁（0〜9）へ畳み込む。"""
-    result = {digit: 1.0 for digit in range(10)}
-    source_weights = _profile_weights(profile)
-
-    for source_number in range(1, 44):
-        score = _weight_value(source_weights, source_number)
-        if score <= 0:
-            continue
-        folded = _fold_to_digit(source_number)
-        result[folded] += score
-        # 星の響きを一点に固定しすぎないよう、隣接する桁へ弱い余韻を加える。
-        result[_fold_to_digit(folded - 1)] += score * 0.10
-        result[_fold_to_digit(folded + 1)] += score * 0.10
-
-    for index, row in enumerate(profile.get("boost_rows", profile.get("planet_rows", [])) or []):
-        if not isinstance(row, Mapping):
-            continue
-        resonance = float(row.get("resonance", 0.0) or 0.0)
-        planet_bonus = max(8.0, 22.0 + resonance * 0.12 - index)
-        for key, factor in (("primary_candidate", 1.0), ("secondary_candidate", 0.55), ("tertiary_candidate", 0.38)):
-            if row.get(key) is None:
-                continue
-            digit = _fold_to_digit(int(row[key]))
-            result[digit] += planet_bonus * factor
-
-    return result
-
-
-def numbers_core_digits(profile: Mapping[str, Any], product: Mapping[str, Any]) -> List[int]:
-    wanted = int(product["digit_count"])
-    ordered_candidates: List[int] = []
-    ordered_candidates.extend(int(value) for value in profile.get("core_numbers", []) or [])
-    ordered_candidates.extend(int(value) for value in profile.get("pool_numbers", []) or [])
-    seen: set[int] = set()
-    result: List[int] = []
-
-    for value in ordered_candidates:
-        folded = _fold_to_digit(value)
-        if folded in seen:
-            continue
-        seen.add(folded)
-        result.append(folded)
-        if len(result) >= wanted:
-            break
-
-    cursor = 0
-    while len(result) < wanted:
-        if cursor not in seen:
-            result.append(cursor)
-            seen.add(cursor)
-        cursor += 1
-    return sorted(result)
 
 
 def _digit_weighted_choice(weights: Mapping[int, float], rng: RandomSource) -> int:
@@ -395,17 +302,6 @@ def _numbers_composition_score(digits: Sequence[int]) -> int:
     spread_score = min(1.0, metrics["spread"] / 9.0)
     repeat_score = max(0.0, 1.0 - metrics["consecutive_count"] * 0.35)
     return round((odd_score * 0.34 + spread_score * 0.36 + repeat_score * 0.30) * 100)
-
-
-def _numbers_divination_score(digits: Sequence[int], weights: Mapping[int, float]) -> int:
-    max_weight = max(weights.values()) if weights else 1.0
-    selected = [float(weights.get(d, 0.0)) for d in digits]
-    if not selected or max_weight <= 0:
-        return 0
-    average = sum(selected) / len(selected)
-    peak = max(selected)
-    normalized = (average / max_weight) * 0.72 + (peak / max_weight) * 0.28
-    return max(0, min(100, round(normalized * 100)))
 
 
 def _numbers_reason(digits: Sequence[int], core_digits: Sequence[int], product: Mapping[str, Any], profile: Mapping[str, Any]) -> str:
@@ -445,30 +341,20 @@ def _generate_numbers_rows(
             continue
         seen.add(key)
         metrics = _numbers_metrics(digits)
-        divination_score = _numbers_divination_score(digits, weights)
+        divination_score = _divination_score(digits, weights)
         composition_score = _numbers_composition_score(digits)
         total_score = round(divination_score * 0.78 + composition_score * 0.22)
-        overlap = sorted(set(digits) & set(core_digits))
         box_digits = sorted(digits)
         rows.append(
             {
-                "product_id": product["product_id"],
-                "product_name": product["name"],
-                "product_kind": "numbers",
                 "numbers": digits,
-                "box_numbers": box_digits,
-                "display_number": "-".join(str(number) for number in digits),
                 "display_box_number": "-".join(str(number) for number in box_digits),
                 "reference_numbers": core_digits,
-                "reference_hit_count": len(overlap),
                 "divination_fit_score": divination_score,
-                "astrology_numbers": core_digits,
-                "astrology_hit_count": len(overlap),
-                "astrology_fit_score": divination_score,
                 "composition_score": composition_score,
                 "ticket_score": total_score,
                 "reason": _numbers_reason(digits, core_digits, product, profile),
-                **metrics,
+                **{key: metrics[key] for key in ("set_sum", "odd_count", "even_count", "spread", "consecutive_count")},
             }
         )
 
@@ -483,16 +369,18 @@ def generate_product_rows(
     profile: Mapping[str, Any],
     seed: str = "",
 ) -> List[Dict[str, Any]]:
-    product = get_product(product_id)
-    rng: RandomSource = random.Random(seed) if seed else random.SystemRandom()
-    if product.get("kind") == "numbers":
-        rows = _generate_numbers_rows(product, count, profile, rng)
-    else:
-        rows = _generate_loto_rows(product, count, profile, rng)
+    """Return a stable prefix of the same ranked daily pool for every count.
 
-    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    stamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    for index, row in enumerate(rows, start=1):
-        row["ticket_id"] = f"web_{stamp}_{index:03d}"
-        row["generated_at"] = generated_at
-    return rows
+    The pool size is shared with form validation. Python's stable sort keeps
+    generation order on score ties, so the highlighted result is always row 0.
+    """
+    product = get_product(product_id)
+    if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= MAX_TICKET_COUNT:
+        raise ValueError(f"受け取る口数は1〜{MAX_TICKET_COUNT}の範囲で選んでください。")
+    rng: RandomSource = random.Random(seed) if seed else random.SystemRandom()
+    if product["kind"] == "numbers":
+        rows = _generate_numbers_rows(product, MAX_TICKET_COUNT, profile, rng)
+    else:
+        rows = _generate_loto_rows(product, MAX_TICKET_COUNT, profile, rng)
+    rows.sort(key=lambda row: row["ticket_score"], reverse=True)
+    return rows[:count]

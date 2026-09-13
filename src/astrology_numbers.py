@@ -23,20 +23,6 @@ ZODIAC_SIGNS = [
     "魚座",
 ]
 ZODIAC_SYMBOLS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"]
-ZODIAC_ENGLISH = [
-    "ARIES",
-    "TAURUS",
-    "GEMINI",
-    "CANCER",
-    "LEO",
-    "VIRGO",
-    "LIBRA",
-    "SCORPIO",
-    "SAGITTARIUS",
-    "CAPRICORN",
-    "AQUARIUS",
-    "PISCES",
-]
 
 PLANETS: Sequence[Tuple[str, str, type, int]] = (
     ("sun", "太陽", ephem.Sun, 16),
@@ -70,7 +56,7 @@ MAJOR_ASPECTS: Sequence[Tuple[int, str]] = (
 def parse_birth_date(value: str, today: date | None = None) -> date:
     text = str(value or "").strip()
     if not text:
-        raise ValueError("星読みを使う場合は、生年月日を西暦で入力してください。")
+        raise ValueError("生年月日を西暦で入力してください。")
     try:
         parsed = date.fromisoformat(text)
     except ValueError as exc:
@@ -112,20 +98,6 @@ def zodiac_name(longitude: float) -> str:
 
 def degree_in_sign(longitude: float) -> float:
     return longitude % 30.0
-
-
-def calculate_birth_sun_sign(birth_date: date) -> Dict[str, Any]:
-    """Return the tropical Sun sign at noon JST for an immediate form preview."""
-    longitude = ecliptic_longitude(ephem.Sun, jst_noon_as_utc(birth_date))
-    index = int(longitude // 30) % 12
-    return {
-        "name": ZODIAC_SIGNS[index],
-        "symbol": ZODIAC_SYMBOLS[index],
-        "english": ZODIAC_ENGLISH[index],
-        "index": index,
-        "longitude": round(longitude, 2),
-        "degree": round(degree_in_sign(longitude), 2),
-    }
 
 
 def digit_sum(value: int | str) -> int:
@@ -259,10 +231,16 @@ def calculate_astrology_profile(birth_date: date, target_date: date | None = Non
 
     filler_seed = int(birth_date.strftime("%Y%m%d")) + int(current_date.strftime("%Y%m%d"))
     cursor = 1
-    while len(weights) < 20:
+    while len(weights) < 20 and cursor <= 128:
         value = filler_seed * (cursor * 17 + 31) + cursor * cursor * 19
         add_weight(weights, to_loto_number(value), max(35.0, 58.0 - cursor))
         cursor += 1
+
+    for number in range(1, 44):
+        if len(weights) >= 20:
+            break
+        if number not in weights:
+            add_weight(weights, number, 35.0)
 
     pool_numbers = [
         number

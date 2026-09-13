@@ -1,10 +1,5 @@
 {% extends "base.html" %}
-{% block title %}ロト・スコープ | エラー{% endblock %}
+{% block title %}ロト・スコープ | お知らせ{% endblock %}
 {% block content %}
-<section class="hero compact error-hero">
-  <div class="hero-kicker">SYSTEM MESSAGE</div>
-  <h1>ロト・スコープ<small>処理を続けられませんでした</small></h1>
-  <p>{{ message }}</p>
-  <div class="action-row"><a class="ghost-button" href="{{ url_for('index') }}">買い目作成画面へ戻る</a></div>
-</section>
+<section class="error-page"><span class="error-symbol" aria-hidden="true">☾</span><p class="eyebrow">LOTO SCOPE</p><h1 tabindex="-1">少し、お待ちください。</h1><p>{{ message }}</p><a class="primary-button" href="{{ url_for('index') }}">入力画面へ戻る <span aria-hidden="true">→</span></a></section>
 {% endblock %}

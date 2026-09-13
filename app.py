@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 import secrets
 import sys
@@ -7,280 +8,219 @@ import time
 from collections import defaultdict, deque
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Deque, Dict, Tuple
+from threading import Lock
+from typing import Any
 
-from flask import Flask, abort, jsonify, render_template, request, session
+from flask import Flask, abort, g, jsonify, redirect, render_template, request, session, url_for
+from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 ROOT_DIR = Path(__file__).resolve().parent
-SRC_DIR = ROOT_DIR / "src"
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
+sys.path.insert(0, str(ROOT_DIR / "src"))
 
-from astrology_numbers import (  # noqa: E402
-    JST,
-    calculate_astrology_profile,
-    calculate_birth_sun_sign,
-    parse_birth_date,
-)
-from divination_numbers import (  # noqa: E402
-    calculate_divination_profile,
-    divination_choices,
-    get_divination,
-)
-from product_numbers import (  # noqa: E402
-    generate_product_rows,
-    get_product,
-    product_choices,
-)
-from utils import load_json  # noqa: E402
+from astrology_numbers import JST, parse_birth_date  # noqa: E402
+from divination_numbers import calculate_divination_profile, divination_choices, get_divination  # noqa: E402
+from product_numbers import generate_product_rows, get_product, product_choices  # noqa: E402
+from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
-APP_VERSION = "v1.15.0-daily-oracle"
+APP_VERSION = "v1.16.0-mystic-oracle"
 DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 
 
-def create_app() -> Flask:
-    app = Flask(__name__)
-    app.config["SECRET_KEY"] = resolve_secret_key()
-    app.config["MAX_CONTENT_LENGTH"] = 256 * 1024
-    app.config["RATE_LIMIT_PER_MINUTE"] = int(os.environ.get("RATE_LIMIT_PER_MINUTE", "30"))
-    app.config["SESSION_COOKIE_HTTPONLY"] = True
-    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["SESSION_COOKIE_SECURE"] = is_production_environment()
+def is_production_environment() -> bool:
+    return (os.environ.get("APP_ENV", "").lower() == "production"
+            or os.environ.get("FLASK_ENV", "").lower() == "production"
+            or os.environ.get("RENDER", "").lower() == "true")
 
-    @app.context_processor
-    def inject_common() -> Dict[str, Any]:
-        settings = load_json("config/app_settings.json")
-        return {
-            "app_version": APP_VERSION,
-            "divination_choices": divination_choices(),
-            "product_choices": product_choices(),
-            "csrf_token": get_csrf_token,
-            "default_ticket_count": int(settings.get("default_ticket_count", 1)),
-            "max_ticket_count": int(settings.get("max_ticket_count", 10)),
-            "today_date": datetime.now(JST).date().isoformat(),
-            "current_year": datetime.now(JST).year,
-        }
+
+def resolve_secret_key() -> str:
+    key = os.environ.get("SECRET_KEY", "").strip()
+    if is_production_environment() and not key:
+        raise RuntimeError("本番公開時は環境変数 SECRET_KEY を必ず設定してください。")
+    return key or secrets.token_hex(32)
+
+
+def get_csrf_token() -> str:
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_urlsafe(32)
+    return str(session["csrf_token"])
+
+
+def validate_csrf_token() -> None:
+    expected = str(session.get("csrf_token", ""))
+    submitted = str(request.form.get("csrf_token", ""))
+    if not expected or not secrets.compare_digest(expected.encode(), submitted.encode()):
+        abort(400, description="フォームの有効期限が切れました。画面を再読み込みして、もう一度お試しください。")
+
+
+class RateLimiter:
+    """Per-app, per-process sliding window, shared safely by worker threads."""
+
+    def __init__(self) -> None:
+        self.buckets: dict[str, deque[float]] = defaultdict(deque)
+        self.lock = Lock()
+        self.last_cleanup = 0.0
+
+    def check(self, key: str, limit: int) -> int:
+        if limit <= 0:
+            return 0
+        now = time.monotonic()
+        cutoff = now - 60.0
+        with self.lock:
+            if now - self.last_cleanup >= 60:
+                for stale in [k for k, v in self.buckets.items() if not v or v[-1] <= cutoff]:
+                    del self.buckets[stale]
+                self.last_cleanup = now
+            bucket = self.buckets[key]
+            while bucket and bucket[0] <= cutoff:
+                bucket.popleft()
+            if len(bucket) >= limit:
+                return max(1, math.ceil(bucket[0] + 60 - now))
+            bucket.append(now)
+        return 0
+
+
+def parse_form_birth(form: Any, today: date | None = None) -> date:
+    # Native selects also work with JavaScript disabled. Repeat forms use ISO.
+    if any(key in form for key in ("birth_year", "birth_month", "birth_day")):
+        try:
+            value = date(int(form.get("birth_year", "")), int(form.get("birth_month", "")), int(form.get("birth_day", ""))).isoformat()
+        except (ValueError, TypeError) as exc:
+            raise ValueError("生年月日の年・月・日を正しく選択してください。") from exc
+    else:
+        value = str(form.get("birth_date", "")).strip()
+    return parse_birth_date(value, today=today)
+
+
+def parse_generate_form(form: Any, today: date | None = None) -> tuple[str, str, int, date]:
+    divination = str(form.get("divination", DEFAULT_DIVINATION_ID)).strip()
+    product = str(form.get("product", DEFAULT_PRODUCT_ID)).strip()
+    get_divination(divination)
+    get_product(product)
+    try:
+        count = int(str(form.get("count", "")).strip())
+    except ValueError as exc:
+        raise ValueError(f"受け取る口数を1〜{MAX_TICKET_COUNT}で選んでください。") from exc
+    if not 1 <= count <= MAX_TICKET_COUNT:
+        raise ValueError(f"受け取る口数は1〜{MAX_TICKET_COUNT}の範囲で選んでください。")
+    return divination, product, count, parse_form_birth(form, today)
+
+
+def build_daily_oracle_seed(birth_date_value: date, target_date_value: date, divination_id: str, product_id: str) -> str:
+    return "|".join(("lotoscope-daily-v1", birth_date_value.isoformat(), target_date_value.isoformat(), divination_id, product_id))
+
+
+def wants_json() -> bool:
+    return request.accept_mimetypes.best == "application/json"
+
+
+def create_app(test_config: dict[str, Any] | None = None) -> Flask:
+    app = Flask(__name__)
+    app.config.update(
+        SECRET_KEY=resolve_secret_key(), MAX_CONTENT_LENGTH=256 * 1024,
+        RATE_LIMIT_PER_MINUTE=int(os.environ.get("RATE_LIMIT_PER_MINUTE", "30")),
+        SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=is_production_environment(),
+        # Trust only a configured proxy. Direct/local deployments ignore XFF.
+        TRUSTED_PROXY_HOPS=int(os.environ.get("TRUSTED_PROXY_HOPS", "1" if os.environ.get("RENDER", "").lower() == "true" else "0")),
+    )
+    if test_config:
+        app.config.update(test_config)
+    hops = int(app.config["TRUSTED_PROXY_HOPS"])
+    if not 0 <= hops <= 5:
+        raise ValueError("TRUSTED_PROXY_HOPS は0〜5で指定してください。")
+    if hops:
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=hops, x_proto=0, x_host=0, x_port=0, x_prefix=0)
+    limiter = RateLimiter()
+    app.extensions["rate_limiter"] = limiter
 
     @app.before_request
-    def protect_post_requests():
-        if request.method != "POST":
-            return None
-        enforce_rate_limit(app)
-        validate_csrf_token()
-        return None
+    def protect_request():
+        g.today = datetime.now(JST).date()
+        if request.method == "POST":
+            # Do not read user-supplied forwarding headers here.
+            retry = limiter.check(request.remote_addr or "unknown", int(app.config["RATE_LIMIT_PER_MINUTE"]))
+            if retry:
+                g.retry_after = retry
+                abort(429, description=f"短時間に操作が集中しています。{retry}秒ほど待ってからお試しください。")
+            validate_csrf_token()
+
+    @app.context_processor
+    def common():
+        today = getattr(g, "today", datetime.now(JST).date())
+        return dict(app_version=APP_VERSION, divination_choices=divination_choices(), product_choices=product_choices(),
+                    csrf_token=get_csrf_token, default_ticket_count=DEFAULT_TICKET_COUNT, max_ticket_count=MAX_TICKET_COUNT,
+                    today_date=today.isoformat(), current_year=today.year, today_label=f"{today.year}.{today.month:02d}.{today.day:02d}")
 
     @app.after_request
-    def add_security_headers(response):
-        response.headers.setdefault("X-Content-Type-Options", "nosniff")
-        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        response.headers.setdefault("X-Frame-Options", "DENY")
-        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
-        response.headers.setdefault(
-            "Content-Security-Policy",
-            "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
-            "script-src 'self'; font-src 'self' data:; form-action 'self'; base-uri 'self'; frame-ancestors 'none'",
-        )
-        if response.mimetype == "text/html":
-            response.headers.setdefault("Cache-Control", "no-store")
+    def security_headers(response):
+        response.headers.update({
+            "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY",
+            "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+            "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'",
+        })
+        if response.mimetype in {"text/html", "application/json"}:
+            response.headers["Cache-Control"] = "no-store"
+        if response.status_code == 429:
+            response.headers["Retry-After"] = str(getattr(g, "retry_after", 60))
         return response
 
     @app.get("/")
     def index():
-        values = dict(request.args.items())
-        return render_template("index.html", values=values, error="")
+        return render_template("index.html", values={}, error="")
 
-    @app.get("/zodiac-preview")
-    def zodiac_preview():
-        try:
-            birth_date_value = parse_birth_date(request.args.get("birth_date", ""))
-            return jsonify(calculate_birth_sun_sign(birth_date_value))
-        except ValueError as exc:
-            return jsonify({"error": str(exc)}), 400
+    @app.get("/generate")
+    def generate_home():
+        return redirect(url_for("index"))
 
-    @app.get("/divination-preview")
+    @app.post("/divination-preview")
     def divination_preview():
         try:
-            divination_id = str(request.args.get("divination", DEFAULT_DIVINATION_ID)).strip()
-            get_divination(divination_id)
-            birth_date_value = parse_birth_date(request.args.get("birth_date", ""))
-            profile = calculate_divination_profile(divination_id, birth_date_value)
-            return jsonify({
-                "method_id": profile["method_id"],
-                "method_name": profile["method_name"],
-                "method_symbol": profile["method_symbol"],
-                "summary_items": profile.get("summary_items", []),
-            })
+            method = str(request.form.get("divination", DEFAULT_DIVINATION_ID)).strip()
+            get_divination(method)
+            birth = parse_form_birth(request.form, g.today)
+            profile = calculate_divination_profile(method, birth, g.today)
+            return jsonify(method_id=profile["method_id"], summary_items=profile["summary_items"])
         except ValueError as exc:
-            return jsonify({"error": str(exc)}), 400
+            return jsonify(error=str(exc)), 400
 
     @app.post("/generate")
     def generate():
         try:
-            divination_id, product_id, count, birth_date_value = parse_generate_form(request.form)
-            divination = get_divination(divination_id)
-            product = get_product(product_id)
-            target_date_value = datetime.now(JST).date()
-            divination_profile = calculate_divination_profile(divination_id, birth_date_value, target_date_value)
-            daily_seed = build_daily_oracle_seed(
-                birth_date_value=birth_date_value,
-                target_date_value=target_date_value,
-                divination_id=divination_id,
-                product_id=product_id,
-            )
-            rows = generate_product_rows(product_id, count, divination_profile, seed=daily_seed)
-            return render_template(
-                "result.html",
-                rows=rows,
-                product=product,
-                product_id=product_id,
-                count=count,
-                divination=divination,
-                divination_id=divination_id,
-                divination_profile=divination_profile,
-            )
+            method, product, count, birth = parse_generate_form(request.form, g.today)
+            profile = calculate_divination_profile(method, birth, g.today)
+            seed = build_daily_oracle_seed(birth, g.today, method, product)
+            rows = generate_product_rows(product, count, profile, seed=seed)
+            html = render_template("result.html", rows=rows, product=get_product(product), product_id=product, count=count,
+                                   divination=get_divination(method), divination_id=method, divination_profile=profile)
+            return jsonify(html=html) if wants_json() else html
         except (ValueError, RuntimeError) as exc:
-            values = dict(request.form.items())
-            return render_template("index.html", values=values, error=str(exc)), 400
+            if wants_json():
+                return jsonify(error=str(exc)), 400
+            return render_template("index.html", values=dict(request.form), error=str(exc)), 400
         except Exception:
             app.logger.exception("Unexpected generation error")
-            values = dict(request.form.items())
-            return render_template(
-                "index.html",
-                values=values,
-                error="数字を導けませんでした。入力内容を確認して、もう一度お試しください。",
-            ), 500
+            abort(500)
 
     @app.get("/health")
     def health():
         return "OK"
 
-    @app.errorhandler(400)
-    def bad_request(err):
-        message = getattr(err, "description", "入力内容を確認してください。")
-        return render_template("error.html", message=message), 400
-
-    @app.errorhandler(404)
-    def not_found(_err):
-        return render_template("error.html", message="ページが見つかりません。"), 404
-
-    @app.errorhandler(413)
-    def request_too_large(_err):
-        return render_template("error.html", message="送信データが大きすぎます。口数を減らして、もう一度お試しください。"), 413
-
-    @app.errorhandler(429)
-    def too_many_requests(err):
-        message = getattr(err, "description", "短時間に操作が集中しています。少し時間をおいてからお試しください。")
-        return render_template("error.html", message=message), 429
-
-    @app.errorhandler(500)
-    def server_error(_err):
-        return render_template("error.html", message="内部エラーが発生しました。時間をおいて再度お試しください。"), 500
+    @app.errorhandler(HTTPException)
+    def http_error(err):
+        messages = {404: "ページが見つかりません。", 405: "この操作は入力画面から行ってください。",
+                    413: "送信データが大きすぎます。画面を開き直してお試しください。",
+                    500: "数字を導けませんでした。少し時間をおいてお試しください。"}
+        message = messages.get(err.code, err.description)
+        if wants_json() or request.path == "/divination-preview":
+            return jsonify(error=message), err.code
+        return render_template("error.html", message=message), err.code
 
     return app
 
 
-def parse_generate_form(form: Any) -> Tuple[str, str, int, date]:
-    divination_id = str(form.get("divination", DEFAULT_DIVINATION_ID)).strip()
-    get_divination(divination_id)
-
-    product_id = str(form.get("product", DEFAULT_PRODUCT_ID)).strip()
-    get_product(product_id)
-
-    settings = load_json("config/app_settings.json")
-    max_count = int(settings.get("max_ticket_count", 10))
-    try:
-        count = int(str(form.get("count", "")).strip())
-    except Exception as exc:
-        raise ValueError(f"受け取る口数を1〜{max_count}で選んでください。") from exc
-    if not 1 <= count <= max_count:
-        raise ValueError(f"受け取る口数は1〜{max_count}の範囲で選んでください。")
-
-    birth_date_value = parse_birth_date(str(form.get("birth_date", "")).strip())
-    return divination_id, product_id, count, birth_date_value
-
-
-
-def build_daily_oracle_seed(
-    birth_date_value: date,
-    target_date_value: date,
-    divination_id: str,
-    product_id: str,
-) -> str:
-    """Return a stable daily seed for one birthday × divination × lottery combination.
-
-    The same inputs on the same JST calendar day produce the same candidate rows.
-    A new JST date naturally produces a new daily reading.
-    """
-    return "|".join(
-        (
-            "lotoscope-daily-v1",
-            birth_date_value.isoformat(),
-            target_date_value.isoformat(),
-            divination_id,
-            product_id,
-        )
-    )
-
-def is_production_environment() -> bool:
-    app_env = os.environ.get("APP_ENV", "").strip().lower()
-    flask_env = os.environ.get("FLASK_ENV", "").strip().lower()
-    return app_env == "production" or flask_env == "production"
-
-
-def resolve_secret_key() -> str:
-    secret_key = os.environ.get("SECRET_KEY", "").strip()
-    if is_production_environment() and not secret_key:
-        raise RuntimeError("本番公開時は環境変数 SECRET_KEY を必ず設定してください。")
-    return secret_key or "dev-only-change-this-secret"
-
-
-def get_csrf_token() -> str:
-    token = session.get("csrf_token")
-    if not token:
-        token = secrets.token_urlsafe(32)
-        session["csrf_token"] = token
-    return str(token)
-
-
-def validate_csrf_token() -> None:
-    expected = session.get("csrf_token")
-    submitted = request.form.get("csrf_token", "")
-    if not expected or not secrets.compare_digest(str(expected), str(submitted)):
-        abort(400, description="フォームの有効期限が切れました。画面を再読み込みして、もう一度お試しください。")
-
-
-_RATE_LIMIT_BUCKETS: Dict[str, Deque[float]] = defaultdict(deque)
-_RATE_LIMIT_LAST_CLEANUP = 0.0
-
-
-def enforce_rate_limit(app: Flask) -> None:
-    global _RATE_LIMIT_LAST_CLEANUP
-    limit = int(app.config.get("RATE_LIMIT_PER_MINUTE", 30))
-    if limit <= 0:
-        return
-    key = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
-    now = time.time()
-    window_start = now - 60
-
-    if now - _RATE_LIMIT_LAST_CLEANUP > 300:
-        stale_keys = [bucket_key for bucket_key, bucket in _RATE_LIMIT_BUCKETS.items() if not bucket or bucket[-1] < window_start]
-        for bucket_key in stale_keys:
-            _RATE_LIMIT_BUCKETS.pop(bucket_key, None)
-        _RATE_LIMIT_LAST_CLEANUP = now
-
-    bucket = _RATE_LIMIT_BUCKETS[key]
-    while bucket and bucket[0] < window_start:
-        bucket.popleft()
-    if len(bucket) >= limit:
-        abort(429, description="短時間に操作が集中しています。少し時間をおいてからお試しください。")
-    bucket.append(now)
-
-
-
 app = create_app()
 
-
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "8786"))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8786")), debug=False)

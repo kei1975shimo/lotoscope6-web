@@ -14,27 +14,27 @@ DIVINATIONS: Dict[str, Dict[str, Any]] = {
         "symbol": "✦",
         "badge": "七天体と星座の響き",
         "description": "誕生日と生成日の七天体を重ね、星の配置から数字を導きます。",
-        "button_label": "占星術で数字を生成する",
+        "button_label": "星の導きを受け取る",
     },
     "kabbalah": {
         "divination_id": "kabbalah",
         "name": "カバラ数秘術",
         "short_name": "数秘術",
-        "english": "KABBALAH NUMEROLOGY",
+        "english": "KABBALAH",
         "symbol": "✡",
         "badge": "誕生日を数へ還元",
         "description": "生年月日を基礎数へ還元し、複数の数秘サイクルから数字を導きます。",
-        "button_label": "カバラ数秘術で数字を生成する",
+        "button_label": "数秘の導きを受け取る",
     },
     "tarot": {
         "divination_id": "tarot",
         "name": "タロット",
         "short_name": "タロット",
-        "english": "TAROT ARCANA",
-        "symbol": "☥",
+        "english": "TAROT",
+        "symbol": "☾",
         "badge": "大アルカナ22枚の導き",
         "description": "生年月日と今日を大アルカナへ対応させ、カードの数字から候補を導きます。",
-        "button_label": "タロットで数字を生成する",
+        "button_label": "カードの導きを受け取る",
     },
 }
 
@@ -336,7 +336,7 @@ def calculate_tarot_profile(birth_date: date, target_date: date) -> Dict[str, An
             ],
             "detail_rows": [
                 {
-                    "symbol": "☥",
+                    "symbol": "☾",
                     "title": label,
                     "line1": f"{card['display_number']} · {card['name']}",
                     "line2": card["keyword"],
