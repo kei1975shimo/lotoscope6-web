@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 from app import APP_VERSION, JST, RateLimiter, build_daily_oracle_seed, create_app, resolve_secret_key
 from divination_numbers import calculate_divination_profile, divination_choices
-from product_numbers import _resample_weights, build_digit_weights, build_loto_weights, generate_product_rows, product_choices
+from product_numbers import _resample_weights, build_digit_weights, build_loto_weights, generate_product_rows, get_product, product_choices, product_full_size
 
 BIRTH = date(1975, 8, 16)
 DAY = date(2026, 9, 13)
@@ -91,6 +91,53 @@ class GenerationRegressionTests(unittest.TestCase):
             self.assertFalse(old & row.keys())
 
 
+class PickSizeRegressionTests(unittest.TestCase):
+    """Requesting fewer numbers/digits than a product's full size (a new
+    'pick_size' option) must never change which tickets are drawn or their
+    order — only trim each ticket's own numbers to the most divination-
+    weighted subset."""
+
+    def test_omitted_pick_size_matches_explicit_full_size(self):
+        for method in METHODS:
+            profile = calculate_divination_profile(method, BIRTH, DAY)
+            for product in PRODUCTS:
+                seed = build_daily_oracle_seed(BIRTH, DAY, method, product)
+                full = product_full_size(get_product(product))
+                with self.subTest(method=method, product=product):
+                    self.assertEqual(
+                        generate_product_rows(product, 5, profile, seed),
+                        generate_product_rows(product, 5, profile, seed, pick_size=full),
+                    )
+
+    def test_reduced_size_is_a_ranked_subset_without_reordering_tickets(self):
+        for method in METHODS:
+            profile = calculate_divination_profile(method, BIRTH, DAY)
+            for info in product_choices():
+                product, full, kind = info['product_id'], info['full_size'], info['kind']
+                seed = build_daily_oracle_seed(BIRTH, DAY, method, product)
+                full_rows = generate_product_rows(product, 10, profile, seed)
+                for size in range(1, full + 1):
+                    with self.subTest(method=method, product=product, size=size):
+                        reduced_rows = generate_product_rows(product, 10, profile, seed, pick_size=size)
+                        self.assertEqual(len(reduced_rows), 10)
+                        for full_row, reduced_row in zip(full_rows, reduced_rows):
+                            self.assertEqual(len(reduced_row['numbers']), size)
+                            if kind == 'numbers':
+                                # A subsequence: left-to-right order is preserved, duplicates included.
+                                remaining = iter(full_row['numbers'])
+                                self.assertTrue(all(value in remaining for value in reduced_row['numbers']))
+                            else:
+                                self.assertLessEqual(set(reduced_row['numbers']), set(full_row['numbers']))
+                                self.assertEqual(reduced_row['numbers'], sorted(reduced_row['numbers']))
+                            if size == full:
+                                self.assertEqual(reduced_row, full_row)
+
+    def test_invalid_pick_size_fails_at_generator_boundary(self):
+        for value in (0, 7, -1, True, 1.5, '1'):
+            with self.subTest(pick_size=value), self.assertRaises(ValueError):
+                generate_product_rows('loto6', 1, {}, 'test', pick_size=value)
+
+
 class RequestRegressionTests(unittest.TestCase):
     def setUp(self):
         self.app = create_app({'TESTING': True, 'SECRET_KEY': 'test', 'RATE_LIMIT_PER_MINUTE': 0, 'TRUSTED_PROXY_HOPS': 0, 'SESSION_COOKIE_SECURE': False})
@@ -116,6 +163,25 @@ class RequestRegressionTests(unittest.TestCase):
                     self.assertEqual(response.text.count('<details class="ticket">'), count - 1)
                 self.assertEqual(tops[0], tops[1])
                 self.assertEqual(tops[0], tops[2])
+
+    def test_pick_size_trims_numbers_and_is_preserved_on_reconfirm(self):
+        response = self.client.post('/generate', data=self.data(product='loto6', count='3', pick_size='2'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text.count('<details class="ticket">'), 2)
+        block = response.text.split('class="best-numbers ', 1)[1].split('</div>', 1)[0]
+        numbers = re.findall(r'aria-label="(\d+)(?:、占いの中心数字)?"', block)
+        self.assertEqual(len(numbers), 2)
+        self.assertIn('name="pick_size" value="2"', response.text)
+
+    def test_pick_size_out_of_range_or_non_numeric_is_rejected(self):
+        headers = {'Accept': 'application/json'}
+        response = self.client.post('/generate', data=self.data(product='numbers3', pick_size='4'), headers=headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('欲しい個数', response.json['error'])
+        for value in ('0', 'abc'):
+            response = self.client.post('/generate', data=self.data(pick_size=value), headers=headers)
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('欲しい個数', response.json['error'])
 
     def test_native_selects_work_without_javascript(self):
         data = self.data(birth_year='2000', birth_month='2', birth_day='29')

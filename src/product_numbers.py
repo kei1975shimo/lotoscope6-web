@@ -16,6 +16,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "kind": "loto",
         "max_number": 31,
         "pick_count": 5,
+        "full_size": 5,
         "badge": "1〜31から5個",
         "ritual_duration": 3900,
     },
@@ -26,6 +27,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "kind": "loto",
         "max_number": 43,
         "pick_count": 6,
+        "full_size": 6,
         "badge": "1〜43から6個",
         "ritual_duration": 4700,
     },
@@ -36,6 +38,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "kind": "loto",
         "max_number": 37,
         "pick_count": 7,
+        "full_size": 7,
         "badge": "1〜37から7個",
         "ritual_duration": 5400,
     },
@@ -45,6 +48,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "english": "NUMBERS 3",
         "kind": "numbers",
         "digit_count": 3,
+        "full_size": 3,
         "badge": "0〜9から3桁（順序あり）",
         "ritual_duration": 3800,
     },
@@ -54,10 +58,16 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "english": "NUMBERS 4",
         "kind": "numbers",
         "digit_count": 4,
+        "full_size": 4,
         "badge": "0〜9から4桁（順序あり）",
         "ritual_duration": 4200,
     },
 }
+
+#: Largest `full_size` across every product, i.e. how many <option> rows the
+#: "欲しい個数" selector needs to render (options beyond a product's own
+#: full_size are disabled client-side; see static/js/app.js).
+MAX_FULL_SIZE = max(item["full_size"] for item in PRODUCTS.values())
 
 PRODUCT_ORDER = ["miniloto", "loto6", "loto7", "numbers3", "numbers4"]
 
@@ -71,6 +81,11 @@ def get_product(product_id: str) -> Dict[str, Any]:
         return dict(PRODUCTS[product_id])
     except KeyError as exc:
         raise ValueError("ミニロト・ロト6・ロト7・ナンバーズ3・ナンバーズ4から選択してください。") from exc
+
+
+def product_full_size(product: Mapping[str, Any]) -> int:
+    """The product's own maximum: pick_count for loto, digit_count for numbers."""
+    return int(product["full_size"])
 
 
 def _weight_value(weights: Mapping[Any, Any], number: int) -> float:
@@ -320,6 +335,93 @@ def _numbers_reason(digits: Sequence[int], core_digits: Sequence[int], product: 
     )
 
 
+def _rank_positions_by_weight(values: Sequence[int], weights: Mapping[int, float]) -> List[int]:
+    """Position indices of `values`, most divination-weighted first.
+
+    Ties (equal weight, including repeated digits) keep the leftmost/
+    lowest-index position first, so a tie always resolves the same way.
+    """
+    return sorted(range(len(values)), key=lambda i: (-_weight_value(weights, values[i]), i))
+
+
+def _reduce_unordered(values: Sequence[int], weights: Mapping[int, float], size: int) -> List[int]:
+    """Keep the `size` most divination-weighted values, order-independent.
+
+    Used for loto-type tickets, where only the set of numbers matters.
+    Displayed ascending, as loto numbers conventionally are.
+    """
+    if size >= len(values):
+        return sorted(values)
+    keep = sorted(_rank_positions_by_weight(values, weights)[:size])
+    return sorted(values[i] for i in keep)
+
+
+def _reduce_ordered(values: Sequence[int], weights: Mapping[int, float], size: int) -> List[int]:
+    """Keep the `size` most divination-weighted positions, left-to-right order kept.
+
+    Used for Numbers-type tickets, where digit order is part of the ticket:
+    dropping digits must not reorder the ones that remain.
+    """
+    if size >= len(values):
+        return list(values)
+    keep = sorted(_rank_positions_by_weight(values, weights)[:size])
+    return [values[i] for i in keep]
+
+
+def _reduce_loto_row(
+    row: Dict[str, Any],
+    weights: Mapping[int, float],
+    maximum: int,
+    core_numbers: Sequence[int],
+    product: Mapping[str, Any],
+    profile: Mapping[str, Any],
+    size: int,
+) -> Dict[str, Any]:
+    numbers = _reduce_unordered(row["numbers"], weights, size)
+    metrics = _loto_metrics(numbers, maximum)
+    divination_score = _divination_score(numbers, weights)
+    composition_score = _composition_score(numbers, maximum)
+    row = dict(row)
+    row.update(
+        {
+            "numbers": numbers,
+            "divination_fit_score": divination_score,
+            "composition_score": composition_score,
+            "ticket_score": round(divination_score * 0.78 + composition_score * 0.22),
+            "reason": _loto_reason(numbers, core_numbers, product, profile),
+            **{key: metrics[key] for key in ("set_sum", "odd_count", "even_count", "spread", "consecutive_count")},
+        }
+    )
+    return row
+
+
+def _reduce_numbers_row(
+    row: Dict[str, Any],
+    weights: Mapping[int, float],
+    core_digits: Sequence[int],
+    product: Mapping[str, Any],
+    profile: Mapping[str, Any],
+    size: int,
+) -> Dict[str, Any]:
+    digits = _reduce_ordered(row["numbers"], weights, size)
+    metrics = _numbers_metrics(digits)
+    divination_score = _divination_score(digits, weights)
+    composition_score = _numbers_composition_score(digits)
+    row = dict(row)
+    row.update(
+        {
+            "numbers": digits,
+            "display_box_number": "-".join(str(number) for number in sorted(digits)),
+            "divination_fit_score": divination_score,
+            "composition_score": composition_score,
+            "ticket_score": round(divination_score * 0.78 + composition_score * 0.22),
+            "reason": _numbers_reason(digits, core_digits, product, profile),
+            **{key: metrics[key] for key in ("set_sum", "odd_count", "even_count", "spread", "consecutive_count")},
+        }
+    )
+    return row
+
+
 def _generate_numbers_rows(
     product: Mapping[str, Any],
     count: int,
@@ -368,19 +470,43 @@ def generate_product_rows(
     count: int,
     profile: Mapping[str, Any],
     seed: str = "",
+    pick_size: int | None = None,
 ) -> List[Dict[str, Any]]:
     """Return a stable prefix of the same ranked daily pool for every count.
 
     The pool size is shared with form validation. Python's stable sort keeps
     generation order on score ties, so the highlighted result is always row 0.
+
+    `pick_size` trims each ticket to fewer numbers/digits than the product's
+    own full size (e.g. 3 of Loto 6's 6 numbers, or 1 of Numbers 3's 3
+    digits), keeping only the ones most weighted by the divination reading.
+    It never changes which tickets are drawn or their order — only how many
+    of each ticket's numbers are shown — so the same-day/ranked-prefix
+    guarantees above hold regardless of the requested size. `None` (or the
+    product's own full size) returns tickets unchanged, exactly as before
+    this option existed.
     """
     product = get_product(product_id)
     if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= MAX_TICKET_COUNT:
         raise ValueError(f"受け取る口数は1〜{MAX_TICKET_COUNT}の範囲で選んでください。")
+    full_size = product_full_size(product)
+    if pick_size is None:
+        pick_size = full_size
+    if isinstance(pick_size, bool) or not isinstance(pick_size, int) or not 1 <= pick_size <= full_size:
+        raise ValueError(f"欲しい個数は1〜{full_size}の範囲で選んでください。")
     rng: RandomSource = random.Random(seed) if seed else random.SystemRandom()
     if product["kind"] == "numbers":
         rows = _generate_numbers_rows(product, MAX_TICKET_COUNT, profile, rng)
     else:
         rows = _generate_loto_rows(product, MAX_TICKET_COUNT, profile, rng)
     rows.sort(key=lambda row: row["ticket_score"], reverse=True)
-    return rows[:count]
+    rows = rows[:count]
+    if pick_size >= full_size:
+        return rows
+    if product["kind"] == "numbers":
+        weights = build_digit_weights(profile)
+        core_digits = numbers_core_digits(profile, product)
+        return [_reduce_numbers_row(row, weights, core_digits, product, profile, pick_size) for row in rows]
+    weights = build_loto_weights(profile, int(product["max_number"]))
+    core_numbers = product_core_numbers(profile, product)
+    return [_reduce_loto_row(row, weights, int(product["max_number"]), core_numbers, product, profile, pick_size) for row in rows]

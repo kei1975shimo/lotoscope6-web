@@ -4,6 +4,10 @@
 {% set current_divination = values.get('divination', 'astrology') %}
 {% set current_product = values.get('product', 'loto6') %}
 {% set current_count = values.get('count', default_ticket_count|string) %}
+{% set current_product_info = (product_choices | selectattr('product_id', 'equalto', current_product) | first) %}
+{% set current_full_size = current_product_info.full_size %}
+{% set current_size_unit = '桁' if current_product_info.kind == 'numbers' else '個' %}
+{% set current_pick_size = values.get('pick_size', current_full_size|string) %}
 {% set birth_iso = values.get('birth_date', '') %}
 {% set birth_y = values.get('birth_year', birth_iso[0:4]) %}
 {% set birth_m = values.get('birth_month', birth_iso[5:7]) %}
@@ -44,15 +48,16 @@
       <legend class="step-title"><span>03</span> くじを選ぶ</legend>
       <div class="product-list">
         {% for item in product_choices %}
-        <label class="product-option"><input type="radio" name="product" value="{{ item.product_id }}" data-name="{{ item.name }}" data-duration="{{ item.ritual_duration }}" {% if current_product == item.product_id %}checked{% endif %} required><span class="product-row"><span class="product-name">{{ item.name }}</span><small>{{ item.badge }}</small><span class="radio-mark" aria-hidden="true"></span></span></label>
+        <label class="product-option"><input type="radio" name="product" value="{{ item.product_id }}" data-name="{{ item.name }}" data-duration="{{ item.ritual_duration }}" data-full-size="{{ item.full_size }}" data-kind="{{ item.kind }}" {% if current_product == item.product_id %}checked{% endif %} required><span class="product-row"><span class="product-name">{{ item.name }}</span><small>{{ item.badge }}</small><span class="radio-mark" aria-hidden="true"></span></span></label>
         {% endfor %}
       </div>
     </fieldset>
     <section class="receive-section" aria-labelledby="receive-title">
       <h2 class="step-title" id="receive-title"><span>04</span> 導きを受け取る</h2>
+      <label class="pick-size-field" for="pick_size"><span>欲しい個数<small data-pick-size-hint>1〜{{ current_full_size }}{{ current_size_unit }}</small></span><select id="pick_size" name="pick_size" required>{% for n in range(1, max_full_size + 1) %}<option value="{{ n }}" {% if n > current_full_size %}disabled{% endif %} {% if current_pick_size|int == n %}selected{% endif %}>{{ n }}{{ current_size_unit }}</option>{% endfor %}</select></label>
       <label class="count-field" for="count"><span>受け取る口数<small>1〜{{ max_ticket_count }}口</small></span><select id="count" name="count" required>{% for n in range(1, max_ticket_count + 1) %}<option value="{{ n }}" {% if current_count|int == n %}selected{% endif %}>{{ n }}口</option>{% endfor %}</select></label>
-      <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>今日の導きは、ひとつ。</strong><small>同じ誕生日・日本時間の日付・占い・くじなら、何度開いても同じ数字です。口数を増やしても、先頭の数字と順番は変わりません。</small></p></div>
-      <div class="selection-summary" aria-live="polite"><span data-summary-method>西洋占星術</span><span aria-hidden="true">×</span><span data-summary-product>ロト6</span><span data-summary-count>1口</span></div>
+      <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>今日の導きは、ひとつ。</strong><small>同じ誕生日・日本時間の日付・占い・くじなら、何度開いても同じ数字です。口数や欲しい個数を変えても、先頭の数字と順番は変わりません。</small></p></div>
+      <div class="selection-summary" aria-live="polite"><span data-summary-method>西洋占星術</span><span aria-hidden="true">×</span><span data-summary-product>ロト6</span><span data-summary-size>{{ current_pick_size }}{{ current_size_unit }}</span><span data-summary-count>1口</span></div>
       <button class="primary-button" type="submit" data-submit-button><span aria-hidden="true">✦</span><span data-button-copy>星の導きを受け取る</span><span aria-hidden="true">→</span></button>
       <p class="submit-note">あなたの誕生日と、今日を重ねて。</p>
     </section>

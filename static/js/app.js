@@ -127,6 +127,24 @@
       if (Number(form.elements.birth_day.value) > maximum) form.elements.birth_day.value = '';
     }
 
+    function updatePickSize(product) {
+      const select = form.elements.pick_size;
+      if (!select) return;
+      const full = Number(product.dataset.fullSize) || 1;
+      const unit = product.dataset.kind === 'numbers' ? '桁' : '個';
+      Array.from(select.options).forEach((option) => {
+        option.disabled = Number(option.value) > full;
+        option.textContent = `${option.value}${unit}`;
+      });
+      // A size that no longer fits the newly chosen product falls back to
+      // its full size, same as the option a fresh page load would select.
+      if (Number(select.value) > full) select.value = String(full);
+      const hint = form.querySelector('[data-pick-size-hint]');
+      if (hint) hint.textContent = `1〜${full}${unit}`;
+      const summarySize = form.querySelector('[data-summary-size]');
+      if (summarySize) summarySize.textContent = `${select.value}${unit}`;
+    }
+
     function updateSelection() {
       const method = selected('divination');
       const product = selected('product');
@@ -137,6 +155,7 @@
       form.querySelector('[data-summary-product]').textContent = product.dataset.name;
       form.querySelector('[data-summary-count]').textContent = `${form.elements.count.value}口`;
       form.querySelector('[data-button-copy]').textContent = method.dataset.buttonLabel;
+      updatePickSize(product);
     }
 
     // Recover a selection when displaying an invalid native form submission.
@@ -146,7 +165,7 @@
     form.addEventListener('change', (event) => {
       if (event.target.name.startsWith('birth_')) updateDays();
       updateSelection();
-      if (event.target.name !== 'product' && event.target.name !== 'count') queuePreview();
+      if (!['product', 'count', 'pick_size'].includes(event.target.name)) queuePreview();
     }, { signal: listeners.signal });
     updateDays();
     updateSelection();

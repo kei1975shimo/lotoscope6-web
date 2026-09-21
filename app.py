@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT_DIR / "src"))
 
 from astrology_numbers import JST, parse_birth_date  # noqa: E402
 from divination_numbers import calculate_divination_profile, divination_choices, get_divination  # noqa: E402
-from product_numbers import generate_product_rows, get_product, product_choices  # noqa: E402
+from product_numbers import MAX_FULL_SIZE, generate_product_rows, get_product, product_choices, product_full_size  # noqa: E402
 from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
 APP_VERSION = "v1.16.0-mystic-oracle"
@@ -93,18 +93,27 @@ def parse_form_birth(form: Any, today: date | None = None) -> date:
     return parse_birth_date(value, today=today)
 
 
-def parse_generate_form(form: Any, today: date | None = None) -> tuple[str, str, int, date]:
+def parse_generate_form(form: Any, today: date | None = None) -> tuple[str, str, int, int, date]:
     divination = str(form.get("divination", DEFAULT_DIVINATION_ID)).strip()
     product = str(form.get("product", DEFAULT_PRODUCT_ID)).strip()
     get_divination(divination)
-    get_product(product)
+    product_info = get_product(product)
     try:
         count = int(str(form.get("count", "")).strip())
     except ValueError as exc:
         raise ValueError(f"受け取る口数を1〜{MAX_TICKET_COUNT}で選んでください。") from exc
     if not 1 <= count <= MAX_TICKET_COUNT:
         raise ValueError(f"受け取る口数は1〜{MAX_TICKET_COUNT}の範囲で選んでください。")
-    return divination, product, count, parse_form_birth(form, today)
+    full_size = product_full_size(product_info)
+    # Missing pick_size (older cached forms, or a client that never sent it)
+    # falls back to the product's own full size — unchanged past behaviour.
+    try:
+        pick_size = int(str(form.get("pick_size", full_size)).strip())
+    except ValueError as exc:
+        raise ValueError(f"欲しい個数を1〜{full_size}で選んでください。") from exc
+    if not 1 <= pick_size <= full_size:
+        raise ValueError(f"欲しい個数は1〜{full_size}の範囲で選んでください。")
+    return divination, product, count, pick_size, parse_form_birth(form, today)
 
 
 def build_daily_oracle_seed(birth_date_value: date, target_date_value: date, divination_id: str, product_id: str) -> str:
@@ -151,6 +160,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         today = getattr(g, "today", datetime.now(JST).date())
         return dict(app_version=APP_VERSION, divination_choices=divination_choices(), product_choices=product_choices(),
                     csrf_token=get_csrf_token, default_ticket_count=DEFAULT_TICKET_COUNT, max_ticket_count=MAX_TICKET_COUNT,
+                    max_full_size=MAX_FULL_SIZE,
                     today_date=today.isoformat(), current_year=today.year, today_label=f"{today.year}.{today.month:02d}.{today.day:02d}")
 
     @app.after_request
@@ -188,11 +198,12 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     @app.post("/generate")
     def generate():
         try:
-            method, product, count, birth = parse_generate_form(request.form, g.today)
+            method, product, count, pick_size, birth = parse_generate_form(request.form, g.today)
             profile = calculate_divination_profile(method, birth, g.today)
             seed = build_daily_oracle_seed(birth, g.today, method, product)
-            rows = generate_product_rows(product, count, profile, seed=seed)
+            rows = generate_product_rows(product, count, profile, seed=seed, pick_size=pick_size)
             html = render_template("result.html", rows=rows, product=get_product(product), product_id=product, count=count,
+                                   pick_size=pick_size,
                                    divination=get_divination(method), divination_id=method, divination_profile=profile)
             return jsonify(html=html) if wants_json() else html
         except (ValueError, RuntimeError) as exc:
