@@ -14,6 +14,7 @@
 {% set birth_d = values.get('birth_day', birth_iso[8:10]) %}
 <section class="intro">
   <div><p class="eyebrow">THE DAILY ORACLE</p><h1 tabindex="-1">今日の導きを、<br class="mobile-break">あなたの数字へ。</h1><p class="intro-note">星、数、カード。心に響く占いをひとつ。</p></div>
+  <time class="date-emblem" datetime="{{ today_date }}"><span>{{ today_label }}</span><small>日本時間・毎日更新</small></time>
 </section>
 <form method="post" action="{{ url_for('generate') }}" data-oracle-form data-home-form data-preview-url="{{ url_for('divination_preview') }}" data-today="{{ today_date }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
