@@ -8,12 +8,22 @@ from product_numbers import generate_product_rows
 
 class ReleaseTests(unittest.TestCase):
     def setUp(self):
-        self.app = create_app({'TESTING': True, 'SECRET_KEY': 'test', 'RATE_LIMIT_PER_MINUTE': 0, 'SESSION_COOKIE_SECURE': False})
+        self.app = create_app({'TESTING': True, 'PREMIUM_PREVIEW_ENABLED': False, 'SECRET_KEY': 'test', 'RATE_LIMIT_PER_MINUTE': 0, 'SESSION_COOKIE_SECURE': False})
         self.client = self.app.test_client()
         self.token = re.search(r'name="csrf_token" value="([^"]+)"', self.client.get('/').text)[1]
 
     def data(self, **kw):
         return dict(dict(csrf_token=self.token, birth_date='2000-02-29', divination='astrology', product='loto6', count='10', pick_size='full'), **kw)
+
+    def test_open_preview_allows_all_methods_without_test_entitlement(self):
+        self.app.config.update(TESTING=False, PREMIUM_PREVIEW_ENABLED=True)
+        home=self.client.get('/').text
+        self.assertNotIn('class="oracle-option locked-oracle"',home)
+        self.assertIn('無料開放中',home)
+        for method in ('astrology','kabbalah','tarot'):
+            for route in ('/generate','/divination-preview'):
+                self.assertEqual(self.client.post(route,data=self.data(divination=method)).status_code,200)
+        self.assertIn('自動課金もありません',self.client.get('/plans').text)
 
     def test_invalid_product_html_returns_400(self):
         self.assertEqual(self.client.post('/generate', data=self.data(product='invalid')).status_code, 400)

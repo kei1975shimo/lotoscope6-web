@@ -307,16 +307,16 @@ body.is-drawing { overflow: hidden; }
 }
 
 /* Quiet observatory: the artwork dissolves into the page instead of a rotating badge. */
-.intro.oracle-hero { position:relative; isolation:isolate; display:grid; grid-template-columns:minmax(0,1fr); justify-content:normal; place-items:center; min-height:420px; margin:16px 0 30px; padding:52px 24px; overflow:hidden; text-align:center; border-bottom:1px solid var(--line); }
+.intro.oracle-hero { position:relative; isolation:isolate; display:grid; grid-template-columns:minmax(0,1fr); justify-content:normal; place-items:center; min-height:330px; margin:8px 0 24px; padding:26px 24px; overflow:hidden; text-align:center; border-bottom:1px solid var(--line); }
 .hero-art { position:absolute; z-index:-1; inset:0; pointer-events:none; }
 .hero-art img { position:absolute; width:500px; height:500px; max-width:none; object-fit:cover; left:50%; top:50%; transform:translate(-50%,-50%); opacity:.23; mask-image:radial-gradient(ellipse, #000 18%, transparent 68%); }
 .oracle-hero::after { content:""; position:absolute; z-index:-1; inset:0; background:radial-gradient(ellipse at center,#0b0b19aa,transparent 72%); }
 .hero-copy { max-width:100%; }
 .oracle-hero .eyebrow { font-size:9px; letter-spacing:.32em; color:#b9a27c; }
-.hero-invocation { font:11px/2 var(--serif); color:#bdb0a1; letter-spacing:.18em; margin-top:25px; }
-.oracle-hero h1 { font-size:clamp(28px,4vw,42px); line-height:1.8; letter-spacing:.12em; margin:12px 0 16px; color:#f3e8d1; text-shadow:0 2px 24px #000; }
+.hero-invocation { font:11px/2 var(--serif); color:#bdb0a1; letter-spacing:.18em; margin-top:12px; }
+.oracle-hero h1 { font-size:clamp(28px,4vw,42px); line-height:1.6; letter-spacing:.12em; margin:8px 0 10px; color:#f3e8d1; text-shadow:0 2px 24px #000; }
 .oracle-hero .intro-note { font:13px/2.1 var(--serif); color:#c3b6b0; }
-.hero-signature { display:flex; align-items:center; justify-content:center; gap:20px; margin-top:25px; color:var(--gold); font-size:20px; }
+.hero-signature { display:flex; align-items:center; justify-content:center; gap:20px; margin-top:12px; color:var(--gold); font-size:20px; }
 .hero-signature span { width:48px; height:1px; background:linear-gradient(90deg,transparent,#cbb18070,transparent); }
 .size-explanation { color:var(--muted); font-size:11px; margin:-6px 0 18px; }
 .pick-size-field select { width:156px; flex-shrink:0; font-size:14px; }
@@ -336,7 +336,7 @@ body.is-drawing { overflow: hidden; }
 .plan-card .plan-price { font:48px/1.4 var(--serif); color:var(--gold-soft); margin:18px 0; }
 .plan-price small { font:14px/1.5 sans-serif; }
 .plan-status { display:inline-block; border:1px solid var(--line); padding:8px 24px; color:var(--gold-soft); }
-@media(max-width:600px) { .intro.oracle-hero { min-height:370px; padding:36px 12px; margin-top:0; } .oracle-hero h1 { font-size:29px; letter-spacing:.06em; } .hero-art img { width:430px; height:430px; } .hero-invocation { font-size:10px; } .legal-page { margin:32px auto; } .legal-page h1 { font-size:25px; } .plan-card { padding:24px 15px; } }
+@media(max-width:600px) { .intro.oracle-hero { min-height:290px; padding:22px 12px; margin-top:0; } .oracle-hero h1 { font-size:29px; letter-spacing:.06em; } .hero-art img { width:430px; height:430px; } .hero-invocation { font-size:10px; } .legal-page { margin:32px auto; } .legal-page h1 { font-size:25px; } .plan-card { padding:24px 15px; } }
 
 .plan-inline { color:var(--muted); font-size:11px; margin:-5px 0 18px; }.plan-inline a { color:var(--gold-soft); text-decoration:underline; text-underline-offset:4px; }
 .locked-oracle .oracle-copy > span { color:#ccba94; }.locked-oracle:focus-visible .oracle-card { outline:2px solid var(--gold); outline-offset:4px; }

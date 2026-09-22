@@ -37,7 +37,7 @@
   </fieldset>
   <fieldset class="oracle-section">
     <legend class="step-title"><span>02</span> 心に響く占いを選ぶ</legend>
-    <p class="plan-inline">西洋占星術は無料。3つの占術を楽しむ <a href="{{ url_for('plans') }}">月額500円のプラン</a></p>
+    <p class="plan-inline">{% if premium_preview %}現在は3つの占術を無料開放中。{% else %}西洋占星術は無料。{% endif %} <a href="{{ url_for('plans') }}">月額500円のプラン</a></p>
     <div class="oracle-grid">
       {% for item in divination_choices %}
       {% if item.divination_id != 'astrology' and not premium_access %}

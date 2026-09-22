@@ -30,7 +30,8 @@ def main():
             page.goto(origin)
             page.screenshot(path=str(output/'home-desktop.png'),full_page=True)
             page.locator('.oracle-hero').screenshot(path=str(output/'hero-desktop.png'))
-            assert page.locator('.locked-oracle').count()==2
+            assert page.locator('.locked-oracle').count()==0
+            assert page.locator('.oracle-hero').bounding_box()['height'] < 380
             for width in (320,390,768,1280):
                 page.set_viewport_size({'width':width,'height':900})
                 for route in ('/','/plans','/privacy','/terms','/support','/commerce'):
@@ -40,7 +41,7 @@ def main():
                     if width==390 and route in ('/','/plans'):
                         page.screenshot(path=str(output/('home-mobile.png' if route=='/' else 'plans-mobile.png')),full_page=True)
             page.set_viewport_size({'width':390,'height':844})
-            app.config['TEST_PREMIUM_ACCESS']=True
+            assert page.locator('.oracle-hero').count() == 0 or page.locator('.oracle-hero').bounding_box()['height'] < 330
             for method in ('astrology','kabbalah','tarot'):
                 for product,full in [('miniloto',5),('loto6',6),('loto7',7),('numbers3',3),('numbers4',4)]:
                     page.goto(origin)

@@ -23,7 +23,7 @@ from divination_numbers import calculate_divination_profile, divination_choices,
 from product_numbers import MAX_FULL_SIZE, generate_product_rows, get_product, product_choices, product_full_size  # noqa: E402
 from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
-APP_VERSION = "v1.17.0-mystic-oracle"
+APP_VERSION = "v1.17.1-mystic-oracle"
 DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 
@@ -129,6 +129,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     app = Flask(__name__)
     app.config.update(
         SECRET_KEY=resolve_secret_key(), MAX_CONTENT_LENGTH=256 * 1024,
+        PREMIUM_PREVIEW_ENABLED=os.environ.get("PREMIUM_PREVIEW_ENABLED", "1") == "1",
         RATE_LIMIT_PER_MINUTE=int(os.environ.get("RATE_LIMIT_PER_MINUTE", "30")),
         SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=is_production_environment(),
@@ -157,9 +158,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             validate_csrf_token()
 
     def has_premium_access() -> bool:
-        # No store verification is connected yet. Fail closed in production.
-        # Only tests may enable premium fixtures; client fields/cookies cannot.
-        return bool(app.testing and app.config.get("TEST_PREMIUM_ACCESS", False))
+        # Temporary open access, explicitly requested for preview. No billing.
+        return bool(app.config["PREMIUM_PREVIEW_ENABLED"] or
+                    (app.testing and app.config.get("TEST_PREMIUM_ACCESS", False)))
 
     def require_method_access(method: str) -> None:
         if method != "astrology" and not has_premium_access():
@@ -171,6 +172,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         return dict(app_version=APP_VERSION, divination_choices=divination_choices(), product_choices=product_choices(),
                     csrf_token=get_csrf_token, default_ticket_count=DEFAULT_TICKET_COUNT, max_ticket_count=MAX_TICKET_COUNT,
                     max_full_size=MAX_FULL_SIZE, premium_access=has_premium_access(),
+                    premium_preview=app.config["PREMIUM_PREVIEW_ENABLED"],
                     operator_name=os.environ.get("OPERATOR_NAME", "下地 恵雄"),
                     support_email=os.environ.get("SUPPORT_EMAIL", "keiyuu1975@yahoo.co.jp"),
                     business_address=os.environ.get("BUSINESS_ADDRESS", "未設定（公開準備中）"),
