@@ -23,7 +23,7 @@ from divination_numbers import calculate_divination_profile, divination_choices,
 from product_numbers import MAX_FULL_SIZE, generate_product_rows, get_product, product_choices, product_full_size  # noqa: E402
 from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
-APP_VERSION = "v1.16.0-mystic-oracle"
+APP_VERSION = "v1.17.0-mystic-oracle"
 DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 
@@ -108,7 +108,8 @@ def parse_generate_form(form: Any, today: date | None = None) -> tuple[str, str,
     # Missing pick_size (older cached forms, or a client that never sent it)
     # falls back to the product's own full size — unchanged past behaviour.
     try:
-        pick_size = int(str(form.get("pick_size", full_size)).strip())
+        raw_size = str(form.get("pick_size", "full")).strip()
+        pick_size = full_size if raw_size == "full" else int(raw_size)
     except ValueError as exc:
         raise ValueError(f"欲しい個数を1〜{full_size}で選んでください。") from exc
     if not 1 <= pick_size <= full_size:
@@ -155,12 +156,25 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
                 abort(429, description=f"短時間に操作が集中しています。{retry}秒ほど待ってからお試しください。")
             validate_csrf_token()
 
+    def has_premium_access() -> bool:
+        # No store verification is connected yet. Fail closed in production.
+        # Only tests may enable premium fixtures; client fields/cookies cannot.
+        return bool(app.testing and app.config.get("TEST_PREMIUM_ACCESS", False))
+
+    def require_method_access(method: str) -> None:
+        if method != "astrology" and not has_premium_access():
+            abort(403, description="この占術は月額プランの対象です。現在は購入受付の準備中です。西洋占星術は無料でご利用いただけます。")
+
     @app.context_processor
     def common():
         today = getattr(g, "today", datetime.now(JST).date())
         return dict(app_version=APP_VERSION, divination_choices=divination_choices(), product_choices=product_choices(),
                     csrf_token=get_csrf_token, default_ticket_count=DEFAULT_TICKET_COUNT, max_ticket_count=MAX_TICKET_COUNT,
-                    max_full_size=MAX_FULL_SIZE,
+                    max_full_size=MAX_FULL_SIZE, premium_access=has_premium_access(),
+                    operator_name=os.environ.get("OPERATOR_NAME", "下地 恵雄"),
+                    support_email=os.environ.get("SUPPORT_EMAIL", "keiyuu1975@yahoo.co.jp"),
+                    business_address=os.environ.get("BUSINESS_ADDRESS", "未設定（公開準備中）"),
+                    business_phone=os.environ.get("BUSINESS_PHONE", "未設定（公開準備中）"),
                     today_date=today.isoformat(), current_year=today.year, today_label=f"{today.year}.{today.month:02d}.{today.day:02d}")
 
     @app.after_request
@@ -189,6 +203,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         try:
             method = str(request.form.get("divination", DEFAULT_DIVINATION_ID)).strip()
             get_divination(method)
+            require_method_access(method)
             birth = parse_form_birth(request.form, g.today)
             profile = calculate_divination_profile(method, birth, g.today)
             return jsonify(method_id=profile["method_id"], summary_items=profile["summary_items"])
@@ -199,6 +214,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     def generate():
         try:
             method, product, count, pick_size, birth = parse_generate_form(request.form, g.today)
+            require_method_access(method)
             profile = calculate_divination_profile(method, birth, g.today)
             seed = build_daily_oracle_seed(birth, g.today, method, product)
             rows = generate_product_rows(product, count, profile, seed=seed, pick_size=pick_size)
@@ -210,9 +226,31 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             if wants_json():
                 return jsonify(error=str(exc)), 400
             return render_template("index.html", values=dict(request.form), error=str(exc)), 400
+        except HTTPException:
+            raise
         except Exception:
             app.logger.exception("Unexpected generation error")
             abort(500)
+
+    @app.get("/plans")
+    def plans():
+        return render_template("plans.html")
+
+    @app.get("/privacy")
+    def privacy():
+        return render_template("privacy.html")
+
+    @app.get("/terms")
+    def terms():
+        return render_template("terms.html")
+
+    @app.get("/support")
+    def support():
+        return render_template("support.html")
+
+    @app.get("/commerce")
+    def commerce():
+        return render_template("commerce.html")
 
     @app.get("/health")
     def health():

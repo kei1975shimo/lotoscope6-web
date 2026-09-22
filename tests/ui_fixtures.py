@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app import create_app
 
-app = create_app({'TESTING': True, 'SECRET_KEY': 'ui-test', 'RATE_LIMIT_PER_MINUTE': 0, 'TRUSTED_PROXY_HOPS': 0, 'SESSION_COOKIE_SECURE': False})
+app = create_app({'TESTING': True, 'TEST_PREMIUM_ACCESS': True, 'SECRET_KEY': 'ui-test', 'RATE_LIMIT_PER_MINUTE': 0, 'TRUSTED_PROXY_HOPS': 0, 'SESSION_COOKIE_SECURE': False})
 client = app.test_client()
 home = client.get('/').text
 token = re.search(r'name="csrf_token" value="([^"]+)"', home)[1]

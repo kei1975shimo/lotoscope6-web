@@ -92,10 +92,7 @@ class GenerationRegressionTests(unittest.TestCase):
 
 
 class PickSizeRegressionTests(unittest.TestCase):
-    """Requesting fewer numbers/digits than a product's full size (a new
-    'pick_size' option) must never change which tickets are drawn or their
-    order — only trim each ticket's own numbers to the most divination-
-    weighted subset."""
+    """Partial candidates stay unique, ranked, in range and stable by count."""
 
     def test_omitted_pick_size_matches_explicit_full_size(self):
         for method in METHODS:
@@ -109,28 +106,27 @@ class PickSizeRegressionTests(unittest.TestCase):
                         generate_product_rows(product, 5, profile, seed, pick_size=full),
                     )
 
-    def test_reduced_size_is_a_ranked_subset_without_reordering_tickets(self):
+    def test_partial_pool_is_unique_ranked_and_count_independent(self):
         for method in METHODS:
             profile = calculate_divination_profile(method, BIRTH, DAY)
             for info in product_choices():
-                product, full, kind = info['product_id'], info['full_size'], info['kind']
+                product, full = info['product_id'], info['full_size']
                 seed = build_daily_oracle_seed(BIRTH, DAY, method, product)
-                full_rows = generate_product_rows(product, 10, profile, seed)
                 for size in range(1, full + 1):
                     with self.subTest(method=method, product=product, size=size):
-                        reduced_rows = generate_product_rows(product, 10, profile, seed, pick_size=size)
-                        self.assertEqual(len(reduced_rows), 10)
-                        for full_row, reduced_row in zip(full_rows, reduced_rows):
-                            self.assertEqual(len(reduced_row['numbers']), size)
-                            if kind == 'numbers':
-                                # A subsequence: left-to-right order is preserved, duplicates included.
-                                remaining = iter(full_row['numbers'])
-                                self.assertTrue(all(value in remaining for value in reduced_row['numbers']))
+                        rows = generate_product_rows(product, 10, profile, seed, pick_size=size)
+                        self.assertEqual(len({tuple(r['numbers']) for r in rows}), 10)
+                        self.assertEqual([r['ticket_score'] for r in rows], sorted([r['ticket_score'] for r in rows], reverse=True))
+                        for count in (1,3,5):
+                            self.assertEqual(generate_product_rows(product,count,profile,seed,pick_size=size),rows[:count])
+                        for row in rows:
+                            self.assertEqual(len(row['numbers']),size)
+                            if info['kind']=='loto':
+                                self.assertEqual(len(set(row['numbers'])),size)
+                                self.assertEqual(row['numbers'],sorted(row['numbers']))
+                                self.assertTrue(all(1 <= n <= info['max_number'] for n in row['numbers']))
                             else:
-                                self.assertLessEqual(set(reduced_row['numbers']), set(full_row['numbers']))
-                                self.assertEqual(reduced_row['numbers'], sorted(reduced_row['numbers']))
-                            if size == full:
-                                self.assertEqual(reduced_row, full_row)
+                                self.assertTrue(all(0 <= n <= 9 for n in row['numbers']))
 
     def test_invalid_pick_size_fails_at_generator_boundary(self):
         for value in (0, 7, -1, True, 1.5, '1'):
@@ -140,7 +136,7 @@ class PickSizeRegressionTests(unittest.TestCase):
 
 class RequestRegressionTests(unittest.TestCase):
     def setUp(self):
-        self.app = create_app({'TESTING': True, 'SECRET_KEY': 'test', 'RATE_LIMIT_PER_MINUTE': 0, 'TRUSTED_PROXY_HOPS': 0, 'SESSION_COOKIE_SECURE': False})
+        self.app = create_app({'TESTING': True, 'TEST_PREMIUM_ACCESS': True, 'SECRET_KEY': 'test', 'RATE_LIMIT_PER_MINUTE': 0, 'TRUSTED_PROXY_HOPS': 0, 'SESSION_COOKIE_SECURE': False})
         self.client = self.app.test_client()
         self.token = self.csrf(self.client)
 
@@ -277,7 +273,7 @@ class RequestRegressionTests(unittest.TestCase):
 
 class RateLimitRegressionTests(unittest.TestCase):
     def check_spoofing(self, hops):
-        app = create_app({'TESTING': True, 'SECRET_KEY': 'rate-test', 'SESSION_COOKIE_SECURE': False, 'RATE_LIMIT_PER_MINUTE': 4, 'TRUSTED_PROXY_HOPS': hops})
+        app = create_app({'TESTING': True, 'TEST_PREMIUM_ACCESS': True, 'SECRET_KEY': 'rate-test', 'SESSION_COOKIE_SECURE': False, 'RATE_LIMIT_PER_MINUTE': 4, 'TRUSTED_PROXY_HOPS': hops})
         client = app.test_client()
         token = RequestRegressionTests.csrf(client)
         codes = []
@@ -300,7 +296,7 @@ class RateLimitRegressionTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_preview_and_generate_share_rate_budget(self):
-        app = create_app({'TESTING': True, 'SECRET_KEY': 'rate-test', 'SESSION_COOKIE_SECURE': False, 'RATE_LIMIT_PER_MINUTE': 1, 'TRUSTED_PROXY_HOPS': 0})
+        app = create_app({'TESTING': True, 'TEST_PREMIUM_ACCESS': True, 'SECRET_KEY': 'rate-test', 'SESSION_COOKIE_SECURE': False, 'RATE_LIMIT_PER_MINUTE': 1, 'TRUSTED_PROXY_HOPS': 0})
         client = app.test_client()
         data = {'csrf_token': RequestRegressionTests.csrf(client), 'birth_date': '1975-08-16', 'count': '1'}
         self.assertEqual(client.post('/divination-preview', data=data).status_code, 200)

@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}お問い合わせ | ロト・スコープ{% endblock %}
+{% block content %}<article class="legal-page"><a href="{{ url_for('index') }}">← 数字を受け取る</a><p class="eyebrow">WE ARE HERE</p><h1 tabindex="-1">お問い合わせ</h1>
+<p>操作方法、不具合、個人情報に関するご相談はこちらへ。</p><h2>運営者</h2><p>{{ operator_name }}</p><h2>メール窓口</h2><p><a href="mailto:{{ support_email }}">{{ support_email }}</a></p><p>不具合の場合は、端末名、OS・ブラウザー、発生した操作とエラー内容をお知らせください。生年月日やカード番号は送信しないでください。</p><h2>よくあるご質問</h2><details><summary>同じ数字が表示されるのはなぜ？</summary><p>同じ誕生日・日本時間の日付・占術・券種・個数では、同じ候補を表示します。口数だけを増やしても先頭の候補は変わりません。</p></details><details><summary>1個だけ受け取れますか？</summary><p>「欲しい個数」で1個を選べます。今日のラッキーナンバーとしてお楽しみください。くじの組み合わせには規定数が必要です。</p></details><details><summary>有料プランを購入できますか？</summary><p>現在は購入受付の準備中です。西洋占星術は無料で利用できます。購入・復元・解約の機能はストア課金の開始時にご案内します。</p></details>
+</article>{% endblock %}

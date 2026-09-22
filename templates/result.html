@@ -8,13 +8,16 @@
 </div>
 {% endmacro %}
 {% set best = rows[0] %}
+{% set partial = pick_size < product.full_size %}
+{% set candidate_unit = '候補' if partial else '口' %}
 <div class="result-topline"><a href="{{ url_for('index') }}">← 選び直す</a><time datetime="{{ divination_profile.target_date }}">{{ divination_profile.target_date_ja }} · 日本時間</time></div>
 <section class="result-hero" id="best-pick">
   <div class="result-art"><img src="{{ url_for('static', filename='img/oracle-' ~ divination_id ~ '.webp') }}" width="512" height="512" alt=""><span class="art-caption">{{ divination.english }}</span></div>
   <div class="result-intro"><p class="eyebrow">YOUR DAILY ORACLE · {{ product.english }}</p><h1 tabindex="-1">今日、あなたに<br>届いた数字。</h1><p>{{ divination.name }} × {{ product.name }}</p><span class="reading-date">{{ divination_profile.target_date_ja }}の導き</span></div>
   <div class="best-numbers number-reveal-group" data-reveal-product="{{ product_id }}">{{ number_group(best) }}</div>
   <div class="best-reading">
-    {% if product.kind == 'numbers' %}<p class="box-note">ボックス参考：<strong>{{ best.display_box_number }}</strong></p>{% endif %}
+    {% if product.kind == 'numbers' and not partial and best.numbers|unique|list|length > 1 %}<p class="box-note">ボックス参考：<strong>{{ best.display_box_number }}</strong></p>{% endif %}
+    {% if partial %}<p class="partial-notice">ラッキーナンバー · {{ pick_size }}{{ '桁' if product.kind == 'numbers' else '個' }}の候補<br><small>{{ product.name }}の規定数（{{ product.full_size }}{{ '桁' if product.kind == 'numbers' else '個' }}）未満のため、このまま購入する組み合わせではありません。</small></p>{% endif %}
     <p class="result-reason">{{ best.reason }}</p>
     <p class="resonance">占いとの響き <strong>{{ best.ticket_score }}</strong><span>/ 100</span></p>
     <small class="score-note">占いとの結びつきを示す目安です。当せん確率ではありません。</small>
@@ -22,11 +25,11 @@
 </section>
 {% if rows|length > 1 %}
 <section class="reading-section" id="all-results">
-  <div class="section-heading"><div><p class="eyebrow">MORE NUMBERS</p><h2>ほかに届いた数字</h2></div><span>全{{ count }}口のうち、2〜{{ count }}口目</span></div>
+  <div class="section-heading"><div><p class="eyebrow">MORE NUMBERS</p><h2>ほかに届いた数字</h2></div><span>全{{ count }}{{ candidate_unit }}のうち、2〜{{ count }}{{ candidate_unit }}目</span></div>
   <div class="ticket-list">
     {% for row in rows[1:] %}
     <details class="ticket"><summary><span class="ticket-rank">{{ '%02d'|format(loop.index + 1) }}</span>{{ number_group(row) }}<span class="ticket-score">響き <b>{{ row.ticket_score }}</b></span><span class="details-chevron" aria-hidden="true">＋</span></summary>
-      <div class="ticket-details"><p>{{ row.reason }}</p>{% if product.kind == 'numbers' %}<p class="box-note">ボックス参考：{{ row.display_box_number }}</p>{% endif %}<dl class="metrics"><div><dt>合計値</dt><dd>{{ row.set_sum }}</dd></div><div><dt>奇数／偶数</dt><dd>{{ row.odd_count }}／{{ row.even_count }}</dd></div><div><dt>範囲の広がり</dt><dd>{{ row.spread }}</dd></div><div><dt>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</dt><dd>{{ row.consecutive_count }}</dd></div></dl><p class="score-note">{{ divination.short_name }} {{ row.divination_fit_score }} ／ 数字構成 {{ row.composition_score }}</p></div>
+      <div class="ticket-details"><p>{{ row.reason }}</p>{% if product.kind == 'numbers' and not partial and row.numbers|unique|list|length > 1 %}<p class="box-note">ボックス参考：{{ row.display_box_number }}</p>{% endif %}<dl class="metrics"><div><dt>合計値</dt><dd>{{ row.set_sum }}</dd></div><div><dt>奇数／偶数</dt><dd>{{ row.odd_count }}／{{ row.even_count }}</dd></div><div><dt>範囲の広がり</dt><dd>{{ row.spread }}</dd></div><div><dt>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</dt><dd>{{ row.consecutive_count }}</dd></div></dl><p class="score-note">{{ divination.short_name }} {{ row.divination_fit_score }} ／ 数字構成 {{ row.composition_score }}</p></div>
     </details>
     {% endfor %}
   </div>
@@ -43,7 +46,7 @@
   </details>
 </section>
 <div class="result-actions">
-  <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>何度開いても、今日の導きは同じ。</strong><small>日本時間の0時を過ぎると、翌日の数字へ切り替わります。</small></p></div>
+  <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>何度開いても、今日の導きは同じ。</strong><small>日本時間の0時以降に再確認すると、翌日の数字を表示します。</small></p></div>
   <form method="post" action="{{ url_for('generate') }}" data-oracle-form data-method-name="{{ divination.name }}" data-method-english="{{ divination.english }}" data-product-name="{{ product.name }}" data-duration="{{ product.ritual_duration }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="divination" value="{{ divination_id }}"><input type="hidden" name="product" value="{{ product_id }}"><input type="hidden" name="count" value="{{ count }}"><input type="hidden" name="pick_size" value="{{ pick_size }}"><input type="hidden" name="birth_date" value="{{ divination_profile.birth_date }}">
     <div class="form-error" role="alert" tabindex="-1" hidden></div>

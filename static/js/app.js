@@ -49,7 +49,7 @@
       day.setCustomValidity('存在する日付を選択してください。');
       return '';
     }
-    if (value > form.dataset.today) {
+    if (value > new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10)) {
       year.setCustomValidity('未来の生年月日は選択できません。');
       return '';
     }
@@ -107,7 +107,7 @@
           preview.replaceChildren(...children);
           preview.hidden = !children.length;
         } catch (error) {
-          if (!disposed && previewKey === key && !controller.signal.aborted) {
+          if (!disposed && previewKey === key && previewController === controller) {
             preview.hidden = true;
             previewKey = ''; // A later selection can retry; generation remains usable.
           }
@@ -133,16 +133,15 @@
       const full = Number(product.dataset.fullSize) || 1;
       const unit = product.dataset.kind === 'numbers' ? '桁' : '個';
       Array.from(select.options).forEach((option) => {
+        if (option.value === 'full') { option.textContent = `規定数（${full}${unit}）`; return; }
         option.disabled = Number(option.value) > full;
         option.textContent = `${option.value}${unit}`;
       });
-      // A size that no longer fits the newly chosen product falls back to
-      // its full size, same as the option a fresh page load would select.
-      if (Number(select.value) > full) select.value = String(full);
+      if (Number(select.value) > full) select.value = 'full';
       const hint = form.querySelector('[data-pick-size-hint]');
       if (hint) hint.textContent = `1〜${full}${unit}`;
       const summarySize = form.querySelector('[data-summary-size]');
-      if (summarySize) summarySize.textContent = `${select.value}${unit}`;
+      if (summarySize) summarySize.textContent = `${select.value === 'full' ? full : select.value}${unit}`;
     }
 
     function updateSelection() {
@@ -153,7 +152,7 @@
       form.querySelector('[data-selection-description]').textContent = method.dataset.description;
       form.querySelector('[data-summary-method]').textContent = method.dataset.name;
       form.querySelector('[data-summary-product]').textContent = product.dataset.name;
-      form.querySelector('[data-summary-count]').textContent = `${form.elements.count.value}口`;
+      form.querySelector('[data-summary-count]').textContent = `${form.elements.count.value}件`;
       form.querySelector('[data-button-copy]').textContent = method.dataset.buttonLabel;
       updatePickSize(product);
     }

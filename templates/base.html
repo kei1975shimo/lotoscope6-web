@@ -24,6 +24,9 @@
     <span class="footer-mark" aria-hidden="true">✧</span>
     <p>数字を選ぶひとときに、小さな神秘を。</p>
     <small>占いによる数字生成はエンターテインメントです。点数は当せん確率を表すものではなく、当せんを保証するものでもありません。抽せん結果は宝くじ公式情報でご確認ください。</small>
+    <nav class="footer-links" aria-label="サービス情報">
+      <a href="{{ url_for('plans') }}">月額プラン</a><a href="{{ url_for('privacy') }}">プライバシーポリシー</a><a href="{{ url_for('terms') }}">利用規約</a><a href="{{ url_for('support') }}">お問い合わせ</a><a href="{{ url_for('commerce') }}">特定商取引法に基づく表記</a>
+    </nav>
     <span class="version">LOTO SCOPE · {{ app_version }}</span>
   </footer>
   {% include "ritual.html" %}

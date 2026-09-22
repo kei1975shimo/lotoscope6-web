@@ -4,20 +4,21 @@
 {% set current_divination = values.get('divination', 'astrology') %}
 {% set current_product = values.get('product', 'loto6') %}
 {% set current_count = values.get('count', default_ticket_count|string) %}
-{% set current_product_info = (product_choices | selectattr('product_id', 'equalto', current_product) | first) %}
+{% set current_product_info = (product_choices | selectattr('product_id', 'equalto', current_product) | first) | default(product_choices[1]) %}
 {% set current_full_size = current_product_info.full_size %}
 {% set current_size_unit = '桁' if current_product_info.kind == 'numbers' else '個' %}
-{% set current_pick_size = values.get('pick_size', current_full_size|string) %}
+{% set current_pick_size = values.get('pick_size', 'full') %}
 {% set birth_iso = values.get('birth_date', '') %}
 {% set birth_y = values.get('birth_year', birth_iso[0:4]) %}
 {% set birth_m = values.get('birth_month', birth_iso[5:7]) %}
 {% set birth_d = values.get('birth_day', birth_iso[8:10]) %}
-<section class="intro">
-  <div><p class="eyebrow">THE DAILY ORACLE</p><h1 tabindex="-1">今日の導きを、<br class="mobile-break">あなたの数字へ。</h1><p class="intro-note">星、数、カード。心に響く占いをひとつ。</p></div>
-  <div class="hero-sigil" aria-hidden="true">
-    <span class="sigil-ring ring-outer"></span><span class="sigil-ring ring-inner"></span>
-    <span class="sigil-mark mark-1">✦</span><span class="sigil-mark mark-2">✧</span><span class="sigil-mark mark-3">✦</span><span class="sigil-mark mark-4">✧</span>
-    <span class="sigil-core">✦</span>
+<section class="intro oracle-hero" aria-labelledby="oracle-heading">
+  <div class="hero-art" aria-hidden="true"><img src="{{ url_for('static', filename='img/oracle-astrology.webp') }}" width="512" height="512" alt=""></div>
+  <div class="hero-copy"><p class="eyebrow">A LITTLE MYSTERY, EVERY DAY</p>
+    <p class="hero-invocation" aria-hidden="true">星を読み、数を結び、カードをひらく。</p>
+    <h1 id="oracle-heading" tabindex="-1">今日のあなたに、<br>ひとつの導きを。</h1>
+    <p class="intro-note">誕生日と今日がめぐり逢う。<br>あなただけの数字を、そっと受け取って。</p>
+    <div class="hero-signature" aria-hidden="true"><span></span> ☾ <span></span></div>
   </div>
 </section>
 <form method="post" action="{{ url_for('generate') }}" data-oracle-form data-home-form data-preview-url="{{ url_for('divination_preview') }}" data-today="{{ today_date }}">
@@ -36,12 +37,19 @@
   </fieldset>
   <fieldset class="oracle-section">
     <legend class="step-title"><span>02</span> 心に響く占いを選ぶ</legend>
+    <p class="plan-inline">西洋占星術は無料。3つの占術を楽しむ <a href="{{ url_for('plans') }}">月額500円のプラン</a></p>
     <div class="oracle-grid">
       {% for item in divination_choices %}
+      {% if item.divination_id != 'astrology' and not premium_access %}
+      <a class="oracle-option locked-oracle" href="{{ url_for('plans') }}" aria-label="{{ item.name }}：月額プランのご案内">
+        <span class="oracle-card"><span class="oracle-art"><img src="{{ url_for('static', filename='img/oracle-' ~ item.divination_id ~ '.webp') }}" width="512" height="512" alt=""></span><span class="oracle-copy"><small>{{ item.english }}</small><strong>{{ item.name }}</strong><span>月額プラン · 詳細を見る</span></span></span>
+      </a>
+      {% else %}
       <label class="oracle-option">
         <input type="radio" name="divination" value="{{ item.divination_id }}" data-name="{{ item.name }}" data-english="{{ item.english }}" data-description="{{ item.description }}" data-button-label="{{ item.button_label }}" {% if current_divination == item.divination_id %}checked{% endif %} required>
         <span class="oracle-card"><span class="oracle-art"><img src="{{ url_for('static', filename='img/oracle-' ~ item.divination_id ~ '.webp') }}" width="512" height="512" alt=""><span class="selection-check" aria-hidden="true">✓</span></span><span class="oracle-copy"><small>{{ item.english }}</small><strong>{{ item.name }}</strong><span>{{ item.badge }}</span></span></span>
       </label>
+      {% endif %}
       {% endfor %}
     </div>
     <p class="selection-description" data-selection-description>{{ divination_choices[0].description }}</p>
@@ -58,10 +66,12 @@
     </fieldset>
     <section class="receive-section" aria-labelledby="receive-title">
       <h2 class="step-title" id="receive-title"><span>04</span> 導きを受け取る</h2>
-      <label class="pick-size-field" for="pick_size"><span>欲しい個数<small data-pick-size-hint>1〜{{ current_full_size }}{{ current_size_unit }}</small></span><select id="pick_size" name="pick_size" required>{% for n in range(1, max_full_size + 1) %}<option value="{{ n }}" {% if n > current_full_size %}disabled{% endif %} {% if current_pick_size|int == n %}selected{% endif %}>{{ n }}{{ current_size_unit }}</option>{% endfor %}</select></label>
-      <label class="count-field" for="count"><span>受け取る口数<small>1〜{{ max_ticket_count }}口</small></span><select id="count" name="count" required>{% for n in range(1, max_ticket_count + 1) %}<option value="{{ n }}" {% if current_count|int == n %}selected{% endif %}>{{ n }}口</option>{% endfor %}</select></label>
-      <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>今日の導きは、ひとつ。</strong><small>同じ誕生日・日本時間の日付・占い・くじなら、何度開いても同じ数字です。口数や欲しい個数を変えても、先頭の数字と順番は変わりません。</small></p></div>
-      <div class="selection-summary" aria-live="polite"><span data-summary-method>西洋占星術</span><span aria-hidden="true">×</span><span data-summary-product>ロト6</span><span data-summary-size>{{ current_pick_size }}{{ current_size_unit }}</span><span data-summary-count>1口</span></div>
+      <label class="pick-size-field" for="pick_size"><span>欲しい個数<small data-pick-size-hint>1〜{{ current_full_size }}{{ current_size_unit }}</small></span><select id="pick_size" name="pick_size" required><option value="full" {% if current_pick_size == "full" %}selected{% endif %}>くじの規定数</option>{% for n in range(1, max_full_size + 1) %}<option value="{{ n }}" {% if current_pick_size|int == n %}selected{% endif %}>{{ n }}{{ current_size_unit }}</option>{% endfor %}</select></label>
+      <p class="size-explanation">少ない個数は今日のラッキーナンバーに。くじの候補には「くじの規定数」を選んでください。</p>
+      <noscript><p class="size-explanation">個数の上限は選んだくじによって異なります。規定数を選ぶと自動で合わせます。</p></noscript>
+      <label class="count-field" for="count"><span>受け取る候補数<small>1〜{{ max_ticket_count }}件</small></span><select id="count" name="count" required>{% for n in range(1, max_ticket_count + 1) %}<option value="{{ n }}" {% if current_count|int == n %}selected{% endif %}>{{ n }}件</option>{% endfor %}</select></label>
+      <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>今日の導きは、ひとつ。</strong><small>同じ誕生日・日本時間の日付・占い・くじなら、何度開いても同じ数字です。欲しい個数が同じなら、口数を変えても候補の順番は変わりません。個数を変えると候補も変わります。</small></p></div>
+      <div class="selection-summary" aria-live="polite"><span data-summary-method>西洋占星術</span><span aria-hidden="true">×</span><span data-summary-product>ロト6</span><span data-summary-size>{{ current_full_size if current_pick_size == "full" else current_pick_size }}{{ current_size_unit }}</span><span data-summary-count>1件</span></div>
       <button class="primary-button" type="submit" data-submit-button><span aria-hidden="true">✦</span><span data-button-copy>星の導きを受け取る</span><span aria-hidden="true">→</span></button>
       <p class="submit-note">あなたの誕生日と、今日を重ねて。</p>
     </section>

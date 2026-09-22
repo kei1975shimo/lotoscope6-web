@@ -15,7 +15,7 @@ from product_numbers import generate_product_rows, product_choices  # noqa: E402
 
 class LotoScopeSmokeTests(unittest.TestCase):
     def setUp(self) -> None:
-        app.config.update(TESTING=True, SESSION_COOKIE_SECURE=False)
+        app.config.update(TESTING=True, TEST_PREMIUM_ACCESS=True, SESSION_COOKIE_SECURE=False)
         self.client = app.test_client()
 
     @staticmethod

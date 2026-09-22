@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}特定商取引法に基づく表記 | ロト・スコープ{% endblock %}
+{% block content %}<article class="legal-page"><a href="{{ url_for('index') }}">← 数字を受け取る</a><p class="eyebrow">COMMERCIAL DISCLOSURE</p><h1 tabindex="-1">特定商取引法に基づく表記</h1>
+<p class="legal-note">有料プランの購入受付は開始していません。所在地・電話番号等の未設定項目は販売開始前に確定して掲載します。</p><dl><dt>役務提供事業者・運営責任者</dt><dd>{{ operator_name }}</dd><dt>所在地</dt><dd>{{ business_address }}</dd><dt>電話番号</dt><dd>{{ business_phone }}</dd><dt>メールアドレス</dt><dd><a href="mailto:{{ support_email }}">{{ support_email }}</a></dd><dt>販売価格</dt><dd>月額500円（税込）／1か月ごとの自動更新（提供予定）</dd><dt>サービス内容</dt><dd>西洋占星術・カバラ数秘術・タロット、および全5券種の数字候補生成。無料では西洋占星術を利用できます。</dd><dt>価格以外に必要な費用</dt><dd>インターネット接続等の通信料金は利用者の負担となります。</dd><dt>支払方法・時期</dt><dd>提供開始後はアプリストアの決済を利用予定です。初回購入時および各更新時に、ストアに登録された支払方法で請求されます。</dd><dt>提供時期・利用期間</dt><dd>提供開始後は購入が確認され次第、有料機能を利用できます。1か月単位で更新されます。</dd><dt>解約・返金</dt><dd>購入したストアの管理画面で更新前に自動更新を停止してください。アプリの削除では解約されません。解約後も有効期間終了まで利用できます。返金はストアの規定と適用法令に従います。</dd><dt>動作環境</dt><dd>現在はWeb版です。スマートフォンアプリの対応OS・バージョンは配信開始前に掲載します。</dd></dl>
+</article>{% endblock %}

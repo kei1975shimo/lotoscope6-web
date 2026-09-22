@@ -46,7 +46,7 @@ function setup({ mode = 'ok', latency = 20, reduce = false, html = fixtures.home
         if (state.mode === 'error429') { resolve({ ok: false, json: async () => ({ error: '60秒ほど待ってからお試しください。' }) }); return; }
         if (state.mode === 'csrf') { resolve({ ok: false, json: async () => ({ error: 'フォームの有効期限が切れました。' }) }); return; }
         resolve({ ok: true, json: async () => fixtures.results[record.data.divination + '|' + record.data.product] });
-      }, String(url).endsWith('/divination-preview') ? 10 : state.latency);
+      }, String(url).endsWith('/divination-preview') ? (state.previewLatency || 10) : state.latency);
     });
   };
   window.eval(source);
@@ -185,5 +185,23 @@ async function test(name, action) {
     assert.equal(t.calls.filter(c => c.url.endsWith('/divination-preview')).length, 1); t.close();
   });
 
+  await test('preview timeout allows retry with the same birthday', async () => {
+    const t = setup(); t.state.previewLatency = 20000; t.birth();
+    await t.clock.tickAsync(15360);
+    t.state.previewLatency = 10; t.select('birth_day', '29');
+    await t.clock.tickAsync(370);
+    assert.equal(t.calls.filter(c => c.url.endsWith('/divination-preview')).length, 2);
+    assert.equal(t.doc.querySelector('.reading-preview').hidden, false); t.close();
+  });
+  await test('full-size choice tracks product; partial choice is retained when valid', async () => {
+    const t = setup(); t.radio('product', 'loto7');
+    assert.equal(t.doc.querySelector('[data-summary-size]').textContent, '7個');
+    t.select('pick_size', '2'); t.radio('product', 'numbers3');
+    assert.equal(t.doc.querySelector('[name="pick_size"]').value, '2');
+    assert.equal(t.doc.querySelector('[data-summary-size]').textContent, '2桁');
+    t.radio('product', 'loto7'); t.select('pick_size', '7'); t.radio('product', 'numbers4');
+    assert.equal(t.doc.querySelector('[name="pick_size"]').value, 'full');
+    assert.equal(t.doc.querySelector('[data-summary-size]').textContent, '4桁'); t.close();
+  });
   console.log(`${passed} offline UI integration tests passed.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

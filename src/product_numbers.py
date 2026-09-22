@@ -472,19 +472,10 @@ def generate_product_rows(
     seed: str = "",
     pick_size: int | None = None,
 ) -> List[Dict[str, Any]]:
-    """Return a stable prefix of the same ranked daily pool for every count.
+    """Rank a unique daily pool for the requested size, then return its prefix.
 
-    The pool size is shared with form validation. Python's stable sort keeps
-    generation order on score ties, so the highlighted result is always row 0.
-
-    `pick_size` trims each ticket to fewer numbers/digits than the product's
-    own full size (e.g. 3 of Loto 6's 6 numbers, or 1 of Numbers 3's 3
-    digits), keeping only the ones most weighted by the divination reading.
-    It never changes which tickets are drawn or their order — only how many
-    of each ticket's numbers are shown — so the same-day/ranked-prefix
-    guarantees above hold regardless of the requested size. `None` (or the
-    product's own full size) returns tickets unchanged, exactly as before
-    this option existed.
+    Full tickets retain their previous results. Partial candidates are generated
+    independently within the product's range and are not purchase-ready tickets.
     """
     product = get_product(product_id)
     if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= MAX_TICKET_COUNT:
@@ -495,18 +486,31 @@ def generate_product_rows(
     if isinstance(pick_size, bool) or not isinstance(pick_size, int) or not 1 <= pick_size <= full_size:
         raise ValueError(f"欲しい個数は1〜{full_size}の範囲で選んでください。")
     rng: RandomSource = random.Random(seed) if seed else random.SystemRandom()
-    if product["kind"] == "numbers":
+    if pick_size < full_size:
+        # Size is part of the daily choice. Count never influences the pool.
+        rng = random.Random(f"{seed}|size={pick_size}") if seed else random.SystemRandom()
+        is_digits = product["kind"] == "numbers"
+        weights = build_digit_weights(profile) if is_digits else build_loto_weights(profile, int(product["max_number"]))
+        cores = numbers_core_digits(profile, product) if is_digits else product_core_numbers(profile, product)
+        rows = []
+        seen = set()
+        for _ in range(5000):
+            values = ([_digit_weighted_choice(weights, rng) for _ in range(pick_size)] if is_digits
+                      else sorted(_weighted_sample_without_replacement(list(weights), weights, pick_size, rng)))
+            key = tuple(values)
+            if key in seen:
+                continue
+            seen.add(key)
+            row = {"numbers": values, "reference_numbers": cores}
+            rows.append(_reduce_numbers_row(row, weights, cores, product, profile, pick_size) if is_digits
+                        else _reduce_loto_row(row, weights, int(product["max_number"]), cores, product, profile, pick_size))
+            if len(rows) == MAX_TICKET_COUNT:
+                break
+        if len(rows) < MAX_TICKET_COUNT:
+            raise RuntimeError("候補を作成できませんでした。もう一度お試しください。")
+    elif product["kind"] == "numbers":
         rows = _generate_numbers_rows(product, MAX_TICKET_COUNT, profile, rng)
     else:
         rows = _generate_loto_rows(product, MAX_TICKET_COUNT, profile, rng)
     rows.sort(key=lambda row: row["ticket_score"], reverse=True)
-    rows = rows[:count]
-    if pick_size >= full_size:
-        return rows
-    if product["kind"] == "numbers":
-        weights = build_digit_weights(profile)
-        core_digits = numbers_core_digits(profile, product)
-        return [_reduce_numbers_row(row, weights, core_digits, product, profile, pick_size) for row in rows]
-    weights = build_loto_weights(profile, int(product["max_number"]))
-    core_numbers = product_core_numbers(profile, product)
-    return [_reduce_loto_row(row, weights, int(product["max_number"]), core_numbers, product, profile, pick_size) for row in rows]
+    return rows[:count]
