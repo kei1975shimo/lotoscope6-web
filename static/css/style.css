@@ -342,3 +342,55 @@ body.is-drawing { overflow: hidden; }
 .locked-oracle .oracle-copy > span { color:#ccba94; }.locked-oracle:focus-visible .oracle-card { outline:2px solid var(--gold); outline-offset:4px; }
 .plan-comparison { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px; }.legal-page .eyebrow { margin-top:24px; }.legal-page details { padding:18px 0; border-bottom:1px solid var(--line); }.legal-page details p { padding-top:12px; }
 @media(max-width:600px) { .plan-comparison { grid-template-columns:1fr; gap:0; } }
+
+/* Mobile reading scale: body 16px, supporting copy 14px, decorative labels 12px. */
+@media (max-width: 768px) {
+  :root { --muted:#c0b8d4; }
+  body { font-size:16px; line-height:1.85; }
+  .app-bar, .app-shell, .app-footer { width:calc(100% - 32px); }
+  .brand { font-size:18px; }.brand small { font-size:11px; }
+  .daily-stamp { font-size:11px; letter-spacing:.03em; }
+  .eyebrow, .intro .eyebrow, .oracle-hero .eyebrow, .section-heading .eyebrow, .result-intro .eyebrow { font-size:12px; letter-spacing:.12em; }
+  .hero-invocation { font-size:13px; letter-spacing:.05em; }
+  .oracle-hero .intro-note { font-size:15px; line-height:1.85; }
+  .step-title { font-size:18px; }.step-title > span { font-size:13px; }
+  .date-fields { gap:8px; }.date-fields label > span { font-size:14px; }
+  select, .pick-size-field select { font-size:16px; min-height:48px; }
+  .privacy-note { font-size:14px; line-height:1.8; white-space:normal; }
+  .birthday-layout { display:block; }.date-fields { width:100%; }.privacy-note { margin-top:14px; }.privacy-note br { display:none; }
+  .oracle-grid { grid-template-columns:1fr; gap:14px; }
+  .oracle-card { display:grid; grid-template-columns:100px minmax(0,1fr); align-items:center; }
+  .oracle-art { aspect-ratio:1; height:100%; min-height:112px; }
+  .oracle-copy { padding:12px 14px; }.oracle-copy > small { font-size:12px; letter-spacing:.12em; }
+  .oracle-copy > strong { font-size:22px; line-height:1.6; margin:3px 0; }
+  .oracle-copy > span { font-size:14px; line-height:1.7; min-height:0; }
+  .plan-inline, .selection-description, .size-explanation { font-size:14px; line-height:1.85; }
+  .selection-description { margin-top:16px; }
+  .reading-preview { grid-template-columns:1fr; gap:12px; }.reading-preview small { font-size:14px; }.reading-preview strong { font-size:18px; }
+  .lower-form { grid-template-columns:1fr; gap:28px; }
+  .product-row { flex-wrap:wrap; gap:4px 12px; padding:14px 16px; }
+  .product-name { font-size:17px; }.product-row > small { order:3; width:100%; margin:0; font-size:14px; }.radio-mark { margin-left:auto; }
+  .count-field, .pick-size-field { font-size:16px; gap:12px; }
+  .count-field small, .pick-size-field small { font-size:14px; }
+  .pick-size-field { flex-wrap:wrap; }.pick-size-field select { width:160px; }
+  .daily-note strong, .result-actions .daily-note strong { font-size:16px; }
+  .daily-note small, .result-actions .daily-note small { font-size:14px; line-height:1.85; }
+  .selection-summary { font-size:14px; }.primary-button { font-size:16px; min-height:56px; }.submit-note { font-size:14px; }
+  .result-topline { font-size:14px; flex-wrap:wrap; }.art-caption { font-size:12px; }
+  .result-intro > p:not(.eyebrow) { font-size:16px; }.reading-date { font-size:14px; }
+  .result-reason { font-size:16px; line-height:1.9; }.score-note, .box-note, .resonance, .resonance > span { font-size:14px; }
+  .partial-notice { font-size:16px; }.partial-notice small { font-size:14px; }
+  .section-heading h2 { font-size:22px; }.section-heading > span { font-size:14px; }
+  .ticket-rank { font-size:14px; }.ticket .number { font-size:18px; }.ticket-details { font-size:16px; padding-left:10px; line-height:1.85; }
+  .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }.metrics dt { font-size:14px; }.metrics dd { font-size:18px; }
+  .profile-grid { grid-template-columns:1fr; }.profile-item { padding:16px; }.profile-item + .profile-item { border-left:0; border-top:1px solid var(--line); }
+  .profile-item > small, .profile-item > span:last-child { font-size:14px; }.profile-item > strong { font-size:24px; }
+  .reading-details > summary { font-size:16px; gap:12px; }.reading-detail-content h3 { font-size:17px; }
+  .muted, .profile-details small, .method-note { font-size:14px; line-height:1.85; }.profile-details p { font-size:16px; }
+  .secondary-link { font-size:16px; }.form-error { font-size:16px; }
+  .app-footer > p { font-size:16px; }.app-footer > small { font-size:14px; line-height:1.85; color:var(--muted); }
+  .footer-links { font-size:14px; gap:6px 16px; }.footer-links a { padding:8px 0; }.version { font-size:11px; }
+  .legal-page p, .legal-page li, .legal-page dd { font-size:16px; line-height:1.9; }.legal-page h2 { font-size:22px; }
+  .legal-page .eyebrow { font-size:12px; }.legal-page dt, .legal-page summary { font-size:17px; }
+  #ritual-text { font-size:16px; }.ritual-product, .ritual-kicker { font-size:14px; }
+}

@@ -40,8 +40,11 @@ def main():
                     checks+=1
                     if width==390 and route in ('/','/plans'):
                         page.screenshot(path=str(output/('home-mobile.png' if route=='/' else 'plans-mobile.png')),full_page=True)
+            page.goto(origin)
             page.set_viewport_size({'width':390,'height':844})
-            assert page.locator('.oracle-hero').count() == 0 or page.locator('.oracle-hero').bounding_box()['height'] < 330
+            page.locator('.oracle-section').screenshot(path=str(output/'readable-oracles-mobile.png'))
+            page.screenshot(path=str(output/'readable-mobile-top.png'))
+            assert page.locator('.oracle-hero').count() == 0 or page.locator('.oracle-hero').bounding_box()['height'] < 370
             for method in ('astrology','kabbalah','tarot'):
                 for product,full in [('miniloto',5),('loto6',6),('loto7',7),('numbers3',3),('numbers4',4)]:
                     page.goto(origin)
@@ -71,6 +74,19 @@ def main():
             assert page.locator('.partial-notice').count()==1
             page.screenshot(path=str(output/'result-mobile.png'),full_page=True)
             checks+=1
+            for width in (320,390,430):
+                page.set_viewport_size({'width':width,'height':844})
+                page.goto(origin)
+                for name,value in [('birth_year','2000'),('birth_month','2'),('birth_day','29'),('count','10')]:
+                    page.locator('#'+name).select_option(value)
+                page.locator('input[value="loto7"]').check(force=True)
+                page.locator('[data-submit-button]').click()
+                page.locator('#best-pick').wait_for()
+                page.locator('details').evaluate_all('(nodes) => nodes.forEach(node => node.open = true)')
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),width
+                if width==390:
+                    page.screenshot(path=str(output/'readable-result-mobile.png'),full_page=True)
+                checks+=1
             # Real native form, with scripts disabled: default adapts to each product.
             native=browser.new_context(java_script_enabled=False,viewport={'width':390,'height':844})
             n=native.new_page()
