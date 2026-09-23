@@ -1,6 +1,6 @@
 {
   "name": "loto-scope-ui-tests",
-  "version": "1.17.6",
+  "version": "1.17.7",
   "private": true,
   "description": "Optional offline DOM tests; not required for Flask deployment",
   "scripts": {

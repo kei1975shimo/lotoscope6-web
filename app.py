@@ -23,7 +23,7 @@ from divination_numbers import TAROT_IMAGE_FILES, calculate_divination_profile, 
 from product_numbers import MAX_FULL_SIZE, generate_product_rows, get_product, product_choices, product_full_size  # noqa: E402
 from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
-APP_VERSION = "v1.17.6-mystic-oracle"
+APP_VERSION = "v1.17.7-mystic-oracle"
 DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 
@@ -179,13 +179,23 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             return selected
         return None
 
+    def numerology_image(value: str) -> str | None:
+        if str(value) not in {"1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "22", "33"}:
+            return None
+        filename = f"img/numerology-{value}.webp"
+        return filename if (Path(app.static_folder) / filename).is_file() else None
+
+    def kabbalah_tree_image() -> str:
+        filename = "img/kabbalah-tree-of-life.webp"
+        return filename if (Path(app.static_folder) / filename).is_file() else "img/oracle-kabbalah.webp"
+
     @app.context_processor
     def common():
         today = getattr(g, "today", datetime.now(JST).date())
         return dict(app_version=APP_VERSION, divination_choices=divination_choices(), product_choices=product_choices(),
                     csrf_token=get_csrf_token, default_ticket_count=DEFAULT_TICKET_COUNT, max_ticket_count=MAX_TICKET_COUNT,
                     max_full_size=MAX_FULL_SIZE, premium_access=has_premium_access(),
-                    premium_preview=app.config["PREMIUM_PREVIEW_ENABLED"], tarot_card_image=tarot_card_image, zodiac_image=zodiac_image,
+                    premium_preview=app.config["PREMIUM_PREVIEW_ENABLED"], tarot_card_image=tarot_card_image, zodiac_image=zodiac_image, numerology_image=numerology_image, kabbalah_tree_image=kabbalah_tree_image,
                     operator_name=os.environ.get("OPERATOR_NAME", "下地 恵雄"),
                     support_email=os.environ.get("SUPPORT_EMAIL", "keiyuu1975@yahoo.co.jp"),
                     business_address=os.environ.get("BUSINESS_ADDRESS", "未設定（公開準備中）"),

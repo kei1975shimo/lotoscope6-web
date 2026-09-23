@@ -12,7 +12,7 @@
 {% set candidate_unit = '候補' if partial else '口' %}
 <div class="result-topline"><a href="{{ url_for('index') }}">← 選び直す</a><time datetime="{{ divination_profile.target_date }}">{{ divination_profile.target_date_ja }} · 日本時間</time></div>
 <section class="result-hero" id="best-pick">
-  <div class="result-art"><img src="{{ url_for('static', filename='img/oracle-' ~ divination_id ~ '.webp') }}" width="512" height="512" alt=""><span class="art-caption">{{ divination.english }}</span></div>
+  <div class="result-art"><img src="{{ url_for('static', filename=kabbalah_tree_image() if divination_id == 'kabbalah' else 'img/oracle-' ~ divination_id ~ '.webp') }}" width="512" height="512" alt=""><span class="art-caption">{{ divination.english }}</span></div>
   <div class="result-intro"><p class="eyebrow">YOUR DAILY ORACLE · {{ product.english }}</p><h1 tabindex="-1">今日、あなたに<br>届いた数字。</h1><p>{{ divination.name }} × {{ product.name }}</p><span class="reading-date">{{ divination_profile.target_date_ja }}の導き</span></div>
   <div class="best-numbers number-reveal-group" data-reveal-product="{{ product_id }}">{{ number_group(best) }}</div>
   <div class="best-reading">
@@ -41,11 +41,11 @@
   {% if divination_id != 'tarot' %}
   <div class="profile-grid">
     {% for item in divination_profile.summary_items %}
-    {% set artwork = zodiac_image(item.value) if divination_id == 'astrology' else none %}
+    {% set artwork = zodiac_image(item.value) if divination_id == 'astrology' else numerology_image(item.value) if divination_id == 'kabbalah' else none %}
     {% if artwork %}
     <div class="profile-item zodiac-profile-item">
-      <img class="zodiac-image" src="{{ url_for('static', filename=artwork) }}" width="640" height="640" loading="lazy" alt="{{ item.value }}のシンボル">
-      <div class="zodiac-caption"><small>{{ item.label }}</small><strong>{{ item.symbol }} {{ item.value }}</strong><span>{{ item.detail }}</span></div>
+      <img class="{{ 'zodiac-image' if divination_id == 'astrology' else 'numerology-image' }}" src="{{ url_for('static', filename=artwork) }}" width="640" height="640" loading="lazy" alt="{{ item.value }}{{ 'のシンボル' if divination_id == 'astrology' else 'の紋章' }}">
+      <div class="zodiac-caption"><small>{{ item.label }}</small><strong>{% if divination_id == 'astrology' %}{{ item.symbol }} {% endif %}{{ item.value }}</strong><span>{{ item.detail }}</span></div>
     </div>
     {% else %}
     <div class="profile-item"><span class="profile-symbol" aria-hidden="true">{{ item.symbol }}</span><small>{{ item.label }}</small><strong>{{ item.value }}</strong><span>{{ item.detail }}</span></div>
@@ -53,6 +53,7 @@
     {% endfor %}
   </div>
   {% endif %}
+  {% if divination_id == 'kabbalah' %}<p class="score-note">数字の紋章は、数秘術の結果を表すオリジナルの意匠です。</p>{% endif %}
   {% if divination_id == 'tarot' %}
   <p class="method-note">今回はこちらのカードが出ました。</p>
   <div class="tarot-card-grid" aria-label="今回出たカード">

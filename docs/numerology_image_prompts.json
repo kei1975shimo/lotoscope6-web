@@ -1,0 +1,96 @@
+{
+  "tool": "built-in image_gen",
+  "cards": [
+    {
+      "id": "tree",
+      "name": "生命の樹",
+      "filename": "kabbalah-tree-of-life.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. TREE OF LIFE. No text or numerals whatsoever. Ten luminous golden medallion spheres connected by fine golden straight channels, a harmonious three-column sefirotic tree floating in starry space, not a botanical tree. Exactly TEN major spheres arranged at these normalized (x,y) positions: (0.50,0.08), (0.74,0.24), (0.26,0.24), (0.74,0.42), (0.26,0.42), (0.50,0.52), (0.74,0.69), (0.26,0.69), (0.50,0.84), (0.50,0.94). Sphere diameters approximately 0.09 of image width. Do not add an eleventh central sphere. Fine connected paths and softly radiant nodes, stars clearly tiny and distinct from the ten spheres. Decorative outer circle subtle. Sculptural jewel-like gold spheres with restrained glows.",
+      "sha256": "63bcece89926a9bc14f12f651cf688f88b38d7acaf566c82fbf9098f03bfa6d0"
+    },
+    {
+      "id": "1",
+      "name": "1",
+      "filename": "numerology-1.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"1\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 1 without ornaments crossing the digits. One brilliant vertical ray and a small sunrise below, evoke beginning. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "4a963a98e7ad9bb8a03c6a52a2a8bc5eb5741fdf1e51e0c27a7e2001d4167057"
+    },
+    {
+      "id": "2",
+      "name": "2",
+      "filename": "numerology-2.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"2\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 2 without ornaments crossing the digits. Two mirrored crescent moons in delicate balanced ornament, evoke partnership. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "94e6a7083419433aa66596abe6e310a0a97c28220e40c2a573e30fcb0f5da5a1"
+    },
+    {
+      "id": "3",
+      "name": "3",
+      "filename": "numerology-3.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"3\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 3 without ornaments crossing the digits. Three small stars in triangular harmony above subtle flowing scrollwork, evoke expression. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "0a5c17b977d5022878b628954794a930cb5d94844dbc695091154896a3486a8f"
+    },
+    {
+      "id": "4",
+      "name": "4",
+      "filename": "numerology-4.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"4\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 4 without ornaments crossing the digits. A stable subtle square geometric foundation behind the number within the circular frame, evoke structure. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "dfd237c27360a710e391b8fa3a003732c4be3b12d49ff39530d34fba6f3a06aa"
+    },
+    {
+      "id": "5",
+      "name": "5",
+      "filename": "numerology-5.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"5\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 5 without ornaments crossing the digits. Five fine rays suggesting gentle movement and a flowing comet ribbon, evoke freedom. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "1506fea90a68f40751d0724fe33d8cac91993a257c3595044c68670b84cdd910"
+    },
+    {
+      "id": "6",
+      "name": "6",
+      "filename": "numerology-6.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"6\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 6 without ornaments crossing the digits. Six-petal delicate floral rosette with symmetric leaves, evoke care and harmony. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "f6f7e1a446f374e608dc6a67870e7723584acb61d9f4f5a2e51be529e78387d6"
+    },
+    {
+      "id": "7",
+      "name": "7",
+      "filename": "numerology-7.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"7\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 7 without ornaments crossing the digits. A tiny lantern and seven small points of starlight in the surrounding night, evoke contemplation. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "dcd1c696e3b49173a0d15c1adcd3e167032936a46b5fcd00fe2f4494fd97af5b"
+    },
+    {
+      "id": "8",
+      "name": "8",
+      "filename": "numerology-8.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"8\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 8 without ornaments crossing the digits. An elegant small infinity loop below and flowing symmetrical arcs, evoke circulation. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "8c0079993926456706d965f5c20d01c994668cd15c5c3e02516597c4dcc59906"
+    },
+    {
+      "id": "9",
+      "name": "9",
+      "filename": "numerology-9.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"9\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 9 without ornaments crossing the digits. Nine delicate star points around the ring and a complete halo, evoke completion. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "b9c0a2178ad7c3012c80e4107676dd955bfbf37ee45ebb3b2df016cabf6ddefd"
+    },
+    {
+      "id": "11",
+      "name": "11",
+      "filename": "numerology-11.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"11\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 11 without ornaments crossing the digits. Two slender luminous pillars on either side, gentle crown of light, evoke inspiration. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "b3776f5646009239a4533d30648aad93d78c6a6125ddf07e2d17f2133d48f4cc"
+    },
+    {
+      "id": "22",
+      "name": "22",
+      "filename": "numerology-22.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"22\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 22 without ornaments crossing the digits. Twin ornate arches and a subtle architectural foundation, evoke building. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "e91a3d2ac98cf0ecd2ac97db69f36201e4c7025bdab2a788e8cf6377fb72c660"
+    },
+    {
+      "id": "33",
+      "name": "33",
+      "filename": "numerology-33.webp",
+      "prompt": "Use case: stylized-concept. One original mystical emblem illustration for a Japanese numerology app. Square 1024x1024. Cohesive series matching antique celestial tarot art: deep midnight navy, exquisite fine antique gold engraving and ivory highlights, subtle blue nebula and stardust, thin elegant circular gold frame, carefully restrained luminosity. Refined timeless design, strongly legible on a phone. No watermark, no labels, no Hebrew lettering, no extra numbers. This is an original artistic numerology emblem, not a historical religious correspondence. The ONLY text is the exact Arabic numeral \"33\", very large centered upright gold serif typography, impeccably clear, occupying about half the image height, readable as 33 without ornaments crossing the digits. Three nested radiant circles and softly spreading luminous wings, evoke compassion. Keep decorative symbolism secondary to the numeral. Do not include any other digit or word.",
+      "sha256": "cf918b774649ac450881750ac469407d72413861d5c861eda335ae2caea0998c"
+    }
+  ]
+}

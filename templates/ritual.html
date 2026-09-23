@@ -8,11 +8,13 @@
         <span class="ritual-core">✦</span>
       </div>
       <div class="ritual-visual kabbalah-visual">
-        <img src="{{ url_for('static', filename='img/oracle-kabbalah.webp') }}" width="512" height="512" alt="">
-        <svg class="tree-light" viewBox="0 0 240 300" focusable="false">
-          <path pathLength="100" d="M120 25L62 74L178 74ZM62 74L62 128L120 159L178 128L178 74M120 25V159M62 74L120 159L178 74M62 128H178M62 128L62 203L120 248L178 203L178 128M120 159L62 203H178ZM120 159V275M62 203L120 275L178 203"/>
-          {% for x,y in [(120,25),(178,74),(62,74),(178,128),(62,128),(120,159),(178,203),(62,203),(120,248),(120,275)] %}<circle class="node-{{ loop.index }}" cx="{{ x }}" cy="{{ y }}" r="9"/>{% endfor %}
+        {% set tree_artwork = kabbalah_tree_image() %}
+        <img class="kabbalah-tree" src="{{ url_for('static', filename=tree_artwork) }}" width="640" height="640" alt="">
+        {% if tree_artwork == 'img/kabbalah-tree-of-life.webp' %}
+        <svg class="tree-sparks" viewBox="0 0 1000 1000" focusable="false">
+          {% for x,y in [(500,105),(700,230),(300,230),(700,405),(300,405),(500,485),(700,608),(300,608),(500,733),(500,873)] %}<circle cx="{{ x }}" cy="{{ y }}" r="15"/>{% endfor %}
         </svg>
+        {% endif %}
       </div>
       <div class="ritual-visual tarot-visual">
         <img class="tarot-atmosphere" src="{{ url_for('static', filename='img/oracle-tarot.webp') }}" width="512" height="512" alt="">

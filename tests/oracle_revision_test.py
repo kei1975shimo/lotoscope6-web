@@ -131,7 +131,7 @@ class CardPresentationTests(unittest.TestCase):
             self.assertIn('／ 数字構成',r.text)
             if method!='tarot':
                 self.assertNotIn('class="tarot-card-grid"',r.text)
-                self.assertIn(f'img/oracle-{method}.webp',r.text)
+                self.assertIn('img/kabbalah-tree-of-life.webp' if method=='kabbalah' else f'img/oracle-{method}.webp',r.text)
             if method=='astrology':
                 self.assertNotIn('出生時 ',r.text)
                 self.assertIn('生まれた日の正午（日本時間）',r.text)

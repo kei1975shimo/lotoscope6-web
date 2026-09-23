@@ -416,7 +416,7 @@ body.is-drawing { overflow: hidden; }
 @media(prefers-reduced-motion:reduce) { .draw-card img { transition:none; } }
 
 /* Zodiac artwork uses the already calculated signs; text remains the fallback. */
-.zodiac-image { width:min(100%,220px); height:auto; aspect-ratio:1; object-fit:contain; border-radius:4px; }
+.zodiac-image, .numerology-image { width:min(100%,220px); height:auto; aspect-ratio:1; object-fit:contain; border-radius:4px; }
 .zodiac-caption { display:grid; gap:4px; padding-top:12px; }
 .zodiac-caption small, .zodiac-caption span { color:var(--muted); font-size:14px; }
 .zodiac-caption strong { font:24px/1.6 var(--serif); }
@@ -425,3 +425,20 @@ body.is-drawing { overflow: hidden; }
   .zodiac-caption { padding-top:0; }
   .zodiac-caption strong { font-size:22px; }
 }
+
+/* The ten light points follow the generated Tree of Life artwork. */
+.kabbalah-visual > img.kabbalah-tree { object-fit:contain; border-radius:4px; opacity:1; }
+.tree-sparks { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.tree-sparks circle { fill:#fff4ca; opacity:.12; filter:drop-shadow(0 0 7px #ffd774); }
+.is-drawing .tree-sparks circle { animation:tree-spark 3.5s ease-in-out infinite; }
+.tree-sparks circle:nth-child(2) { animation-delay:.2s; }
+.tree-sparks circle:nth-child(3) { animation-delay:.4s; }
+.tree-sparks circle:nth-child(4) { animation-delay:.6s; }
+.tree-sparks circle:nth-child(5) { animation-delay:.8s; }
+.tree-sparks circle:nth-child(6) { animation-delay:1s; }
+.tree-sparks circle:nth-child(7) { animation-delay:1.2s; }
+.tree-sparks circle:nth-child(8) { animation-delay:1.4s; }
+.tree-sparks circle:nth-child(9) { animation-delay:1.6s; }
+.tree-sparks circle:nth-child(10) { animation-delay:1.8s; }
+@keyframes tree-spark { 0%,100% { opacity:.12; } 35% { opacity:.85; } 65% { opacity:.2; } }
+@media(prefers-reduced-motion:reduce) { .is-drawing .tree-sparks circle { animation:none; opacity:.25; } }
