@@ -15,9 +15,9 @@
     ],
     kabbalah: [
       ['数の扉を開いています', '誕生日に秘められた数を辿って。'],
-      ['光が、ひとつずつ結ばれる', '生命数と今日の周期を重ねます。'],
-      ['数の響きが、ひとつに', 'あなたと今日をつなぐ、数の流れ。'],
-      ['数秘の導きが整いました', 'まもなく、今日の数字が届きます。'],
+      ['王冠に、最初の光がともる', '生命数を起点に、光が樹をくだります。'],
+      ['光が、ひとつずつ結ばれる', '誕生日と今日の周期を、生命の樹に重ねます。'],
+      ['十の光が、ひとつの道に', '数の響きが、あなたの数字へ流れこみます。'],
     ],
     tarot: [
       ['カードの扉を開いています', '誕生日に結ばれたアルカナを。'],
@@ -83,6 +83,15 @@
       preview.hidden = true;
       preview.replaceChildren();
       if (!key) return;
+      if (method.value === 'tarot') {
+        // The arcana stay face down until the draw itself; never preview them.
+        const veil = document.createElement('p');
+        veil.className = 'preview-veil';
+        veil.textContent = 'カードは伏せたまま。導きを受け取る瞬間に開かれます。';
+        preview.replaceChildren(veil);
+        preview.hidden = false;
+        return;
+      }
       previewTimer = setTimeout(async () => {
         const controller = new AbortController();
         previewController = controller;

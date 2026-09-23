@@ -23,7 +23,7 @@ from divination_numbers import TAROT_IMAGE_FILES, calculate_divination_profile, 
 from product_numbers import MAX_FULL_SIZE, generate_product_rows, get_product, product_choices, product_full_size  # noqa: E402
 from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
-APP_VERSION = "v1.17.7-mystic-oracle"
+APP_VERSION = "v1.17.8-mystic-oracle"
 DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 
@@ -230,6 +230,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             get_divination(method)
             require_method_access(method)
             birth = parse_form_birth(request.form, g.today)
+            if method == "tarot":
+                # Tarot cards are revealed only by the draw itself.
+                return jsonify(method_id=method, summary_items=[])
             profile = calculate_divination_profile(method, birth, g.today)
             return jsonify(method_id=profile["method_id"], summary_items=profile["summary_items"])
         except ValueError as exc:

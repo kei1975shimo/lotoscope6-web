@@ -1,59 +1,60 @@
-# ロト・スコープ v1.17.7
+# ロト・スコープ v1.17.8
 
-生年月日と日本時間の日付を使う、占い・ラッキーナンバー生成アプリです。Flask製Webアプリであり、iOS/Androidアプリやストア課金はまだ含みません。
+生年月日と日本時間の日付から、占い（西洋占星術・カバラ数秘術・タロット）でミニロト／ロト6／ロト7／ナンバーズ3／ナンバーズ4の数字を導くFlask製Webアプリです。
+運営者：下地 恵雄　問い合わせ：keiyuu1975@yahoo.co.jp
 
-## 無料・有料
+## 構成（公開用）
 
-- 無料：西洋占星術、全5券種の数字範囲、個数・候補数の指定。
-- 月額500円（税込、提供予定）：3占術と全5券種。
-- 有料プランは購入受付準備中。現在はすべての占術を一時無料開放。契約や自動課金は発生しません。
-- 月額案内 `/plans`、プライバシー `/privacy`、規約 `/terms`、問い合わせ `/support`、特商法表記 `/commerce` を追加。
-- 運営者：下地 恵雄。問い合わせ：keiyuu1975@yahoo.co.jp。
+| パス | 内容 |
+|---|---|
+| `app.py` | Flask本体・画面ルート・セキュリティ設定 |
+| `src/` | 占術計算・数字生成 |
+| `config/app_settings.json` | 口数の既定値・上限（上限10は変更しない） |
+| `templates/` `static/` | 画面・CSS・JavaScript・画像 |
+| `requirements.txt` `Procfile` `render.yaml` `.python-version` | Render用設定 |
 
-## 数字の仕様
+## v1.17.8 の変更
 
-「欲しい個数」は残しています。「くじの規定数」を選ぶと、ミニロト5個（1〜31）、ロト6は6個（1〜43）、ロト7は7個（1〜37）、ナンバーズ3は3桁、ナンバーズ4は4桁（各桁0〜9）です。
+数字の生成・点数・順番、画面のデザインは変更していません。
 
-少ない個数はラッキーナンバー等の部分候補で、そのまま購入する組み合わせではない旨を明示します。ロトは重複なし・昇順、ナンバーズは順序を持ち、桁の値の繰り返しや先頭の0も許します。ボックス参考は規定桁数かつ全桁同一でない場合のみ表示。
+- カバラ数秘術の演出を強化：生命の樹を王冠から順に光の稲妻が下り、10の球が段階的に点灯。周囲を1〜9・11・22・33の数字の環が回り、最後に中心から光が広がります。
+- タロット選択時、誕生日を入れた段階で大アルカナが先に表示されないようにしました（画面とサーバーの両方で非表示）。カードは抽選演出で初めて開きます。
+- 画像を表示サイズに合わせて縮小・再圧縮（約11MB→約3.7MB）。
+- 使われていないCSSを削除。JavaScript無効時の説明文・ボタン名が選択中の占術と一致するよう修正。
+- 公開に不要なファイル（テスト、開発用資料、Node.js設定）を除外。
 
-同じ誕生日・日本時間の日付・占術・券種・個数では候補が固定されます。先に最大10件の異なる候補を生成・採点し、その先頭を表示するので候補数を変えても順番は同じです。個数を変えると候補集合は変わります。点数は占いとの結びつき78%と数字構成22%の独自指標で、当せん確率ではありません。
+## Renderの既存サイトを更新する
 
-規定数はv1.16.0の方式を維持。部分候補は重複と採点順の問題を直すため生成方式を変更しました。最大候補数の設定は10を維持してください。
+1. 現在のリポジトリをバックアップします。
+2. このZIPの中身を既存リポジトリへ上書きします。
+3. **次の旧ファイル・フォルダーを削除します**（上書きだけでは消えません）：
+   `docs/`、`tests/`、`package.json`、`package-lock.json`、`LOCAL_RUN_JA.md`、`UPDATE_EXISTING_SITE_JA.md`、`node_modules/`（あれば）、旧版の `src/utils.py`、`static/img/cosmic-zodiac-wheel.webp`、`PUBLISH_STEPS_JA.md`
+4. Renderの環境変数を確認します。
 
-## 主な修正
+   | 項目 | 設定 |
+   |---|---|
+   | APP_ENV | production |
+   | SECRET_KEY | 設定済みの値を維持 |
+   | RATE_LIMIT_PER_MINUTE | 30 |
+   | TRUSTED_PROXY_HOPS | 1 |
+   | PREMIUM_PREVIEW_ENABLED | 1（一時無料開放。0でロック） |
 
-不正な券種による500エラー、JavaScript無効時の規定数選択、部分候補の重複と点数順、プレビュー時間切れ後の再試行、日付をまたいだ入力検証、説明文を修正。ヒーローを静かな星読み盤と明朝体へ変更しました。
+5. Build Command `pip install -r requirements.txt`、Start Command `gunicorn --workers 1 --threads 4 app:app`。
+6. コミット・pushし、デプロイ完了後に `/health` が `OK`、画面下部に `v1.17.8-mystic-oracle` が出ることを確認します。
 
-## 起動・検証
-
-Windowsでの起動は `LOCAL_RUN_JA.md`、検証結果は `docs/verification_ja.md` を参照。
+## PCでの起動（Windows）
 
 ```powershell
-python -m unittest tests.smoke_test tests.regression_test tests.release_test tests.oracle_revision_test -q
-python tests/generation_matrix.py
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+$env:APP_ENV='development'; $env:TRUSTED_PROXY_HOPS='0'
+.\.venv\Scripts\python.exe app.py
 ```
 
-任意の画面テスト（Node.jsはpackage.jsonの対応版）：
+ブラウザーで `http://127.0.0.1:8786` を開きます。
 
-```powershell
-npm ci
-$env:PYTHONUTF8='1'
-npm test
-```
+## 注意
 
-実ブラウザー検証は別途PythonのplaywrightとEdgeがある環境で `python tests/browser_check.py`。公開時の依存には含めません。
-
-`TESTING=True, TEST_PREMIUM_ACCESS=True` はテスト専用です。公開時は設定しないでください。購入状態の検証には代用できません。
-
-## 公開前の残作業
-
-`docs/STORE_RELEASE_JA.md` を参照。所在地・電話番号、ホスティングのログ処理方針、ネイティブアプリ、商品登録、購入検証・復元・更新・解約連携は未完了です。準備中の表記を消すだけで販売開始しないでください。
-
-## 一時無料開放
-既定で `PREMIUM_PREVIEW_ENABLED=1` として3占術を使えます。環境変数を `0` にして再起動するとロックを戻せます。購入権限や課金機能とは独立した運営側の設定です。ヒーローは上下余白・行間を調整して短縮しました。
-
-## v1.17.2 スマートフォンの読みやすさ
-768px以下では本文16px、説明・注記14pxを中心に拡大。占術カードは横長の縦一覧、くじの数字範囲は独立した行に表示。結果詳細・プラン・規約・フッターも拡大し、補助文字のコントラストを改善しました。一時無料開放と短いヒーローは維持。
-
-## v1.17.7 説明・画像対応
-生成数字・点数・順序は変更していません。正午の星位置と合成スコアの説明を修正。タロットは4枚の画像表示に対応し、個別画像がない場合は共通画像を使用します。詳細は `docs/REVISION_1_17_3_JA.md`、画像配置は `docs/TAROT_IMAGES_JA.md`。
+- 点数は占いとの結びつき78%と数字構成22%の独自指標で、当せん確率ではありません。
+- 有料プランは未実装です（ストア課金・購入検証・所在地／電話番号の掲載が必要）。準備中の表記を消すだけで販売を開始しないでください。
+- テスト・開発資料は別ZIP（`loto_scope_v1.17.8_devtools.zip`）にあります。公開用リポジトリには含めません。
