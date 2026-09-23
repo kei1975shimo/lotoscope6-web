@@ -73,6 +73,24 @@ async function test(name, action) {
 }
 
 (async () => {
+  await test('tarot opens actual unique result images and cancellation clears them', async () => {
+    const t = setup(); t.birth(); t.radio('divination', 'tarot'); t.submit();
+    await t.clock.tickAsync(4800);
+    const sources = [...t.doc.querySelectorAll('[data-tarot-draw] img')].map(img => img.src);
+    assert.ok(sources.length > 0);
+    assert.equal(new Set(sources).size, sources.length);
+    assert.ok(t.doc.querySelector('.draw-card.is-open'));
+    await t.clock.tickAsync(1700);
+    assert.deepEqual([...t.doc.querySelectorAll('.tarot-card img')].map(img => img.src), sources);
+    assert.equal(t.doc.querySelector('#divination-reading .profile-grid'), null);
+    assert.equal(t.doc.querySelector('#divination-reading .profile-details'), null);
+    t.submit(); await t.clock.tickAsync(4800);
+    t.doc.querySelector('[data-cancel-ritual]').click();
+    assert.equal(t.doc.querySelectorAll('[data-tarot-draw] img').length, 0);
+    assert.equal(t.doc.getElementById('ritual').open, false);
+    await t.clock.tickAsync(2000);
+    assert.equal(t.doc.getElementById('ritual').open, false); t.close();
+  });
   await test('generation starts immediately; result waits only for the minimum ritual; repeat reuses the flow', async () => {
     const t = setup(); t.birth(); t.select('count', '10');
     const start = t.clock.now; t.submit(); t.submit();
@@ -152,7 +170,7 @@ async function test(name, action) {
         assert.equal(t.doc.querySelector('[data-button-copy]').textContent, chosen.dataset.buttonLabel);
         t.submit();
         assert.equal(t.doc.querySelector('.ritual-card').dataset.theme, method);
-        await t.clock.tickAsync(5500);
+        await t.clock.tickAsync(method === 'tarot' ? 7200 : 5500);
         assert.equal(t.doc.querySelector('main').dataset.theme, method);
         assert.equal(t.doc.querySelector('.number-reveal-group').dataset.revealProduct, product);
         t.close();

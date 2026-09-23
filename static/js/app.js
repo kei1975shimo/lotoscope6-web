@@ -195,6 +195,15 @@
     dialog.querySelector('[data-ritual-product]').textContent = `${selection.methodName} × ${selection.productName}`;
     const duration = reducedMotion.matches ? 0 : selection.duration;
     const timers = [];
+    const deck = dialog.querySelector('[data-tarot-draw]');
+    deck?.replaceChildren();
+    if (deck) for (let i = 0; i < 4; i += 1) {
+      const back = document.createElement('div');
+      back.className = 'draw-card';
+      back.textContent = '✧';
+      deck.append(back);
+    }
+    let finishReveal = () => {};
     let resolveDone;
     const done = new Promise((resolve) => { resolveDone = resolve; });
     const phase = (index) => {
@@ -218,9 +227,38 @@
     }, duration));
     return {
       done,
+      prepare(html) {
+        if (selection.method !== 'tarot' || !deck) return;
+        const parsed = new DOMParser().parseFromString(html, 'text/html');
+        const cards = Array.from(parsed.querySelectorAll('.tarot-card'));
+        deck.replaceChildren(...cards.map((source) => {
+          const slot = document.createElement('div');
+          slot.className = 'draw-card';
+          const img = source.querySelector('img').cloneNode(true);
+          img.loading = 'eager';
+          const label = document.createElement('span');
+          label.textContent = source.querySelector('strong').textContent;
+          slot.append(img, label);
+          return slot;
+        }));
+      },
+      reveal() {
+        if (selection.method !== 'tarot' || reducedMotion.matches || !deck?.children.length) return Promise.resolve();
+        title.textContent = 'こちらのカードが出ました';
+        text.textContent = 'カードの意味と、今日の数字をお届けします。';
+        return new Promise((resolve) => {
+          finishReveal = resolve;
+          Array.from(deck.children).forEach((slot, index) => {
+            timers.push(setTimeout(() => slot.classList.add('is-open'), index * 230));
+          });
+          timers.push(setTimeout(resolve, 1700));
+        });
+      },
       close() {
         timers.forEach(clearTimeout);
         resolveDone();
+        finishReveal();
+        deck?.replaceChildren();
         if (dialog.open) dialog.close();
         document.body.classList.remove('is-drawing');
       },
@@ -286,7 +324,12 @@
     const draw = { controller, ritual, timeout, button, form };
     activeDraw = draw;
     try {
-      const [payload] = await Promise.all([responsePromise, ritual.done]);
+      const [payload] = await Promise.all([responsePromise.then((payload) => {
+        if (activeDraw === draw) ritual.prepare(payload.html);
+        return payload;
+      }), ritual.done]);
+      if (activeDraw !== draw) return;
+      await ritual.reveal();
       if (activeDraw !== draw) return;
       ritual.close();
       replacePage(payload.html);

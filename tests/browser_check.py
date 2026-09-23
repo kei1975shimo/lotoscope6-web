@@ -96,7 +96,9 @@ def main():
                 page.locator('[data-submit-button]').click()
                 page.locator('#best-pick').wait_for()
                 page.locator('.tarot-card-grid').scroll_into_view_if_needed()
-                assert page.locator('.tarot-card').count()==4
+                assert 1 <= page.locator('.tarot-card').count() <= 4
+                sources=page.locator('.tarot-card img').evaluate_all('(imgs) => imgs.map(img => img.src)')
+                assert len(sources)==len(set(sources))
                 for img in page.locator('.tarot-card img').all():
                     img.scroll_into_view_if_needed()
                     img.evaluate('(img) => img.decode()')

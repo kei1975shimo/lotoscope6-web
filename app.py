@@ -23,7 +23,7 @@ from divination_numbers import TAROT_IMAGE_FILES, calculate_divination_profile, 
 from product_numbers import MAX_FULL_SIZE, generate_product_rows, get_product, product_choices, product_full_size  # noqa: E402
 from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
-APP_VERSION = "v1.17.4-mystic-oracle"
+APP_VERSION = "v1.17.5-mystic-oracle"
 DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 

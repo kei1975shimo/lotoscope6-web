@@ -16,8 +16,8 @@
       </div>
       <div class="ritual-visual tarot-visual">
         <img class="tarot-atmosphere" src="{{ url_for('static', filename='img/oracle-tarot.webp') }}" width="512" height="512" alt="">
-        <div class="tarot-fan">
-          {% for symbol in ['☾', '✦', '☉'] %}<div class="ritual-tarot tarot-{{ loop.index }}"><div class="card-turn"><span class="card-back">✧</span><span class="card-front"><i>{{ symbol }}</i><small>✧ · ✧</small></span></div></div>{% endfor %}
+        <div class="tarot-draw" data-tarot-draw>
+          {% for i in range(4) %}<div class="draw-card"><span class="draw-back">✧</span></div>{% endfor %}
         </div>
       </div>
       <div class="ritual-dust"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>

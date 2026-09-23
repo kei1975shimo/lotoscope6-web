@@ -95,8 +95,8 @@ class CardPresentationTests(unittest.TestCase):
                 self.app.static_folder=temp
                 r=self.client.post('/generate',data=self.data)
                 self.assertEqual(r.status_code,200)
-                self.assertEqual(r.text.count('<figure class="tarot-card">'),4)
-                self.assertEqual(r.text.count('<small>共通イメージ</small>'),4)
+                self.assertEqual(r.text.count('<figure class="tarot-card">'), len({c['number'] for c in calculate_divination_profile('tarot',date(2000,2,29),DAYS[0])['tarot_cards']}))
+                self.assertEqual(r.text.count('<small>共通イメージ</small>'), r.text.count('<figure class="tarot-card">'))
                 self.assertNotRegex(r.text,r'src="[^"]*tarot-\d{2}-')
             finally:
                 self.app.static_folder=previous

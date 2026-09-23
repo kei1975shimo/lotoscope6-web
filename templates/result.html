@@ -38,23 +38,23 @@
 {% endif %}
 <section class="reading-section" id="divination-reading">
   <div class="section-heading"><div><p class="eyebrow">{{ divination_profile.reading_kicker }}</p><h2>{{ divination_profile.reading_title }}</h2></div></div>
-  <div class="profile-grid">{% for item in divination_profile.summary_items %}<div class="profile-item"><span class="profile-symbol" aria-hidden="true">{{ item.symbol }}</span><small>{{ item.label }}</small><strong>{{ item.value }}</strong><span>{{ item.detail }}</span></div>{% endfor %}</div>
+  {% if divination_id != 'tarot' %}<div class="profile-grid">{% for item in divination_profile.summary_items %}<div class="profile-item"><span class="profile-symbol" aria-hidden="true">{{ item.symbol }}</span><small>{{ item.label }}</small><strong>{{ item.value }}</strong><span>{{ item.detail }}</span></div>{% endfor %}</div>{% endif %}
   {% if divination_id == 'tarot' %}
-  <p class="method-note">{{ divination_profile.method_note }}</p>
-  <div class="tarot-card-grid" aria-label="今回の4枚のカード">
-    {% for card in divination_profile.tarot_cards %}
+  <p class="method-note">今回はこちらのカードが出ました。</p>
+  <div class="tarot-card-grid" aria-label="今回出たカード">
+    {% for card in divination_profile.tarot_cards|unique(attribute='number') %}
     {% set artwork = tarot_card_image(card.image_filename) %}
     <figure class="tarot-card">
       <img src="{{ url_for('static', filename=artwork) }}" width="400" height="600" loading="lazy" alt="{{ card.name ~ 'のカード' if artwork != 'img/oracle-tarot.webp' else 'タロット共通イメージ（' ~ card.name ~ 'の個別画像は準備中）' }}">
-      <figcaption><span>{{ card.role }}</span><strong>{{ card.display_number }} · {{ card.name }}</strong><span>{{ card.description }}</span>{% if artwork == 'img/oracle-tarot.webp' %}<small>共通イメージ</small>{% endif %}</figcaption>
+      <figcaption><span>{{ divination_profile.tarot_cards|selectattr('number', 'equalto', card.number)|map(attribute='role')|join('・') }}</span><strong>{{ card.display_number }} · {{ card.name }}</strong><span>{{ card.keyword }}</span>{% if artwork == 'img/oracle-tarot.webp' %}<small>共通イメージ</small>{% endif %}</figcaption>
     </figure>
     {% endfor %}
   </div>
   {% endif %}
   <details class="reading-details"><summary>この導きを、もう少し詳しく<span class="details-chevron" aria-hidden="true">＋</span></summary>
     <div class="reading-detail-content"><h3>{{ product.name }}で参考にした中心数字</h3><p class="muted">買い目そのものではなく、候補を選ぶ際の重み付けに使った数字です。</p>{{ number_group({'numbers': best.reference_numbers, 'reference_numbers': best.reference_numbers}) }}<p class="score-note">結果の数字と重なったものには ✧ を添えています。</p>
-      <div class="profile-details">{% for row in divination_profile.detail_rows %}<div><h3>{{ row.symbol }} {{ row.title }}</h3><p>{{ row.line1 }}</p><p>{{ row.line2 }}</p><small>{{ row.line3 }}</small></div>{% endfor %}</div>
-      {% if divination_id != 'tarot' %}<p class="method-note">{{ divination_profile.method_note }}</p>{% endif %}
+      {% if divination_id != 'tarot' %}<div class="profile-details">{% for row in divination_profile.detail_rows %}<div><h3>{{ row.symbol }} {{ row.title }}</h3><p>{{ row.line1 }}</p><p>{{ row.line2 }}</p><small>{{ row.line3 }}</small></div>{% endfor %}</div>{% endif %}
+      <p class="method-note">{{ divination_profile.method_note }}</p>
     </div>
   </details>
 </section>
