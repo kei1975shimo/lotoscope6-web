@@ -344,6 +344,14 @@ body.is-drawing { overflow: hidden; }
 @media(max-width:600px) { .plan-comparison { grid-template-columns:1fr; gap:0; } }
 
 /* Mobile reading scale: body 16px, supporting copy 14px, decorative labels 12px. */
+.tarot-card-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-top:20px; }
+.tarot-card { margin:0; min-width:0; border:1px solid var(--line); background:#10121e; border-radius:4px; overflow:hidden; }
+.tarot-card img { width:100%; aspect-ratio:2 / 3; height:auto; object-fit:contain; background:#090a12; }
+.tarot-card figcaption { display:grid; gap:6px; padding:14px; overflow-wrap:anywhere; }
+.tarot-card figcaption > span, .tarot-card small { font-size:14px; line-height:1.8; color:var(--muted); }
+.tarot-card strong { font:18px/1.7 var(--serif); color:var(--gold-soft); }
+@media(max-width:768px) { .tarot-card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }.tarot-card figcaption { padding:12px; } }
+@media(max-width:360px) { .tarot-card-grid { grid-template-columns:1fr; }.tarot-card { display:grid; grid-template-columns:90px minmax(0,1fr); align-items:center; } }
 @media (max-width: 768px) {
   :root { --muted:#c0b8d4; }
   body { font-size:16px; line-height:1.85; }

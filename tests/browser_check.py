@@ -87,6 +87,24 @@ def main():
                 if width==390:
                     page.screenshot(path=str(output/'readable-result-mobile.png'),full_page=True)
                 checks+=1
+            for width in (320,390,768,1280):
+                page.set_viewport_size({'width':width,'height':900})
+                page.goto(origin)
+                for name,value in [('birth_year','2000'),('birth_month','2'),('birth_day','29')]:
+                    page.locator('#'+name).select_option(value)
+                page.locator('input[value="tarot"]').check(force=True)
+                page.locator('[data-submit-button]').click()
+                page.locator('#best-pick').wait_for()
+                page.locator('.tarot-card-grid').scroll_into_view_if_needed()
+                assert page.locator('.tarot-card').count()==4
+                for img in page.locator('.tarot-card img').all():
+                    img.scroll_into_view_if_needed()
+                    img.evaluate('(img) => img.decode()')
+                    assert img.evaluate('(img) => img.naturalWidth > 0')
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                if width==390:
+                    page.locator('.tarot-card-grid').screenshot(path=str(output/'tarot-four-cards-mobile.png'))
+                checks+=1
             # Real native form, with scripts disabled: default adapts to each product.
             native=browser.new_context(java_script_enabled=False,viewport={'width':390,'height':844})
             n=native.new_page()

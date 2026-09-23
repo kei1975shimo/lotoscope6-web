@@ -65,6 +65,15 @@ TAROT_MAJOR = [
     (22, "愚者", "自由・可能性"),
 ]
 
+# Display/artwork numbering only: the generator still uses 22 for the Fool.
+TAROT_IMAGE_SLUGS = (
+    "fool", "magician", "high-priestess", "empress", "emperor", "hierophant",
+    "lovers", "chariot", "strength", "hermit", "wheel-of-fortune", "justice",
+    "hanged-man", "death", "temperance", "devil", "tower", "star", "moon",
+    "sun", "judgement", "world",
+)
+TAROT_IMAGE_FILES = tuple(f"img/tarot-{n:02d}-{slug}.webp" for n, slug in enumerate(TAROT_IMAGE_SLUGS))
+
 
 def divination_choices() -> List[Dict[str, Any]]:
     return [dict(DIVINATIONS[item_id]) for item_id in DIVINATION_ORDER]
@@ -152,8 +161,8 @@ def _astrology_profile(birth_date: date, target_date: date) -> Dict[str, Any]:
         {
             "symbol": row["symbol"],
             "title": row["planet_name"],
-            "line1": f"出生時 {row['birth_sign_symbol']} {row['birth_sign']} {row['birth_degree']}°",
-            "line2": f"生成日 {row['current_sign_symbol']} {row['current_sign']} {row['current_degree']}°",
+            "line1": f"生まれた日の正午（日本時間） {row['birth_sign_symbol']} {row['birth_sign']} {row['birth_degree']}°",
+            "line2": f"生成日の正午（日本時間） {row['current_sign_symbol']} {row['current_sign']} {row['current_degree']}°",
             "line3": f"{row['aspect_name']} {row['aspect_degree']}°への誤差 {row['orb']}°",
         }
         for row in raw.get("planet_rows", [])
@@ -256,7 +265,8 @@ def _tarot_card(number: int) -> Dict[str, Any]:
     number = ((int(number) - 1) % 22) + 1
     card_number, name, keyword = TAROT_MAJOR[number - 1]
     display = "0" if card_number == 22 else str(card_number)
-    return {"number": card_number, "display_number": display, "name": name, "keyword": keyword}
+    return {"number": card_number, "display_number": display, "name": name, "keyword": keyword,
+            "image_filename": TAROT_IMAGE_FILES[int(display)]}
 
 
 def calculate_tarot_profile(birth_date: date, target_date: date) -> Dict[str, Any]:
@@ -301,7 +311,9 @@ def calculate_tarot_profile(birth_date: date, target_date: date) -> Dict[str, An
         _add_weight(weights, primary, 126 - index * 6)
         _add_weight(weights, secondary, 96 - index * 5)
         _add_weight(weights, tertiary, 79 - index * 4)
-        # 大アルカナの数字を1〜43へ二巡させ、同じカードの「影」の数字も候補にする。
+        # Historical cyclic shadow mapping: 1 -> 23, ..., 21 -> 43, 22 -> 44 -> 1.
+        # There are only 21 slots in 23..43, so the Fool intentionally wraps
+        # under the retained specification. Never clamp all cards to 1..22.
         _add_weight(weights, arcana + 22, 68 - index * 3)
 
     candidate_values.extend(
@@ -329,6 +341,7 @@ def calculate_tarot_profile(birth_date: date, target_date: date) -> Dict[str, An
             "reading_title": "この数字へつながったタロット",
             "reading_kicker": "MAJOR ARCANA READING",
             "reason_source": "生年月日と今日から開いた大アルカナ",
+            "tarot_cards": [dict(card, role=label, description=detail) for label, card, detail in card_defs],
             "summary_items": [
                 {"symbol": "Ⅰ", "label": "誕生カード", "value": card_defs[0][1]["name"], "detail": f"Arcana {card_defs[0][1]['display_number']}"},
                 {"symbol": "☾", "label": "今日のカード", "value": card_defs[2][1]["name"], "detail": f"Arcana {card_defs[2][1]['display_number']}"},
@@ -345,8 +358,10 @@ def calculate_tarot_profile(birth_date: date, target_date: date) -> Dict[str, An
                 for label, card, detail in card_defs
             ],
             "method_note": (
-                "タロットの誕生カード計算法には複数の方式があります。本アプリでは大アルカナ22枚を使い、"
-                "生年月日と生成日の数をカードへ対応させ、その番号と組み合わせを1〜43の候補へ展開しています。"
+                "大アルカナ22枚の番号を起点に、生年月日・生成日・カード同士の組み合わせを使って"
+                "1〜43へ展開しています。カード番号そのものに加え、計算で組み合わせた数字や、"
+                "22を足して43を超えたら1へ戻す「影の数字」も参考にします。"
+                "そのためロト6では23〜43も候補になります。他のくじでは、そのくじの数字範囲へ重みを換算します。"
             ),
         }
     )

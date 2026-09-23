@@ -1,4 +1,4 @@
-# ロト・スコープ v1.17.2
+# ロト・スコープ v1.17.4
 
 生年月日と日本時間の日付を使う、占い・ラッキーナンバー生成アプリです。Flask製Webアプリであり、iOS/Androidアプリやストア課金はまだ含みません。
 
@@ -29,7 +29,7 @@
 Windowsでの起動は `LOCAL_RUN_JA.md`、検証結果は `docs/verification_ja.md` を参照。
 
 ```powershell
-python -m unittest tests.smoke_test tests.regression_test tests.release_test -q
+python -m unittest tests.smoke_test tests.regression_test tests.release_test tests.oracle_revision_test -q
 python tests/generation_matrix.py
 ```
 
@@ -54,3 +54,6 @@ npm test
 
 ## v1.17.2 スマートフォンの読みやすさ
 768px以下では本文16px、説明・注記14pxを中心に拡大。占術カードは横長の縦一覧、くじの数字範囲は独立した行に表示。結果詳細・プラン・規約・フッターも拡大し、補助文字のコントラストを改善しました。一時無料開放と短いヒーローは維持。
+
+## v1.17.4 説明・画像対応
+生成数字・点数・順序は変更していません。正午の星位置と合成スコアの説明を修正。タロットは4枚の画像表示に対応し、個別画像がない場合は共通画像を使用します。詳細は `docs/REVISION_1_17_3_JA.md`、画像配置は `docs/TAROT_IMAGES_JA.md`。

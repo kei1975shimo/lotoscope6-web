@@ -105,6 +105,9 @@ def digit_sum(value: int | str) -> int:
 
 
 def to_loto_number(value: int | float) -> int:
+    # Preserve the historical zero-based residue mapping (1 -> 2, 43 -> 1).
+    # Original intent is undocumented. Switching to one-based normalization
+    # changes daily results; do not alter without an explicit migration decision.
     return int(round(value)) % 43 + 1
 
 

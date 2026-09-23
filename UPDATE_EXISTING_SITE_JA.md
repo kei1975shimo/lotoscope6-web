@@ -1,4 +1,4 @@
-# 既存のRenderサイトをv1.17.2へ更新
+# 既存のRenderサイトをv1.17.3へ更新
 
 このZIPは更新用のファイル一式です。今回の作業では公開中のRenderサイトには反映していません。
 
@@ -16,7 +16,7 @@
 
 5. Build Commandを `pip install -r requirements.txt`、Start Commandを `gunicorn --workers 1 --threads 4 app:app` にします。
 6. Gitへコミット・pushし、Renderのデプロイ完了を待ちます。
-7. `/health` が `OK` になり、画面下部に `v1.17.2-mystic-oracle` が出ることを確認します。
+7. `/health` が `OK` になり、画面下部に `v1.17.3-mystic-oracle` が出ることを確認します。
 8. 無料開放中の3占術、くじ5種類、再確認ボタンを操作します。同じ条件で1口・3口・10口を比較し、先頭と順番が一致することを確認します。
 
 `render.yaml`を使った新規作成でも同じ構成になります。既存サービスでは、ファイルを置くだけで環境変数やStart Commandが更新されるとは限らないため、ダッシュボードも確認します。

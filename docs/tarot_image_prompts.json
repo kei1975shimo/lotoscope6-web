@@ -1,0 +1,203 @@
+{
+  "tool": "built-in image_gen",
+  "cards": [
+    {
+      "id": 0,
+      "slug": "fool",
+      "prompt": "Use case: stylized-concept. Create ONE finished original Major Arcana tarot card illustration, THE FOOL (00), for a Japanese mystical number app. Portrait aspect ratio 2:3. Shared deck art direction: exquisite etched storybook painting with fine antique gold linework, deep midnight navy, restrained ivory and muted jewel hues, luminous celestial atmosphere; elegant thin double-line gold rectangular border inset 4%, small matching corner star flourishes. Fully illustrated scene, no lettering, no numerals, no labels or watermark. Main subject large and legible on a phone, natural anatomy, expressive face, fully clothed. The Fool: a young adult traveler in ivory and indigo, carrying a small bundle and white rose, a small white dog, dawn stars above mountain cliffs. IMPORTANT composition: traveler steps toward the LEFT side of the image, body and face in clear left-facing three-quarter profile, chin gently lifted left toward the dawn; anatomically natural neck, gaze aligned with torso. A calm moment of hopeful beginning, not a fall. Frame full body and dog inside border. Do not face right. This belongs to a 22-card deck with varied face directions. Output only this one individual illustration.",
+      "status": "generated",
+      "filename": "img/tarot-00-fool.webp",
+      "sha256": "61182416e9c4e69e621a757c5cf894db771071cc22fbfeecdd2a073c72e315ea",
+      "bytes": 346110
+    },
+    {
+      "id": 1,
+      "slug": "magician",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE MAGICIAN. A confident adult magician facing directly toward the viewer, symmetrical frontal face and forward shoulders, one hand raising a wand and the other pointing toward the ground. A table in front with one cup, one pentacle, one sword and a wand; white and indigo robe, an infinity sign above the head, flowering garden. Clearly FRONT FACING, not a right-facing profile.",
+      "status": "generated",
+      "filename": "img/tarot-01-magician.webp",
+      "sha256": "8896694a831ecb5aecf932099d8b51f435a1a3ea5b34af514fed96e2a06c4049",
+      "bytes": 372972
+    },
+    {
+      "id": 2,
+      "slug": "high-priestess",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE HIGH PRIESTESS. A calm adult priestess seated squarely FRONT FACING between two dark stone pillars, gaze directly toward the viewer, silver crescent crown, ivory veil and flowing midnight blue robes, closed scroll held naturally, a pomegranate-patterned veil and crescent moon at her feet. Precise symmetrical frontal portrait, not turned right.",
+      "status": "generated",
+      "filename": "img/tarot-02-high-priestess.webp",
+      "sha256": "dbc4c98d74cd1fa5f8338f07ee17efe81f8cdb2e3f9865a264285369ed6eec15",
+      "bytes": 298750
+    },
+    {
+      "id": 3,
+      "slug": "empress",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE EMPRESS. A mature regal woman seated in a lush garden of wheat and roses, elaborate crown of small stars, ivory and muted emerald gown, natural relaxed hands holding a small scepter. Head and torso in a gentle THREE-QUARTER RIGHT orientation, gaze toward a flowering branch to the right, softly welcoming expression, warm abundance. Avoid rigid profile.",
+      "status": "generated",
+      "filename": "img/tarot-03-empress.webp",
+      "sha256": "27de5cc21def3da7fe5bc9875abd9d665428b760653cd728a127816818bec19a",
+      "bytes": 406598
+    },
+    {
+      "id": 4,
+      "slug": "emperor",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE EMPEROR. A dignified older bearded ruler seated on a stone throne with ram motifs, muted crimson robes over restrained ceremonial armor, one orb and a scepter, mountains behind. Head and upper body naturally THREE-QUARTER LEFT, eyes directed slightly left, powerful balanced posture, no turned neck against the torso.",
+      "status": "generated",
+      "filename": "img/tarot-04-emperor.webp",
+      "sha256": "522524d87eea1a7aca7bd6b0fefb2591528fcd94079c8d71d73ac2598e605dcc",
+      "bytes": 370102
+    },
+    {
+      "id": 5,
+      "slug": "hierophant",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE HIEROPHANT. A wise ceremonial teacher seated between temple pillars, FRONT FACING centered face and torso, ivory and gold vestments, a small triple crown, one hand in blessing, the other holding a triple cross staff. Two smaller fully clothed adult students viewed from behind face the teacher. Crossed keys below, solemn calm.",
+      "status": "generated",
+      "filename": "img/tarot-05-hierophant.webp",
+      "sha256": "f0d2034cdb82ae9e89b7672cfe1ad1cba21c19e0d74339ab47ad0a2a7a549aa6",
+      "bytes": 350456
+    },
+    {
+      "id": 6,
+      "slug": "lovers",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE LOVERS. Two fully clothed adult lovers of equal scale standing beneath a luminous winged angel, garden and distant mountain. The person on the LEFT turns RIGHT toward their partner; the person on the RIGHT turns LEFT toward their partner. Their eyes meet naturally, relaxed hands nearly touching. Angel above is FRONTAL with downward gaze. Ivory and indigo robes. No nudity; two naturally opposed face directions, never both looking right.",
+      "status": "generated",
+      "filename": "img/tarot-06-lovers.webp",
+      "sha256": "4495e63deefaf693855190c5c0c5e99604a22fd1154c78af805717d9b563e63c",
+      "bytes": 398456
+    },
+    {
+      "id": 7,
+      "slug": "chariot",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE CHARIOT. A heroic adult charioteer standing upright in a ceremonial chariot under a starry canopy, head and shoulders FACE DIRECTLY FORWARD toward viewer, regal indigo armor, one upright staff. Two seated sphinxes, one dark and one ivory, look forward beneath. Balanced axial composition, distant city.",
+      "status": "generated",
+      "filename": "img/tarot-07-chariot.webp",
+      "sha256": "ae97eeb74b7b941f802fa916981c08e28a48c879c4a972c03bf9f2759b830d0f",
+      "bytes": 362984
+    },
+    {
+      "id": 8,
+      "slug": "strength",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: STRENGTH. A serene adult woman in an ivory gown leans gently toward a golden lion. Woman at RIGHT, head and torso angled DOWN-LEFT, looking into the lion's face on the LEFT. Lion looks UP-RIGHT toward her. Hands rest gently on its mane and jaw, no wrestling, no aggression. Subtle infinity motif above; forest clearing.",
+      "status": "generated",
+      "filename": "img/tarot-08-strength.webp",
+      "sha256": "d7a6dc0040c38f019ee54980454351dddf681476de44f56991c63f61c60b77cf",
+      "bytes": 350738
+    },
+    {
+      "id": 9,
+      "slug": "hermit",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE HERMIT. An elderly hooded traveler on a snowy mountain ledge, holding a warm star-shaped lantern in front of him on the LEFT of the composition and a wooden staff. Face in clear LEFT-facing three-quarter profile and eyes looking slightly down-left at the lantern, head naturally aligned with rounded shoulders. Indigo wool cloak, quiet contemplation.",
+      "status": "generated",
+      "filename": "img/tarot-09-hermit.webp",
+      "sha256": "1951358acec470b5419f137058a338b560006560d77ded8831fe91acbb938fc5",
+      "bytes": 330762
+    },
+    {
+      "id": 10,
+      "slug": "wheel-of-fortune",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: WHEEL OF FORTUNE. A magnificent large antique golden spoked wheel suspended among indigo clouds, a small sphinx poised above, a serpent descending on one side and a symbolic jackal-like guardian rising on the other. Four luminous guardian symbols in the corners: angel, eagle, lion, bull. The main subject is the wheel, NOT a human portrait. No letters or written symbols on the wheel, only geometric celestial engraving.",
+      "status": "generated",
+      "filename": "img/tarot-10-wheel-of-fortune.webp",
+      "sha256": "c38f3ec557c7455f76d6bd84a9ed61669c3d0a983cad395090ed2815f0bcfd74",
+      "bytes": 360350
+    },
+    {
+      "id": 11,
+      "slug": "justice",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: JUSTICE. A composed adult woman seated between two balanced pillars, stern serene symmetrical FRONT-FACING face and torso, looking directly at viewer. One upright straight sword in her right hand and balanced scales in her left hand. Muted crimson and ivory robes, small gold crown, all hands naturally attached, both pans level, dignified and still.",
+      "status": "generated",
+      "filename": "img/tarot-11-justice.webp",
+      "sha256": "093092c4400bdf3e45070aed3ca8471a172d46916763110cfd2a95379c87fbde",
+      "bytes": 336520
+    },
+    {
+      "id": 12,
+      "slug": "hanged-man",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: MAJOR ARCANA 12, symbolic perspective and contemplation. A peaceful adult fantasy sage FLOATS freely upside down in a magical oval of golden light, weightless like a celestial dream, centered full body visible. He wears an indigo tunic and ivory trousers, one knee gently bent across the other leg, arms relaxed behind his back. Upside-down face looks directly toward viewer, serene expression, golden halo behind his head. Surrounding stars, distant mountains, two living trees frame the sides but do not touch him. Magical levitation only: absolutely no rope, no tie, no binding, no attachment, no restraint, no injury. Naturally coherent anatomy. Entire illustration retains upright gold border while only the floating person is inverted. No text or title.",
+      "status": "generated",
+      "filename": "img/tarot-12-hanged-man.webp",
+      "sha256": "39a064ac77a79d4577bff19a0adb67ce4ae6259c83c0062cdd86cfb394637a6f",
+      "bytes": 360180
+    },
+    {
+      "id": 13,
+      "slug": "death",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: DEATH. A symbolic skeletal knight in dark ceremonial armor riding a white horse slowly toward the LEFT, skull and horse in LEFT-facing profile, carrying a dark banner with a white five-petal rose. A rising golden sun between two towers in the distance and small new flowers in foreground express transformation. Atmospheric, dignified, non-graphic, no blood, no corpses, no violent scene.",
+      "status": "generated",
+      "filename": "img/tarot-13-death.webp",
+      "sha256": "c02b8ec1e2481c8ed8bdd5b2d02a5e562f535c48a4dc90d8af9684db473ed74d",
+      "bytes": 374178
+    },
+    {
+      "id": 14,
+      "slug": "temperance",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: TEMPERANCE. An androgynous adult angel standing FRONT FACING, face gently tilted DOWN toward two golden cups pouring a single delicate stream between them. Broad balanced wings, ivory robe with indigo sash, one bare foot at the edge of water and the other on land, a golden path toward dawn. Calm anatomical hands, centered balanced body; not a side profile.",
+      "status": "generated",
+      "filename": "img/tarot-14-temperance.webp",
+      "sha256": "0d1a1c5fc6e772309a1a726e98f2dd86b70e752d6242bc4d8cde04d4420ce666",
+      "bytes": 356768
+    },
+    {
+      "id": 15,
+      "slug": "devil",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE DEVIL. A symbolic horned, winged mythical creature seated FRONT FACING on a dark stone pedestal, symmetrical forward face with thoughtful eyes, regal rather than horrific. Two fully clothed adult figures beneath with loose open chains representing attachments, one looking inward LEFT and the other inward RIGHT, able to release themselves. Indigo, muted burgundy and gold, no nudity, no gore, no sensational horror.",
+      "status": "generated",
+      "filename": "img/tarot-15-devil.webp",
+      "sha256": "a88467fb4d8280bc37c444b64342c235e53812c55167b7271228a35be1b615a5",
+      "bytes": 324294
+    },
+    {
+      "id": 16,
+      "slug": "tower",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE TOWER. A tall ancient stone tower on a crag under an indigo storm, one golden lightning bolt striking and dislodging its crown, masonry fragments and sparks in the air, ocean below. Two tiny fully clothed symbolic figures tumble in different orientations far from foreground, no injuries shown. Architectural event is main subject, no large portrait and no right-facing character repetition.",
+      "status": "generated",
+      "filename": "img/tarot-16-tower.webp",
+      "sha256": "f70fbe5b17467b7e6457758c82c838e39cc8e56e9e6b4214cea4606ed16aeb5c",
+      "bytes": 317604
+    },
+    {
+      "id": 17,
+      "slug": "star",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE STAR. An adult woman in a flowing ivory and pale blue gown kneels beside a still pool, face and shoulders in natural THREE-QUARTER LEFT with gaze DOWN-LEFT at the water. She pours water from two small vessels, one into the pool and one onto the earth. One large eight-pointed star and seven smaller stars overhead, quiet plants and distant bird. Fully clothed, hopeful, no nudity.",
+      "status": "generated",
+      "filename": "img/tarot-17-star.webp",
+      "sha256": "80250360c36148c090671f8c4327e6cb070a0c30ae9342e43496f62a0dab0412",
+      "bytes": 365674
+    },
+    {
+      "id": 18,
+      "slug": "moon",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE MOON. A luminous crescent and full-moon aura above a winding path between two towers. A dog on the LEFT looks UP-RIGHT and a wolf on the RIGHT looks UP-LEFT toward the moon, a small crayfish emerges from the pool at bottom center. Dreamlike blue mist, moon has subtle FRONT-FACING serene face if anthropomorphic, no main human figure. Balanced opposing animal directions.",
+      "status": "generated",
+      "filename": "img/tarot-18-moon.webp",
+      "sha256": "e83f7115958837f8761807b95a9e3a79299635c6a6fdf1b427888873382a888c",
+      "bytes": 359874
+    },
+    {
+      "id": 19,
+      "slug": "sun",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE SUN. A radiant large sun with a serene FRONT-FACING face over tall sunflowers, a happy fully clothed young child in ivory tunic seated safely on a white pony walking toward the RIGHT. Child's torso and smiling face face mostly FORWARD toward viewer, naturally aligned, holding a flowing muted red banner; pony right-facing. Warm joyful gold light, innocence, no nudity.",
+      "status": "generated",
+      "filename": "img/tarot-19-sun.webp",
+      "sha256": "ad20d2577488f514c809e3604aea26a92c2285b60e618a8d3f6094668175e7e8",
+      "bytes": 408466
+    },
+    {
+      "id": 20,
+      "slug": "judgement",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: JUDGEMENT. A luminous adult angel above the clouds, head directed gently DOWN and FRONT toward the people below, blowing a small golden trumpet. Below, three fully clothed adults rise from shadow into dawn and lift their faces UP toward the angel from different angles; left person up-right, middle front-up, right up-left. Renewal, awakening, no exposed bodies, no coffins or corpses, no horror.",
+      "status": "generated",
+      "filename": "img/tarot-20-judgement.webp",
+      "sha256": "de00c4f76c16f037c0e0097a963618192ad40f20ba05cf84591c5d3a9b6d1144",
+      "bytes": 366884
+    },
+    {
+      "id": 21,
+      "slug": "world",
+      "prompt": "Use case: stylized-concept. Asset: ONE original illustrated Major Arcana tarot card for a Japanese mystical number app. Portrait 2:3 aspect ratio, 1024x1536 preferred. Cohesive deck style: exquisite etched storybook painting, finely detailed antique gold linework, midnight navy background, restrained ivory and muted jewel hues, subtle paper texture, luminous celestial atmosphere. Thin double-line rectangular antique gold border inset near edges, small matching corner star flourishes. Rich full scene, large clear subject readable on mobile. No text, no numerals, no card title, no watermark, no multi-card sheet. All people fully clothed, natural faces and believable necks and hands. Carefully honor the stated face direction, avoiding a deck where everyone looks right. Subject/composition: THE WORLD. A joyful adult dancer in a flowing ivory and indigo gown at center of an oval laurel wreath, body mostly FRONTAL with head gently THREE-QUARTER LEFT, relaxed expressive posture holding two short batons. Four small guardian emblems in corners: angel, eagle, lion, bull. Celestial completion, flowing fabric covers the body, balanced natural anatomy, gold stars in navy sky.",
+      "status": "generated",
+      "filename": "img/tarot-21-world.webp",
+      "sha256": "0ed06570565580e859e4187ce2a9d49c722a5939e8e95b26d595c8b1c72a526d",
+      "bytes": 370854
+    }
+  ]
+}
