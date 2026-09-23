@@ -23,7 +23,7 @@ from divination_numbers import TAROT_IMAGE_FILES, calculate_divination_profile, 
 from product_numbers import MAX_FULL_SIZE, generate_product_rows, get_product, product_choices, product_full_size  # noqa: E402
 from settings import DEFAULT_TICKET_COUNT, MAX_TICKET_COUNT  # noqa: E402
 
-APP_VERSION = "v1.17.5-mystic-oracle"
+APP_VERSION = "v1.17.6-mystic-oracle"
 DEFAULT_DIVINATION_ID = "astrology"
 DEFAULT_PRODUCT_ID = "loto6"
 
@@ -172,13 +172,20 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             return filename
         return "img/oracle-tarot.webp"
 
+    def zodiac_image(sign: str) -> str | None:
+        filename = {'牡羊座': 'img/zodiac-aries.webp', '牡牛座': 'img/zodiac-taurus.webp', '双子座': 'img/zodiac-gemini.webp', '蟹座': 'img/zodiac-cancer.webp', '獅子座': 'img/zodiac-leo.webp', '乙女座': 'img/zodiac-virgo.webp', '天秤座': 'img/zodiac-libra.webp', '蠍座': 'img/zodiac-scorpio.webp', '射手座': 'img/zodiac-sagittarius.webp', '山羊座': 'img/zodiac-capricorn.webp', '水瓶座': 'img/zodiac-aquarius.webp', '魚座': 'img/zodiac-pisces.webp'}
+        selected = filename.get(sign)
+        if selected and (Path(app.static_folder) / selected).is_file():
+            return selected
+        return None
+
     @app.context_processor
     def common():
         today = getattr(g, "today", datetime.now(JST).date())
         return dict(app_version=APP_VERSION, divination_choices=divination_choices(), product_choices=product_choices(),
                     csrf_token=get_csrf_token, default_ticket_count=DEFAULT_TICKET_COUNT, max_ticket_count=MAX_TICKET_COUNT,
                     max_full_size=MAX_FULL_SIZE, premium_access=has_premium_access(),
-                    premium_preview=app.config["PREMIUM_PREVIEW_ENABLED"], tarot_card_image=tarot_card_image,
+                    premium_preview=app.config["PREMIUM_PREVIEW_ENABLED"], tarot_card_image=tarot_card_image, zodiac_image=zodiac_image,
                     operator_name=os.environ.get("OPERATOR_NAME", "下地 恵雄"),
                     support_email=os.environ.get("SUPPORT_EMAIL", "keiyuu1975@yahoo.co.jp"),
                     business_address=os.environ.get("BUSINESS_ADDRESS", "未設定（公開準備中）"),

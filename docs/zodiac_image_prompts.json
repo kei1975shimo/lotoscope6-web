@@ -1,0 +1,101 @@
+{
+  "tool": "built-in image_gen",
+  "cards": [
+    {
+      "id": 0,
+      "slug": "aries",
+      "name": "牡羊座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. A majestic ram with strong curling horns, head and body facing LEFT in three-quarter profile, luminous fleece, poised on small celestial rock.",
+      "filename": "img/zodiac-aries.webp",
+      "sha256": "98588a424b903f07193ebaab0b7072b4f8f99e2eb5807a482597b6cbf340109e"
+    },
+    {
+      "id": 1,
+      "slug": "taurus",
+      "name": "牡牛座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. A powerful bull, frontal symmetrical head with natural gently curving horns, calm expression, subtle golden dust around shoulders.",
+      "filename": "img/zodiac-taurus.webp",
+      "sha256": "93531d5ed56c4d476bf110702507e7e569fcbb8870e0fa636505786dd185c8ea"
+    },
+    {
+      "id": 2,
+      "slug": "gemini",
+      "name": "双子座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. Two fully clothed adult celestial twins from waist up, balanced mirrored composition facing INWARD toward each other, one looks right and other left; flowing ivory robes, a small shared star between hands.",
+      "filename": "img/zodiac-gemini.webp",
+      "sha256": "c3deacef5809129797017084fbb217dd682b12641130f9b429e798c67c8e2d8e"
+    },
+    {
+      "id": 3,
+      "slug": "cancer",
+      "name": "蟹座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. One elegant crab seen from ABOVE, two distinct claws raised evenly, articulated shell and legs, mystical moonlit tidal ripples.",
+      "filename": "img/zodiac-cancer.webp",
+      "sha256": "62dba44e86a6c6d17f7fbd962a296c304c22e3be0a76f244e08b6eec00770b4d"
+    },
+    {
+      "id": 4,
+      "slug": "leo",
+      "name": "獅子座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. One noble lion with flowing gold mane, head facing RIGHT in natural three-quarter profile, royal calm celestial presence.",
+      "filename": "img/zodiac-leo.webp",
+      "sha256": "ade5dac87010483c3714e404a8801a564f90598644e7431ab65b8bd26e293671"
+    },
+    {
+      "id": 5,
+      "slug": "virgo",
+      "name": "乙女座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. A serene fully clothed adult maiden in ivory and navy robes holding ears of wheat, head gently DOWN-LEFT aligned naturally with body, delicate gold hair ornaments, graceful waist-up portrait.",
+      "filename": "img/zodiac-virgo.webp",
+      "sha256": "d7329bc5c64a335792fb0b3ddca5368f5c90a1a76da06264b76f1d705a012211"
+    },
+    {
+      "id": 6,
+      "slug": "libra",
+      "name": "天秤座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. One exquisite antique golden balance scale in frontal symmetric composition, two equally balanced hanging pans, central star finial, no people.",
+      "filename": "img/zodiac-libra.webp",
+      "sha256": "cb250fdc6e5cb6a98d3e02ecda41178fe972c2aa5a749d80a03880dc0e0f508d"
+    },
+    {
+      "id": 7,
+      "slug": "scorpio",
+      "name": "蠍座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. One ornate celestial scorpion from above, natural paired pincers and segmented tail curving up to LEFT, unmistakable eight-legged scorpion silhouette, gold engraved armor.",
+      "filename": "img/zodiac-scorpio.webp",
+      "sha256": "ed5fc9c536c2f1a5f85f3aef91467771fe3098d65c2e58889bd281fd4ac4ebba"
+    },
+    {
+      "id": 8,
+      "slug": "sagittarius",
+      "name": "射手座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. A noble fully clothed celestial centaur archer in side profile facing LEFT, bow drawn toward an empty distant star, graceful natural equine anatomy and human upper body, no target person.",
+      "filename": "img/zodiac-sagittarius.webp",
+      "sha256": "c4a3e78734b8ac2da1d619a38bab5e3fc2a2039cdfe78d98709c46390f866e56"
+    },
+    {
+      "id": 9,
+      "slug": "capricorn",
+      "name": "山羊座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. One mythical sea-goat, goat head with swept horns faces RIGHT, forelegs above a flowing coiled fish tail, elegant cohesive anatomy, luminous ocean mist.",
+      "filename": "img/zodiac-capricorn.webp",
+      "sha256": "aac081d6814b52c439a1d287e3022746d2e310ac673de45841866f8b363211d7"
+    },
+    {
+      "id": 10,
+      "slug": "aquarius",
+      "name": "水瓶座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. An ornate tilted ancient gold and lapis amphora pouring a stream of tiny stars into flowing celestial water, central vessel and ribbon-like water form clear emblem, no people.",
+      "filename": "img/zodiac-aquarius.webp",
+      "sha256": "3a45e6304b658b01185ec19bc5721fddb098b3a52e29fa51c799f24c92d27376"
+    },
+    {
+      "id": 11,
+      "slug": "pisces",
+      "name": "魚座",
+      "prompt": "Use case: stylized-concept. Create ONE original mystical zodiac emblem illustration for Japanese astrology app. Square 1024x1024. A coherent luxury celestial set: midnight navy background, finely etched antique gold and ivory linework, subtle stardust and muted blue nebula, elegant thin circular astrolabe ring around central subject. Large unmistakable sculptural subject fills inner circle, clear silhouette legible on mobile. Refined symbolic illustration, rich engraving texture, restrained luminous highlights, no text, no letters, no numerals, no watermark. Not a zodiac wheel of all signs. Only the specified zodiac subject. Ring is decorative, not an astronomical chart. Natural anatomy. Two elegant koi-like celestial fish swimming in opposite directions around a central small star, one head points LEFT above and the other RIGHT below, flowing tails, balanced circular composition.",
+      "filename": "img/zodiac-pisces.webp",
+      "sha256": "55fbfed87f53cda6c37143061116dedf3c08319bc3d4679cca0937151b88685b"
+    }
+  ]
+}

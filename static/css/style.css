@@ -414,3 +414,14 @@ body.is-drawing { overflow: hidden; }
 .draw-card.is-open::before { display:none; }
 .ritual-card[data-theme="tarot"] .ritual-stage { width:220px; aspect-ratio:2/3; }
 @media(prefers-reduced-motion:reduce) { .draw-card img { transition:none; } }
+
+/* Zodiac artwork uses the already calculated signs; text remains the fallback. */
+.zodiac-image { width:min(100%,220px); height:auto; aspect-ratio:1; object-fit:contain; border-radius:4px; }
+.zodiac-caption { display:grid; gap:4px; padding-top:12px; }
+.zodiac-caption small, .zodiac-caption span { color:var(--muted); font-size:14px; }
+.zodiac-caption strong { font:24px/1.6 var(--serif); }
+@media(max-width:600px) {
+  .profile-item.zodiac-profile-item { grid-template-columns:104px minmax(0,1fr); gap:16px; align-items:center; text-align:left; justify-items:stretch; }
+  .zodiac-caption { padding-top:0; }
+  .zodiac-caption strong { font-size:22px; }
+}

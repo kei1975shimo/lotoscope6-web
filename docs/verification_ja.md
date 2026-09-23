@@ -47,3 +47,9 @@
 Python59件（900条件の固定結果・先頭一致を含む）、DOM16件、Edge52項目と実アニメーションの画像一致チェックに成功。キャンセル時の画像・タイマー破棄、通信エラー回復、モーション低減も検証。390pxの演出と整理後の結果を目視確認。実機Safariは未検証。
 
 変更ファイル：templates/result.html、templates/ritual.html、static/js/app.js、static/css/style.css、関連テスト、画像説明・検証記録、バージョン表記（app.py、README.md、package.json、package-lock.json）。
+
+## v1.17.6（2026年9月24日）
+
+内蔵image_genで12星座の神秘的なシンボルを制作し、640×640px WebPで同梱。占星術結果の太陽星座・月星座・生成日の太陽の欄に、既存計算済みの星座名から画像を対応付ける。画像欠落時は従来の記号と名称を表示。画像一覧はzodiac_gallery.html、生成プロンプトとSHA-256はzodiac_image_prompts.json。原稿PNGは作業フォルダーzodiac_artwork/originalsに保存。
+
+Python62件成功（既存59件、新規3件）。900条件の生成結果と先頭一致を維持。12星座の画像対応・欠落時処理・未知のパス入力拒否・12誕生日の結果画面を検証。Edgeで全12画像のデコードと320/390/768/1280pxでの表示を確認、一覧と390px画面を目視確認。数字生成・占術計算・JavaScriptの変更なし。実機Safariは未検証。
