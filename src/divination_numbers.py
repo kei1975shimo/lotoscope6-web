@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+import hashlib
+from oracle_mapping import finish_profile
 from typing import Any, Dict, List, Mapping
 
 from astrology_numbers import JST, calculate_astrology_profile
@@ -33,7 +35,7 @@ DIVINATIONS: Dict[str, Dict[str, Any]] = {
         "english": "TAROT",
         "symbol": "☾",
         "badge": "大アルカナ22枚の導き",
-        "description": "生年月日と今日を大アルカナへ対応させ、カードの数字から候補を導きます。",
+        "description": "大アルカナを混ぜ、四枚のカードを開いて今日の数字を導きます。",
         "button_label": "カードの導きを受け取る",
     },
 }
@@ -151,7 +153,7 @@ def _astrology_profile(birth_date: date, target_date: date) -> Dict[str, Any]:
     raw["reading_title"] = "この数字へつながった星読み"
     raw["reading_kicker"] = "CELESTIAL READING"
     raw["reason_source"] = "誕生の日と今日の七天体"
-    raw["boost_rows"] = raw.get("planet_rows", [])
+    raw["boost_rows"] = []
     raw["summary_items"] = [
         {"symbol": raw["sun_sign_symbol"], "label": "太陽星座", "value": raw["sun_sign"], "detail": "生まれた日の太陽"},
         {"symbol": raw["moon_sign_symbol"], "label": "月星座", "value": raw["moon_sign"], "detail": "生まれた日の月"},
@@ -163,102 +165,44 @@ def _astrology_profile(birth_date: date, target_date: date) -> Dict[str, Any]:
             "title": row["planet_name"],
             "line1": f"生まれた日の正午（日本時間） {row['birth_sign_symbol']} {row['birth_sign']} {row['birth_degree']}°",
             "line2": f"生成日の正午（日本時間） {row['current_sign_symbol']} {row['current_sign']} {row['current_degree']}°",
-            "line3": f"{row['aspect_name']} {row['aspect_degree']}°への誤差 {row['orb']}°",
+            "line3": "正午の星位置です。成立したアスペクトは下に記載します。",
         }
         for row in raw.get("planet_rows", [])
     ]
+    raw['detail_rows'].extend(
+        dict(symbol='✦', title=a['label'], line1=f"角度 {a['degree']}° ／ 許容差内の誤差 {a['orb']}°",
+             line2='生成日の天体と、誕生日の天体の関係', line3='許容差は6度。吉凶や当せん確率の評価ではありません。')
+        for a in raw['aspect_rows'])
     return raw
 
 
 def calculate_kabbalah_profile(birth_date: date, target_date: date) -> Dict[str, Any]:
-    method = get_divination("kabbalah")
-    profile = _base_profile(birth_date, target_date, method)
-
-    ymd_digits = birth_date.strftime("%Y%m%d")
-    life_path = _reduce_number(_digit_sum(ymd_digits))
-    birthday = _reduce_number(birth_date.day)
+    profile = _base_profile(birth_date, target_date, get_divination('kabbalah'))
+    month, day, year = [_reduce_number(n) for n in (birth_date.month, birth_date.day, birth_date.year)]
+    life = _reduce_number(month + day + year)
+    birthday = day
     attitude = _reduce_number(birth_date.month + birth_date.day)
-    birth_year = _reduce_number(_digit_sum(birth_date.year))
-    personal_year = _reduce_number(birth_date.month + birth_date.day + _digit_sum(target_date.year))
-    personal_month = _reduce_number(personal_year + target_date.month)
-
-    bases = [life_path, birthday, attitude, birth_year, personal_year, personal_month]
-    labels = [
-        ("生命数", life_path, "生年月日全体から導く中心数"),
-        ("誕生日数", birthday, "生まれた日の性質"),
-        ("態度数", attitude, "月と日を合わせた表現の数"),
-        ("誕生年数", birth_year, "生まれた年の基礎振動"),
-        ("パーソナルイヤー", personal_year, "今年の流れを示す数"),
-        ("パーソナルマンス", personal_month, "今月の流れを示す数"),
-    ]
-
-    seed = int(birth_date.strftime("%Y%m%d"))
-    today_seed = int(target_date.strftime("%Y%m%d"))
-    candidate_values: List[int] = []
-    weights: Dict[int, float] = {}
-    boost_rows: List[Dict[str, Any]] = []
-
-    for index, base in enumerate(bases, start=1):
-        primary = _fold43(base)
-        secondary = _fold43(base * (index + 2) + birth_date.month + birth_date.day)
-        tertiary = _fold43(base * 7 + _digit_sum(seed) * index + _digit_sum(today_seed))
-        resonance = max(45.0, 108.0 - index * 6.0 + (8.0 if base in {11, 22, 33} else 0.0))
-        boost_rows.append(
-            {
-                "resonance": resonance,
-                "primary_candidate": primary,
-                "secondary_candidate": secondary,
-                "tertiary_candidate": tertiary,
-            }
-        )
-        candidate_values.extend([primary, secondary, tertiary])
-        _add_weight(weights, primary, 120 - index * 5)
-        _add_weight(weights, secondary, 92 - index * 4)
-        _add_weight(weights, tertiary, 75 - index * 3)
-        _add_weight(weights, primary - 1, 42)
-        _add_weight(weights, primary + 1, 42)
-
-    candidate_values.extend(
-        [
-            _fold43(seed),
-            _fold43(_digit_sum(seed) * 11),
-            _fold43(birth_date.month * 9 + birth_date.day * 4),
-            _fold43(today_seed),
-            _fold43(personal_year * 13 + target_date.day),
-        ]
-    )
-    core_numbers = _unique(candidate_values, wanted=6)
-    for rank, number in enumerate(core_numbers, start=1):
-        _add_weight(weights, number, 118 - rank * 4)
-
-    pool_numbers = [number for number, _ in sorted(weights.items(), key=lambda item: (-item[1], item[0]))]
-    pool_numbers = _unique(pool_numbers + candidate_values, wanted=24)
-
+    py = _reduce_number(birth_date.month + birth_date.day + _digit_sum(target_date.year), False)
+    pm = _reduce_number(py + target_date.month, False)
+    pd = _reduce_number(pm + target_date.day, False)
+    calculations = [
+        ('生命数',life,f'月 {birth_date.month} → {month}、日 {birth_date.day} → {day}、年 {birth_date.year} → {year}。{month} + {day} + {year} → {life}'),
+        ('誕生日数',birthday,f'{birth_date.day} → {birthday}'),
+        ('態度数',attitude,f'{birth_date.month} + {birth_date.day} → {attitude}'),
+        ('今年の数',py,f'{birth_date.month} + {birth_date.day} + {_digit_sum(target_date.year)}（今年の各桁の和） → {py}'),
+        ('今月の数',pm,f'{py} + {target_date.month} → {pm}'),
+        ('今日の数',pd,f'{pm} + {target_date.day} → {pd}')]
     profile.update(
-        {
-            "core_numbers": sorted(core_numbers),
-            "pool_numbers": pool_numbers,
-            "weights": weights,
-            "boost_rows": boost_rows,
-            "reading_title": "この数字へつながったカバラ数秘術",
-            "reading_kicker": "KABBALAH NUMEROLOGY",
-            "reason_source": "生年月日から導いた数秘術の基礎数と今日の周期数",
-            "summary_items": [
-                {"symbol": "Ⅰ", "label": "生命数", "value": str(life_path), "detail": "人生の中心となる数"},
-                {"symbol": "◇", "label": "誕生日数", "value": str(birthday), "detail": "生まれた日に宿る数"},
-                {"symbol": "↻", "label": "今年の数", "value": str(personal_year), "detail": f"{target_date.year}年の周期"},
-            ],
-            "detail_rows": [
-                {"symbol": "✡", "title": label, "line1": f"導かれた数：{value}", "line2": detail, "line3": "マスターナンバー11・22・33は途中で一桁化せず扱います。" if value in {11, 22, 33} else "1〜9の基礎数として数字候補へ展開します。"}
-                for label, value, detail in labels
-            ],
-            "method_note": (
-                "数秘術には複数の流派があります。本アプリでは、生年月日を使う簡易的なカバラ数秘術風の方式として、"
-                "生命数・誕生日数・態度数・年周期などを1〜43の候補へ展開しています。"
-            ),
-        }
-    )
-    return profile
+        reading_title='この数字へつながった数秘の流れ', reading_kicker='NUMEROLOGY READING',
+        reason_source='生命数・誕生日数と年・月・日の周期',
+        numerology_values=dict(life_path=life,birthday=birthday,attitude=attitude,personal_year=py,personal_month=pm,personal_day=pd),
+        oracle_evidence=[dict(kind='numerology',value=n,label=label) for label,n,_ in calculations],
+        summary_items=[dict(symbol='✡',label=label,value=str(n),detail=detail) for label,n,detail in
+                       [('生命数',life,'生年月日から導く中心数'),('誕生日数',birthday,'生まれた日に宿る数'),('今日の数',pd,'年・月・日を重ねた周期')]],
+        detail_rows=[dict(symbol='✡',title=label,line1=f'導かれた数：{n}',line2=trace,
+                          line3='生命数は年月日を別々に還元し11・22・33を保持。年・月・日の周期は1〜9に還元します。') for label,n,trace in calculations],
+        method_note='カバラ数秘術という名称で親しまれる現代の生年月日数秘術を採用しています。ユダヤ教のカバラの伝統的解釈や姓名のゲマトリアではありません。生命数は年月日を個別に還元する方式、周期は暦年方式です。数字を各桁の和で1〜9へ還元して基礎数と照合し、同じ還元数を優先する部分は本アプリ独自のくじへの対応です。11・22・33との直接一致は重みを2倍にします。')
+    return finish_profile(profile)
 
 
 def _tarot_card(number: int) -> Dict[str, Any]:
@@ -270,102 +214,30 @@ def _tarot_card(number: int) -> Dict[str, Any]:
 
 
 def calculate_tarot_profile(birth_date: date, target_date: date) -> Dict[str, Any]:
-    method = get_divination("tarot")
-    profile = _base_profile(birth_date, target_date, method)
-
-    birth_sum = _digit_sum(birth_date.strftime("%Y%m%d"))
-    target_sum = _digit_sum(target_date.strftime("%Y%m%d"))
-    birth_arcana = ((birth_sum - 1) % 22) + 1
-    soul_arcana = ((_reduce_number(birth_sum, preserve_masters=False) + birth_date.month + birth_date.day - 1) % 22) + 1
-    day_arcana = ((birth_arcana + target_sum + target_date.day - 1) % 22) + 1
-    bridge_arcana = ((birth_arcana + day_arcana + birth_date.day - 1) % 22) + 1
-
-    card_defs = [
-        ("誕生カード", _tarot_card(birth_arcana), "生年月日全体から開くカード"),
-        ("魂のカード", _tarot_card(soul_arcana), "誕生日の基礎数から開くカード"),
-        ("今日のカード", _tarot_card(day_arcana), "誕生カードと生成日を重ねたカード"),
-        ("橋渡しカード", _tarot_card(bridge_arcana), "誕生と今日を結ぶ補助カード"),
-    ]
-
-    weights: Dict[int, float] = {}
-    candidate_values: List[int] = []
-    boost_rows: List[Dict[str, Any]] = []
-    birth_seed = int(birth_date.strftime("%Y%m%d"))
-    target_seed = int(target_date.strftime("%Y%m%d"))
-
-    for index, (_label, card, _detail) in enumerate(card_defs, start=1):
-        arcana = int(card["number"])
-        primary = _fold43(arcana)
-        secondary = _fold43(arcana * 2 + birth_date.day + index * 3)
-        tertiary = _fold43(arcana * 3 + target_date.day + birth_date.month * index)
-        resonance = 112.0 - index * 7.0
-        boost_rows.append(
-            {
-                "resonance": resonance,
-                "primary_candidate": primary,
-                "secondary_candidate": secondary,
-                "tertiary_candidate": tertiary,
-            }
-        )
-        candidate_values.extend([primary, secondary, tertiary])
-        _add_weight(weights, primary, 126 - index * 6)
-        _add_weight(weights, secondary, 96 - index * 5)
-        _add_weight(weights, tertiary, 79 - index * 4)
-        # Historical cyclic shadow mapping: 1 -> 23, ..., 21 -> 43, 22 -> 44 -> 1.
-        # There are only 21 slots in 23..43, so the Fool intentionally wraps
-        # under the retained specification. Never clamp all cards to 1..22.
-        _add_weight(weights, arcana + 22, 68 - index * 3)
-
-    candidate_values.extend(
-        [
-            _fold43(birth_seed),
-            _fold43(target_seed),
-            _fold43(birth_arcana * day_arcana),
-            _fold43(soul_arcana * 5 + bridge_arcana * 7),
-            _fold43(_digit_sum(birth_seed) * 9 + _digit_sum(target_seed)),
-        ]
-    )
-    core_numbers = _unique(candidate_values, wanted=6)
-    for rank, number in enumerate(core_numbers, start=1):
-        _add_weight(weights, number, 120 - rank * 4)
-
-    pool_numbers = [number for number, _ in sorted(weights.items(), key=lambda item: (-item[1], item[0]))]
-    pool_numbers = _unique(pool_numbers + candidate_values, wanted=24)
-
+    profile = _base_profile(birth_date, target_date, get_divination('tarot'))
+    # Daily deterministic shuffle without replacement. Birth/date personalize
+    # the shuffle; they are not arithmetic assignments of named cards.
+    seed = f'tarot-spread-v1|{birth_date.isoformat()}|{target_date.isoformat()}'
+    deck = sorted(range(1,23), key=lambda n:(hashlib.sha256(f'{seed}|{n}'.encode()).digest(),n))
+    roles = [('現在','いまの状況を映すカード'),('課題','向き合うテーマ'),('助言','意識したい姿勢'),('向かう先','これからの可能性')]
+    cards = [dict(_tarot_card(n),role=role,description=description) for n,(role,description) in zip(deck,roles)]
+    evidence = []
+    for card in cards:
+        evidence.append(dict(kind='arcana',value=card['number'],label=f"{card['role']}・{card['name']}"))
+        # Explicit app adaptation, including Fool 22 + 22 = 44 -> 1 for Loto6.
+        evidence.append(dict(kind='arcana',value=card['number']+22,label=f"{card['name']}の影（+22）",strength=0.5))
+    for i,card in enumerate(cards):
+        for other in cards[i+1:]:
+            evidence.append(dict(kind='arcana',value=card['number']+other['number'],
+                                 label=f"{card['name']}＋{other['name']}",strength=0.5))
     profile.update(
-        {
-            "core_numbers": sorted(core_numbers),
-            "pool_numbers": pool_numbers,
-            "weights": weights,
-            "boost_rows": boost_rows,
-            "reading_title": "この数字へつながったタロット",
-            "reading_kicker": "MAJOR ARCANA READING",
-            "reason_source": "生年月日と今日から開いた大アルカナ",
-            "tarot_cards": [dict(card, role=label, description=detail) for label, card, detail in card_defs],
-            "summary_items": [
-                {"symbol": "Ⅰ", "label": "誕生カード", "value": card_defs[0][1]["name"], "detail": f"Arcana {card_defs[0][1]['display_number']}"},
-                {"symbol": "☾", "label": "今日のカード", "value": card_defs[2][1]["name"], "detail": f"Arcana {card_defs[2][1]['display_number']}"},
-                {"symbol": "∞", "label": "橋渡し", "value": card_defs[3][1]["name"], "detail": f"Arcana {card_defs[3][1]['display_number']}"},
-            ],
-            "detail_rows": [
-                {
-                    "symbol": "☾",
-                    "title": label,
-                    "line1": f"{card['display_number']} · {card['name']}",
-                    "line2": card["keyword"],
-                    "line3": detail,
-                }
-                for label, card, detail in card_defs
-            ],
-            "method_note": (
-                "大アルカナ22枚の番号を起点に、生年月日・生成日・カード同士の組み合わせを使って"
-                "1〜43へ展開しています。カード番号そのものに加え、計算で組み合わせた数字や、"
-                "22を足して43を超えたら1へ戻す「影の数字」も参考にします。"
-                "そのためロト6では23〜43も候補になります。他のくじでは、そのくじの数字範囲へ重みを換算します。"
-            ),
-        }
-    )
-    return profile
+        tarot_cards=cards,oracle_evidence=evidence,
+        reading_title='四枚のカードが伝える導き',reading_kicker='FOUR CARD READING',
+        reason_source='今回開いた四枚の大アルカナ',
+        summary_items=[dict(symbol='☾',label=c['role'],value=c['name'],detail=c['keyword']) for c in cards[:3]],
+        detail_rows=[dict(symbol='☾',title=c['role'],line1=c['name'],line2=c['keyword'],line3=c['description']) for c in cards],
+        method_note='大アルカナ22枚を混ぜ、重複なく四枚を引きます。すべて正位置として読む方式です。「現在・課題・助言・向かう先」の配置は本アプリ独自の四枚展開です。同じ誕生日と日本時間の日付では同じ並びを再現します。カード番号（愚者は対応計算では22）、22を足す影の数字、二枚の番号の和を券種の範囲で循環させます。この数字への展開は独自ルールで、ロト6では23〜43も候補になります。')
+    return finish_profile(profile)
 
 
 def calculate_divination_profile(divination_id: str, birth_date: date, target_date: date | None = None) -> Dict[str, Any]:

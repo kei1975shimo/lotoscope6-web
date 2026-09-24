@@ -5,6 +5,7 @@ import random
 from typing import Any, Dict, List, Mapping, MutableSet, Sequence
 
 from settings import MAX_TICKET_COUNT
+from oracle_mapping import correspondence
 
 RandomSource = random.Random | random.SystemRandom
 
@@ -136,14 +137,21 @@ def _resample_weights(source: Sequence[float], size: int) -> List[float]:
 
 
 def build_loto_weights(profile: Mapping[str, Any], maximum: int) -> Dict[int, float]:
+    if profile.get('oracle_evidence'):
+        return correspondence(profile, maximum)[0]
     return {i + 1: 1.0 + value for i, value in enumerate(_resample_weights(_source_weights(profile), maximum))}
 
 
 def build_digit_weights(profile: Mapping[str, Any]) -> Dict[int, float]:
+    if profile.get('oracle_evidence'):
+        return correspondence(profile, 10, 0)[0]
     return {i: 1.0 + value for i, value in enumerate(_resample_weights(_source_weights(profile), 10))}
 
 
 def _core_numbers(profile: Mapping[str, Any], size: int, wanted: int, minimum: int) -> List[int]:
+    if profile.get('oracle_evidence'):
+        weights, _ = correspondence(profile, size, minimum)
+        return sorted(sorted(weights, key=lambda n: (-weights[n], n))[:wanted])
     # Resample the core signal in the same coordinate system as the weights.
     cores = set(profile.get("core_numbers", []) or [])
     source = _source_weights(profile)
@@ -245,7 +253,7 @@ def _loto_reason(numbers: Sequence[int], core_numbers: Sequence[int], product: M
         )
     return (
         f"{source}を{product['name']}の数字範囲へ映し、"
-        f"{method}で強く響く候補同士が偏りすぎないよう結びました。"
+        f"{method}の対応する重みに沿って候補を結びました。"
     )
 
 
@@ -268,13 +276,13 @@ def _generate_loto_rows(
         attempts += 1
         numbers = sorted(_weighted_sample_without_replacement(population, weights, pick_count, rng))
         key = tuple(numbers)
-        if key in seen or not _valid_loto_shape(numbers, maximum):
+        if key in seen:
             continue
         seen.add(key)
         metrics = _loto_metrics(numbers, maximum)
         divination_score = _divination_score(numbers, weights)
         composition_score = _composition_score(numbers, maximum)
-        total_score = round(divination_score * 0.78 + composition_score * 0.22)
+        total_score = divination_score
         rows.append(
             {
                 "numbers": numbers,
@@ -387,7 +395,7 @@ def _reduce_loto_row(
             "numbers": numbers,
             "divination_fit_score": divination_score,
             "composition_score": composition_score,
-            "ticket_score": round(divination_score * 0.78 + composition_score * 0.22),
+            "ticket_score": divination_score,
             "reason": _loto_reason(numbers, core_numbers, product, profile),
             **{key: metrics[key] for key in ("set_sum", "odd_count", "even_count", "spread", "consecutive_count")},
         }
@@ -414,7 +422,7 @@ def _reduce_numbers_row(
             "display_box_number": "-".join(str(number) for number in sorted(digits)),
             "divination_fit_score": divination_score,
             "composition_score": composition_score,
-            "ticket_score": round(divination_score * 0.78 + composition_score * 0.22),
+            "ticket_score": divination_score,
             "reason": _numbers_reason(digits, core_digits, product, profile),
             **{key: metrics[key] for key in ("set_sum", "odd_count", "even_count", "spread", "consecutive_count")},
         }
@@ -445,7 +453,7 @@ def _generate_numbers_rows(
         metrics = _numbers_metrics(digits)
         divination_score = _divination_score(digits, weights)
         composition_score = _numbers_composition_score(digits)
-        total_score = round(divination_score * 0.78 + composition_score * 0.22)
+        total_score = divination_score
         box_digits = sorted(digits)
         rows.append(
             {
@@ -474,7 +482,7 @@ def generate_product_rows(
 ) -> List[Dict[str, Any]]:
     """Rank a unique daily pool for the requested size, then return its prefix.
 
-    Full tickets retain their previous results. Partial candidates are generated
+    Version 1.18 uses method-specific evidence weights. Partial candidates are generated
     independently within the product's range and are not purchase-ready tickets.
     """
     product = get_product(product_id)
@@ -512,5 +520,10 @@ def generate_product_rows(
         rows = _generate_numbers_rows(product, MAX_TICKET_COUNT, profile, rng)
     else:
         rows = _generate_loto_rows(product, MAX_TICKET_COUNT, profile, rng)
+    if profile.get('oracle_evidence'):
+        _, origins = correspondence(profile, int(product['max_number']) if product['kind']=='loto' else 10,
+                                    1 if product['kind']=='loto' else 0)
+        for row in rows:
+            row['number_origins'] = [origins[n] for n in row['numbers']]
     rows.sort(key=lambda row: row["ticket_score"], reverse=True)
     return rows[:count]

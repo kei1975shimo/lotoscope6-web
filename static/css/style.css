@@ -468,3 +468,7 @@ body.is-drawing { overflow: hidden; }
   .is-drawing .kabbalah-tree, .is-drawing .tree-current, .is-drawing .numerology-orbit { animation:none; }
   .kabbalah-tree, .tree-sparks, .numerology-orbit { transition:none; }
 }
+
+.number-origins div { margin-block: 1rem; }
+.number-origins dt { font-weight: 700; }
+.number-origins dd { margin: .35rem 0 0; line-height: 1.8; overflow-wrap: anywhere; }

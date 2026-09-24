@@ -251,7 +251,7 @@
         if (!['tarot', 'kabbalah'].includes(selection.method) || reducedMotion.matches || !deck?.children.length) return Promise.resolve();
         if (selection.method === 'kabbalah') card.classList.add('showing-emblems');
         title.textContent = selection.method === 'kabbalah' ? 'あなたの数が結ばれました' : 'こちらのカードが出ました';
-        text.textContent = selection.method === 'kabbalah' ? '生命数・誕生日数・今年の数から、今日の数字へ。' : 'カードの意味と、今日の数字をお届けします。';
+        text.textContent = selection.method === 'kabbalah' ? '生命数・誕生日数・今日の数から、今日の数字へ。' : 'カードの意味と、今日の数字をお届けします。';
         return new Promise((resolve) => {
           finishReveal = resolve;
           Array.from(deck.children).forEach((slot, index) => {

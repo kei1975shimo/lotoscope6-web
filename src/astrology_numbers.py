@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 from zoneinfo import ZoneInfo
 
 import ephem
+from oracle_mapping import finish_profile
 
 JST = ZoneInfo("Asia/Tokyo")
 ZODIAC_SIGNS = [
@@ -77,8 +78,9 @@ def jst_noon_as_utc(day: date) -> datetime:
 def ecliptic_longitude(body_class: type, moment_utc: datetime) -> float:
     body = body_class()
     utc_naive = moment_utc.astimezone(timezone.utc).replace(tzinfo=None)
-    body.compute(ephem.Date(utc_naive))
-    ecliptic = ephem.Ecliptic(body)
+    moment = ephem.Date(utc_naive)
+    body.compute(moment, epoch=moment)
+    ecliptic = ephem.Ecliptic(body, epoch=moment)
     return math.degrees(float(ecliptic.lon)) % 360.0
 
 
@@ -125,151 +127,45 @@ def unique_number(candidate: int, used: set[int], step: int) -> int:
     return number
 
 
-def _build_planet_rows(birth_date: date, target_date: date) -> List[Dict[str, Any]]:
-    birth_moment = jst_noon_as_utc(birth_date)
-    target_moment = jst_noon_as_utc(target_date)
-    birth_key = int(birth_date.strftime("%Y%m%d"))
-    target_key = int(target_date.strftime("%Y%m%d"))
-    rows: List[Dict[str, Any]] = []
-
-    for index, (planet_id, planet_name, body_class, priority) in enumerate(PLANETS, start=1):
-        birth_lon = ecliptic_longitude(body_class, birth_moment)
-        current_lon = ecliptic_longitude(body_class, target_moment)
-        distance = circular_distance(birth_lon, current_lon)
-        aspect_degree, aspect_name, orb = nearest_aspect(distance)
-        resonance = max(0.0, 100.0 - orb * 8.0) + priority
-
-        birth_sign_index = int(birth_lon // 30) + 1
-        current_sign_index = int(current_lon // 30) + 1
-        primary_value = (
-            round(birth_lon * 10) * 3
-            + round(current_lon * 10) * 5
-            + round(distance * 10) * 7
-            + birth_sign_index * 11
-            + current_sign_index * 13
-            + digit_sum(birth_key) * 17
-            + digit_sum(target_key) * 19
-            + index * 23
-        )
-        secondary_value = (
-            round(((birth_lon + current_lon) % 360.0) * 100)
-            + round(orb * 100) * 3
-            + birth_date.month * 29
-            + birth_date.day * 31
-            + target_date.month * 37
-            + target_date.day * 41
-            + index * 43
-        )
-        tertiary_value = (
-            round(degree_in_sign(birth_lon) * 1000)
-            + round(degree_in_sign(current_lon) * 1000) * 2
-            + aspect_degree * 7
-            + birth_date.year
-            + target_date.year * 3
-            + index * 47
-        )
-
-        rows.append(
-            {
-                "planet_id": planet_id,
-                "planet_name": planet_name,
-                "symbol": PLANET_SYMBOLS[planet_id],
-                "birth_longitude": round(birth_lon, 2),
-                "birth_sign": zodiac_name(birth_lon),
-                "birth_sign_symbol": ZODIAC_SYMBOLS[int(birth_lon // 30) % 12],
-                "birth_degree": round(degree_in_sign(birth_lon), 2),
-                "current_longitude": round(current_lon, 2),
-                "current_sign": zodiac_name(current_lon),
-                "current_sign_symbol": ZODIAC_SYMBOLS[int(current_lon // 30) % 12],
-                "current_degree": round(degree_in_sign(current_lon), 2),
-                "distance": round(distance, 2),
-                "aspect_degree": aspect_degree,
-                "aspect_name": aspect_name,
-                "orb": round(orb, 2),
-                "resonance": round(resonance, 2),
-                "primary_candidate": to_loto_number(primary_value),
-                "secondary_candidate": to_loto_number(secondary_value),
-                "tertiary_candidate": to_loto_number(tertiary_value),
-                "priority": priority,
-                "index": index,
-            }
-        )
-    return rows
+# One published policy for this date-only chart; orb choices vary by school.
+ASPECT_ORB = 6.0
 
 
 def calculate_astrology_profile(birth_date: date, target_date: date | None = None) -> Dict[str, Any]:
     current_date = target_date or datetime.now(JST).date()
-    planet_rows = _build_planet_rows(birth_date, current_date)
-    ranked = sorted(planet_rows, key=lambda row: (row["resonance"], row["priority"]), reverse=True)
-
-    used_core: set[int] = set()
-    core_numbers: List[int] = []
-    for row in ranked:
-        number = unique_number(int(row["primary_candidate"]), used_core, 5 + int(row["index"]) * 2)
-        row["core_number"] = number
-        if len(core_numbers) < 6:
-            core_numbers.append(number)
-
-    weights: Dict[int, float] = {}
-    for rank, row in enumerate(ranked, start=1):
-        base_score = max(45.0, 112.0 - rank * 5.0 + float(row["resonance"]) * 0.18)
-        add_weight(weights, int(row["core_number"]), base_score)
-        add_weight(weights, int(row["secondary_candidate"]), base_score - 17.0)
-        add_weight(weights, int(row["tertiary_candidate"]), base_score - 25.0)
-
-    birth_date_numbers = [
-        to_loto_number(birth_date.year),
-        to_loto_number(birth_date.month * 3 + birth_date.day),
-        to_loto_number(digit_sum(birth_date.strftime("%Y%m%d")) * 7),
-        to_loto_number((birth_date.year % 100) * 5 + birth_date.month * 11 + birth_date.day * 13),
-    ]
-    current_date_numbers = [
-        to_loto_number(current_date.year + current_date.month * 13 + current_date.day * 17),
-        to_loto_number(digit_sum(current_date.strftime("%Y%m%d")) * 11),
-    ]
-    for index, number in enumerate(birth_date_numbers, start=1):
-        add_weight(weights, number, 74.0 - index * 3.0)
-    for index, number in enumerate(current_date_numbers, start=1):
-        add_weight(weights, number, 66.0 - index * 3.0)
-
-    filler_seed = int(birth_date.strftime("%Y%m%d")) + int(current_date.strftime("%Y%m%d"))
-    cursor = 1
-    while len(weights) < 20 and cursor <= 128:
-        value = filler_seed * (cursor * 17 + 31) + cursor * cursor * 19
-        add_weight(weights, to_loto_number(value), max(35.0, 58.0 - cursor))
-        cursor += 1
-
-    for number in range(1, 44):
-        if len(weights) >= 20:
-            break
-        if number not in weights:
-            add_weight(weights, number, 35.0)
-
-    pool_numbers = [
-        number
-        for number, _score in sorted(weights.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    sun_row = next(row for row in planet_rows if row["planet_id"] == "sun")
-    moon_row = next(row for row in planet_rows if row["planet_id"] == "moon")
-
-    return {
-        "birth_date": birth_date.isoformat(),
-        "birth_date_ja": f"{birth_date.year}年{birth_date.month}月{birth_date.day}日",
-        "target_date": current_date.isoformat(),
-        "target_date_ja": f"{current_date.year}年{current_date.month}月{current_date.day}日",
-        "calculation_time": "12:00 JST",
-        "sun_sign": sun_row["birth_sign"],
-        "sun_sign_symbol": sun_row["birth_sign_symbol"],
-        "moon_sign": moon_row["birth_sign"],
-        "moon_sign_symbol": moon_row["birth_sign_symbol"],
-        "current_sun_sign": sun_row["current_sign"],
-        "current_sun_sign_symbol": sun_row["current_sign_symbol"],
-        "core_numbers": sorted(core_numbers),
-        "pool_numbers": pool_numbers,
-        "weights": weights,
-        "planet_rows": planet_rows,
-        "method_note": (
-            "出生時刻・出生地を使わない簡易星読みです。生年月日と生成日の正午（日本時間）における"
-            "7天体の黄経、星座、主要アスペクトへの近さを1〜43へ変換しています。"
-        ),
-    }
+    rows = []
+    evidence = []
+    for planet_id, name, body_class, _legacy_priority in PLANETS:
+        birth_lon = ecliptic_longitude(body_class, jst_noon_as_utc(birth_date))
+        current_lon = ecliptic_longitude(body_class, jst_noon_as_utc(current_date))
+        rows.append(dict(planet_id=planet_id, planet_name=name, symbol=PLANET_SYMBOLS[planet_id],
+                         birth_longitude=birth_lon, current_longitude=current_lon,
+                         birth_sign=zodiac_name(birth_lon), current_sign=zodiac_name(current_lon),
+                         birth_sign_symbol=ZODIAC_SYMBOLS[int(birth_lon//30)],
+                         current_sign_symbol=ZODIAC_SYMBOLS[int(current_lon//30)],
+                         birth_degree=round(degree_in_sign(birth_lon),2),
+                         current_degree=round(degree_in_sign(current_lon),2)))
+        for label, lon in [('誕生日', birth_lon), ('生成日', current_lon)]:
+            evidence.append(dict(kind='longitude', value=lon, strength=1.0, label=f'{label}の{name}'))
+    aspects = []
+    # All 7 transit bodies against all 7 natal bodies; not only same-body pairs.
+    for transit in rows:
+        for natal in rows:
+            angle, name, orb = nearest_aspect(circular_distance(transit['current_longitude'], natal['birth_longitude']))
+            if orb > ASPECT_ORB:
+                continue
+            label = f"生成日の{transit['planet_name']} × 誕生日の{natal['planet_name']}・{name}"
+            aspects.append(dict(label=label, degree=angle, orb=round(orb,3)))
+            # Closer aspects reinforce their actual endpoints equally. Hard
+            # aspects are not treated as bad lottery outcomes.
+            for lon in (transit['current_longitude'], natal['birth_longitude']):
+                evidence.append(dict(kind='longitude', value=lon, strength=1-orb/ASPECT_ORB, label=label))
+    sun, moon = rows[:2]
+    return finish_profile(dict(
+        calculation_time='12:00 JST', planet_rows=rows, aspect_rows=aspects,
+        sun_sign=sun['birth_sign'], sun_sign_symbol=sun['birth_sign_symbol'],
+        moon_sign=moon['birth_sign'], moon_sign_symbol=moon['birth_sign_symbol'],
+        current_sun_sign=sun['current_sign'], current_sun_sign_symbol=sun['current_sign_symbol'],
+        oracle_evidence=evidence,
+        method_note='出生時刻・出生地を使わない簡易星読みです。両日の正午（日本時間）の七天体を、各日の春分点を基準とする黄経で計算します。出生図のハウス・上昇宮は扱いません。月や星座境界は出生時刻により変わり得ます。主要アスペクトは0・60・90・120・180度、許容差6度以内で判定します。黄道を券種の数字数で等分し、天体が入る区画とその近さを数字の重みにする部分は本アプリ独自の対応です。'
+    ))

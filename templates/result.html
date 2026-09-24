@@ -2,6 +2,9 @@
 {% block title %}ロト・スコープ | {{ product.name }} × {{ divination.name }}{% endblock %}
 {% block theme %}{{ divination_id }}{% endblock %}
 {% block content %}
+{% macro origin_list(row) %}
+<dl class="number-origins">{% for item in row.number_origins %}<div><dt>{{ item.number }} · {{ item.source }}</dt><dd>{{ item.detail }}</dd></div>{% endfor %}</dl>
+{% endmacro %}
 {% macro number_group(row) %}
 <div class="numbers {% if product.kind == 'numbers' %}digits{% endif %}" data-number-count="{{ row.numbers|length }}" aria-label="数字">
   {% for n in row.numbers %}<span class="number{% if n in row.reference_numbers %} core-number{% endif %}" aria-label="{{ n }}{% if n in row.reference_numbers %}、占いの中心数字{% endif %}">{% if n in row.reference_numbers %}<i aria-hidden="true">✧</i>{% endif %}{{ n if product.kind == 'numbers' else '%02d'|format(n) }}</span>{% endfor %}
@@ -19,8 +22,8 @@
     {% if product.kind == 'numbers' and not partial and best.numbers|unique|list|length > 1 %}<p class="box-note">ボックス参考：<strong>{{ best.display_box_number }}</strong></p>{% endif %}
     {% if partial %}<p class="partial-notice">ラッキーナンバー · {{ pick_size }}{{ '桁' if product.kind == 'numbers' else '個' }}の候補<br><small>{{ product.name }}の規定数（{{ product.full_size }}{{ '桁' if product.kind == 'numbers' else '個' }}）未満のため、このまま購入する組み合わせではありません。</small></p>{% endif %}
     <p class="result-reason">{{ best.reason }}</p>
-    <p class="resonance">数字の総合スコア <strong>{{ best.ticket_score }}</strong><span>/ 100</span></p>
-    <small class="score-note">占いとの結びつき78％＋数字構成22％の目安です。当せん確率ではありません。</small>
+    <p class="resonance">占術との対応度 <strong>{{ best.ticket_score }}</strong><span>/ 100</span></p>
+    <small class="score-note">占術から数字へ対応させた重みの目安です。当せん確率ではありません。数字構成は参考表示で、順位には使いません。</small>
     <p class="score-note">{{ divination.short_name }} {{ best.divination_fit_score }} ／ 数字構成 {{ best.composition_score }}</p>
   </div>
 </section>
@@ -29,8 +32,8 @@
   <div class="section-heading"><div><p class="eyebrow">MORE NUMBERS</p><h2>ほかに届いた数字</h2></div><span>全{{ count }}{{ candidate_unit }}のうち、2〜{{ count }}{{ candidate_unit }}目</span></div>
   <div class="ticket-list">
     {% for row in rows[1:] %}
-    <details class="ticket"><summary><span class="ticket-rank">{{ '%02d'|format(loop.index + 1) }}</span>{{ number_group(row) }}<span class="ticket-score">総合 <b>{{ row.ticket_score }}</b></span><span class="details-chevron" aria-hidden="true">＋</span></summary>
-      <div class="ticket-details"><p>{{ row.reason }}</p>{% if product.kind == 'numbers' and not partial and row.numbers|unique|list|length > 1 %}<p class="box-note">ボックス参考：{{ row.display_box_number }}</p>{% endif %}<dl class="metrics"><div><dt>合計値</dt><dd>{{ row.set_sum }}</dd></div><div><dt>奇数／偶数</dt><dd>{{ row.odd_count }}／{{ row.even_count }}</dd></div><div><dt>範囲の広がり</dt><dd>{{ row.spread }}</dd></div><div><dt>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</dt><dd>{{ row.consecutive_count }}</dd></div></dl><p class="score-note">{{ divination.short_name }} {{ row.divination_fit_score }} ／ 数字構成 {{ row.composition_score }}</p></div>
+    <details class="ticket"><summary><span class="ticket-rank">{{ '%02d'|format(loop.index + 1) }}</span>{{ number_group(row) }}<span class="ticket-score">対応 <b>{{ row.ticket_score }}</b></span><span class="details-chevron" aria-hidden="true">＋</span></summary>
+      <div class="ticket-details">{{ origin_list(row) }}<p>{{ row.reason }}</p>{% if product.kind == 'numbers' and not partial and row.numbers|unique|list|length > 1 %}<p class="box-note">ボックス参考：{{ row.display_box_number }}</p>{% endif %}<dl class="metrics"><div><dt>合計値</dt><dd>{{ row.set_sum }}</dd></div><div><dt>奇数／偶数</dt><dd>{{ row.odd_count }}／{{ row.even_count }}</dd></div><div><dt>範囲の広がり</dt><dd>{{ row.spread }}</dd></div><div><dt>{% if product.kind == 'numbers' %}重複する桁{% else %}連続数字{% endif %}</dt><dd>{{ row.consecutive_count }}</dd></div></dl><p class="score-note">{{ divination.short_name }} {{ row.divination_fit_score }} ／ 数字構成 {{ row.composition_score }}</p></div>
     </details>
     {% endfor %}
   </div>
@@ -61,7 +64,7 @@
     {% set artwork = tarot_card_image(card.image_filename) %}
     <figure class="tarot-card">
       <img src="{{ url_for('static', filename=artwork) }}" width="400" height="600" loading="lazy" alt="{{ card.name ~ 'のカード' if artwork != 'img/oracle-tarot.webp' else 'タロット共通イメージ（' ~ card.name ~ 'の個別画像は準備中）' }}">
-      <figcaption><span>{{ divination_profile.tarot_cards|selectattr('number', 'equalto', card.number)|map(attribute='role')|join('・') }}</span><strong>{{ card.display_number }} · {{ card.name }}</strong><span>{{ card.keyword }}</span>{% if artwork == 'img/oracle-tarot.webp' %}<small>共通イメージ</small>{% endif %}</figcaption>
+      <figcaption><span>{{ divination_profile.tarot_cards|selectattr('number', 'equalto', card.number)|map(attribute='role')|join('・') }}</span><strong>{{ card.display_number }} · {{ card.name }}</strong><span>{{ card.keyword }} · 正位置</span>{% if artwork == 'img/oracle-tarot.webp' %}<small>共通イメージ</small>{% endif %}</figcaption>
     </figure>
     {% endfor %}
   </div>
@@ -69,7 +72,9 @@
   <details class="reading-details"><summary>この導きを、もう少し詳しく<span class="details-chevron" aria-hidden="true">＋</span></summary>
     <div class="reading-detail-content"><h3>{{ product.name }}で参考にした中心数字</h3><p class="muted">買い目そのものではなく、候補を選ぶ際の重み付けに使った数字です。</p>{{ number_group({'numbers': best.reference_numbers, 'reference_numbers': best.reference_numbers}) }}<p class="score-note">結果の数字と重なったものには ✧ を添えています。</p>
       {% if divination_id != 'tarot' %}<div class="profile-details">{% for row in divination_profile.detail_rows %}<div><h3>{{ row.symbol }} {{ row.title }}</h3><p>{{ row.line1 }}</p><p>{{ row.line2 }}</p><small>{{ row.line3 }}</small></div>{% endfor %}</div>{% endif %}
+      <h3>今回の数字と占術の対応</h3>{{ origin_list(best) }}
       <p class="method-note">{{ divination_profile.method_note }}</p>
+      <p class="score-note">各数字には、最も大きく寄与した対応を表示しています。複数の対応を合算し、循環距離が離れるほど重みを小さくします。距離0は直接一致、それ以外は独自の補間です。ナンバーズでは星・カードの区分1〜10を数字0〜9へ対応させ、数秘術の0は10として還元します。</p>
     </div>
   </details>
 </section>
