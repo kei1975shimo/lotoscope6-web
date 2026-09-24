@@ -15,9 +15,9 @@
     ],
     kabbalah: [
       ['数の扉を開いています', '誕生日に秘められた数を辿って。'],
-      ['王冠に、最初の光がともる', '生命数を起点に、光が樹をくだります。'],
-      ['光が、ひとつずつ結ばれる', '誕生日と今日の周期を、生命の樹に重ねます。'],
-      ['十の光が、ひとつの道に', '数の響きが、あなたの数字へ流れこみます。'],
+      ['光が、ひとつずつ結ばれる', '生命数と今日の周期を重ねます。'],
+      ['数の響きが、ひとつに', 'あなたと今日をつなぐ、数の流れ。'],
+      ['数秘の導きが整いました', 'まもなく、今日の数字が届きます。'],
     ],
     tarot: [
       ['カードの扉を開いています', '誕生日に結ばれたアルカナを。'],
@@ -82,16 +82,8 @@
       previewKey = key;
       preview.hidden = true;
       preview.replaceChildren();
-      if (!key) return;
-      if (method.value === 'tarot') {
-        // The arcana stay face down until the draw itself; never preview them.
-        const veil = document.createElement('p');
-        veil.className = 'preview-veil';
-        veil.textContent = 'カードは伏せたまま。導きを受け取る瞬間に開かれます。';
-        preview.replaceChildren(veil);
-        preview.hidden = false;
-        return;
-      }
+      // Tarot is revealed only after an explicit draw, never during selection.
+      if (!key || method.value === 'tarot') return;
       previewTimer = setTimeout(async () => {
         const controller = new AbortController();
         previewController = controller;
@@ -204,9 +196,11 @@
     dialog.querySelector('[data-ritual-product]').textContent = `${selection.methodName} × ${selection.productName}`;
     const duration = reducedMotion.matches ? 0 : selection.duration;
     const timers = [];
-    const deck = dialog.querySelector('[data-tarot-draw]');
+    card.classList.remove('showing-emblems');
+    dialog.querySelectorAll('[data-tarot-draw], [data-number-draw]').forEach(node => node.replaceChildren());
+    const deck = dialog.querySelector(selection.method === 'kabbalah' ? '[data-number-draw]' : '[data-tarot-draw]');
     deck?.replaceChildren();
-    if (deck) for (let i = 0; i < 4; i += 1) {
+    if (deck && selection.method === 'tarot') for (let i = 0; i < 4; i += 1) {
       const back = document.createElement('div');
       back.className = 'draw-card';
       back.textContent = '✧';
@@ -237,24 +231,27 @@
     return {
       done,
       prepare(html) {
-        if (selection.method !== 'tarot' || !deck) return;
+        if (!['tarot', 'kabbalah'].includes(selection.method) || !deck) return;
         const parsed = new DOMParser().parseFromString(html, 'text/html');
-        const cards = Array.from(parsed.querySelectorAll('.tarot-card'));
+        const cards = Array.from(parsed.querySelectorAll(selection.method === 'tarot' ? '.tarot-card' : '.profile-item:has(.numerology-image)'));
         deck.replaceChildren(...cards.map((source) => {
           const slot = document.createElement('div');
           slot.className = 'draw-card';
           const img = source.querySelector('img').cloneNode(true);
           img.loading = 'eager';
           const label = document.createElement('span');
-          label.textContent = source.querySelector('strong').textContent;
+          label.textContent = selection.method === 'kabbalah'
+            ? `${source.querySelector('small').textContent} ${source.querySelector('strong').textContent}`
+            : source.querySelector('strong').textContent;
           slot.append(img, label);
           return slot;
         }));
       },
       reveal() {
-        if (selection.method !== 'tarot' || reducedMotion.matches || !deck?.children.length) return Promise.resolve();
-        title.textContent = 'こちらのカードが出ました';
-        text.textContent = 'カードの意味と、今日の数字をお届けします。';
+        if (!['tarot', 'kabbalah'].includes(selection.method) || reducedMotion.matches || !deck?.children.length) return Promise.resolve();
+        if (selection.method === 'kabbalah') card.classList.add('showing-emblems');
+        title.textContent = selection.method === 'kabbalah' ? 'あなたの数が結ばれました' : 'こちらのカードが出ました';
+        text.textContent = selection.method === 'kabbalah' ? '生命数・誕生日数・今年の数から、今日の数字へ。' : 'カードの意味と、今日の数字をお届けします。';
         return new Promise((resolve) => {
           finishReveal = resolve;
           Array.from(deck.children).forEach((slot, index) => {
@@ -268,6 +265,7 @@
         resolveDone();
         finishReveal();
         deck?.replaceChildren();
+        card.classList.remove('showing-emblems');
         if (dialog.open) dialog.close();
         document.body.classList.remove('is-drawing');
       },

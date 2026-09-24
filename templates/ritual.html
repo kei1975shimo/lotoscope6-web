@@ -9,23 +9,15 @@
       </div>
       <div class="ritual-visual kabbalah-visual">
         {% set tree_artwork = kabbalah_tree_image() %}
-        <span class="kabbalah-halo"></span>
         <img class="kabbalah-tree" src="{{ url_for('static', filename=tree_artwork) }}" width="640" height="640" alt="">
         {% if tree_artwork == 'img/kabbalah-tree-of-life.webp' %}
-        {% set sephirot = [(500,105),(700,230),(300,230),(700,405),(300,405),(500,485),(700,608),(300,608),(500,733),(500,873)] %}
         <svg class="tree-sparks" viewBox="0 0 1000 1000" focusable="false">
-          <polyline class="tree-lightning" points="{% for x,y in sephirot %}{{ x }},{{ y }} {% endfor %}" pathLength="100"/>
-          <polyline class="tree-pulse" points="{% for x,y in sephirot %}{{ x }},{{ y }} {% endfor %}" pathLength="100"/>
-          {% for x,y in sephirot %}<circle class="sephira-halo s{{ loop.index }}" cx="{{ x }}" cy="{{ y }}" r="46"/>{% endfor %}
-          {% for x,y in sephirot %}<circle class="sephira s{{ loop.index }}" cx="{{ x }}" cy="{{ y }}" r="15"/>{% endfor %}
+          <path class="tree-current" pathLength="100" d="M500 105L700 230L500 485L300 230L500 105V485L700 608L500 733L300 608L500 485V873M300 230V608M700 230V608M300 405H700M300 608H700"/>
+          {% for x,y in [(500,105),(700,230),(300,230),(700,405),(300,405),(500,485),(700,608),(300,608),(500,733),(500,873)] %}<circle cx="{{ x }}" cy="{{ y }}" r="15"/>{% endfor %}
         </svg>
         {% endif %}
-        <svg class="numeral-ring" viewBox="0 0 1000 1000" focusable="false">
-          <g class="numeral-orbit">
-            {% for n,x,y in [('1',500,-30),('2',765,41),('3',959,235),('4',1030,500),('5',959,765),('6',765,959),('7',500,1030),('8',235,959),('9',41,765),('11',-30,500),('22',41,235),('33',235,41)] %}<text class="n{{ loop.index }}" x="{{ x }}" y="{{ y }}">{{ n }}</text>{% endfor %}
-          </g>
-        </svg>
-        <span class="kabbalah-burst"></span>
+        <span class="numerology-orbit orbit-a"></span><span class="numerology-orbit orbit-b"></span>
+        <div class="number-draw" data-number-draw></div>
       </div>
       <div class="ritual-visual tarot-visual">
         <img class="tarot-atmosphere" src="{{ url_for('static', filename='img/oracle-tarot.webp') }}" width="512" height="512" alt="">

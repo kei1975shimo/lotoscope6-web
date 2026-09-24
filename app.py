@@ -231,7 +231,6 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             require_method_access(method)
             birth = parse_form_birth(request.form, g.today)
             if method == "tarot":
-                # Tarot cards are revealed only by the draw itself.
                 return jsonify(method_id=method, summary_items=[])
             profile = calculate_divination_profile(method, birth, g.today)
             return jsonify(method_id=profile["method_id"], summary_items=profile["summary_items"])

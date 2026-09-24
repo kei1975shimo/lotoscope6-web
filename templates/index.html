@@ -8,7 +8,6 @@
 {% set current_full_size = current_product_info.full_size %}
 {% set current_size_unit = '桁' if current_product_info.kind == 'numbers' else '個' %}
 {% set current_pick_size = values.get('pick_size', 'full') %}
-{% set current_divination_info = (divination_choices | selectattr('divination_id', 'equalto', current_divination) | first) | default(divination_choices[0]) %}
 {% set birth_iso = values.get('birth_date', '') %}
 {% set birth_y = values.get('birth_year', birth_iso[0:4]) %}
 {% set birth_m = values.get('birth_month', birth_iso[5:7]) %}
@@ -53,7 +52,7 @@
       {% endif %}
       {% endfor %}
     </div>
-    <p class="selection-description" data-selection-description>{{ current_divination_info.description }}</p>
+    <p class="selection-description" data-selection-description>{{ divination_choices[0].description }}</p>
     <div class="reading-preview" aria-live="polite" aria-atomic="true" hidden></div>
   </fieldset>
   <div class="lower-form">
@@ -72,8 +71,8 @@
       <noscript><p class="size-explanation">個数の上限は選んだくじによって異なります。規定数を選ぶと自動で合わせます。</p></noscript>
       <label class="count-field" for="count"><span>受け取る候補数<small>1〜{{ max_ticket_count }}件</small></span><select id="count" name="count" required>{% for n in range(1, max_ticket_count + 1) %}<option value="{{ n }}" {% if current_count|int == n %}selected{% endif %}>{{ n }}件</option>{% endfor %}</select></label>
       <div class="daily-note"><span aria-hidden="true">☾</span><p><strong>今日の導きは、ひとつ。</strong><small>同じ誕生日・日本時間の日付・占い・くじなら、何度開いても同じ数字です。欲しい個数が同じなら、口数を変えても候補の順番は変わりません。個数を変えると候補も変わります。</small></p></div>
-      <div class="selection-summary" aria-live="polite"><span data-summary-method>{{ current_divination_info.name }}</span><span aria-hidden="true">×</span><span data-summary-product>{{ current_product_info.name }}</span><span data-summary-size>{{ current_full_size if current_pick_size == "full" else current_pick_size }}{{ current_size_unit }}</span><span data-summary-count>{{ current_count }}件</span></div>
-      <button class="primary-button" type="submit" data-submit-button><span aria-hidden="true">✦</span><span data-button-copy>{{ current_divination_info.button_label }}</span><span aria-hidden="true">→</span></button>
+      <div class="selection-summary" aria-live="polite"><span data-summary-method>西洋占星術</span><span aria-hidden="true">×</span><span data-summary-product>ロト6</span><span data-summary-size>{{ current_full_size if current_pick_size == "full" else current_pick_size }}{{ current_size_unit }}</span><span data-summary-count>1件</span></div>
+      <button class="primary-button" type="submit" data-submit-button><span aria-hidden="true">✦</span><span data-button-copy>星の導きを受け取る</span><span aria-hidden="true">→</span></button>
       <p class="submit-note">あなたの誕生日と、今日を重ねて。</p>
     </section>
   </div>
